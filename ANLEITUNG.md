@@ -7,7 +7,9 @@ Dies ist die erste Version. Alles ist kostenlos, keine Kreditkarte, keine Accoun
 - Ort suchen (z.B. "Natural History Museum London") → Adresse, Koordinaten und (falls in OpenStreetMap hinterlegt) Öffnungszeiten + Website werden automatisch gezogen
 - Kalender-Ansicht: Termine pro Tag planen
 - Karten-Ansicht: alle Punkte auf einer OpenStreetMap
+- Packliste mit Kategorien, Fortschrittsbalken und Schnell-Chips
 - Teilen: per Link an deine Frau – sie tippt drauf, sieht alle Einträge und kann eigene hinzufügen
+- **NEU:** Optional Cloud-Sync via Supabase – ihr seht automatisch die Einträge des anderen (siehe Teil 5)
 - Funktioniert offline (nach dem ersten Laden)
 - Als App auf dem Homescreen installierbar (iOS + Android)
 
@@ -94,14 +96,14 @@ Wenn du eine neue Version der App hast:
 5. Optional: Datum + Uhrzeit eintragen, wenn du schon planst.
 6. "Speichern" tippen.
 
-### Mit deiner Frau teilen
+### Mit deiner Frau teilen (per Link, ohne Cloud-Sync)
 1. Tippe oben rechts auf das **↗** Symbol.
 2. "Link kopieren" tippen.
 3. Link per WhatsApp/SMS/Mail an deine Frau schicken.
 4. Sie öffnet ihn → sieht alle deine Einträge → kann ihre eigenen hinzufügen.
 5. Wenn sie ihre Liste auch teilt, tippst du auf ihren Link und bekommst ihre Einträge importiert.
 
-**Wichtig zum Verständnis:** Da es ohne Account keinen zentralen Server gibt, ist Sync per Link. Wer zuletzt teilt, hat die neueste Liste. In der Praxis: einer von euch (z.B. du) ist der "Hauptplaner", deine Frau schickt dir ihren Link nach dem Hinzufügen, du übernimmst.
+**Wichtig zum Verständnis:** Ohne Cloud-Sync (Teil 5) ist das Teilen manuell — wer zuletzt teilt, hat die neueste Liste. Für echten gemeinsamen Sync siehe Teil 5.
 
 ### Kalender befüllen
 - Gehe auf den Tab "Kalender".
@@ -114,15 +116,86 @@ Wenn du eine neue Version der App hast:
 - Auf einen Pin tippen zeigt den Namen.
 - So siehst du, was dicht beieinander liegt, und kannst Tage thematisch-geographisch planen.
 
+### Packliste
+- Tab "Packliste" → Fortschrittsbalken zeigt, wieviel schon gepackt ist.
+- "Schnell hinzufügen" Chips für typische Sachen (Reisepass, Ladegerät, …).
+- Tippen auf einen Eintrag hakt ihn ab, Stift-Icon zum Bearbeiten.
+
+---
+
+## Teil 5: Echter Cloud-Sync (optional, 5 Minuten)
+
+Bisher sind Einträge nur auf dem Handy, auf dem sie angelegt wurden. Mit Cloud-Sync sehen du und deine Frau automatisch die Einträge des anderen — ohne Link zu schicken. Weiterhin kostenlos, weiterhin ohne Kreditkarte.
+
+### Schritt 1: Supabase-Account anlegen
+1. Auf einem Computer: https://supabase.com öffnen → "Start your project".
+2. Mit GitHub oder E-Mail einloggen (kostenlos, keine Karte verlangt).
+3. "New Project" → Name: `tripmate` → Datenbank-Passwort setzen (irgendeines — musst du dir nicht merken) → Region: "Frankfurt (eu-central-1)" → "Create".
+4. Warten, bis das Projekt aufgebaut ist (~1 Minute).
+
+### Schritt 2: Datenbank-Tabelle anlegen
+1. Links im Menü: **SQL Editor** → oben rechts "+ New query".
+2. Folgendes einfügen und "Run" klicken:
+
+```sql
+create table trips (
+  room_code text primary key,
+  state jsonb,
+  updated_at timestamptz default now()
+);
+alter table trips enable row level security;
+create policy "r" on trips for select using (true);
+create policy "i" on trips for insert with check (true);
+create policy "u" on trips for update using (true);
+```
+
+Du siehst "Success. No rows returned" — alles gut.
+
+### Schritt 3: URL + Key kopieren
+1. Links im Menü unten: **Project Settings** (Zahnrad) → **API**.
+2. Kopiere zwei Werte:
+   - **Project URL** (z.B. `https://abcdefgh.supabase.co`)
+   - **anon public** Key (langer String, beginnt mit `eyJ...`)
+
+### Schritt 4: In der App aktivieren
+1. TripMate öffnen → oben rechts ⚙ tippen.
+2. Ganz unten: **Cloud-Sync einrichten** tippen.
+3. Die drei Felder ausfüllen:
+   - **Supabase Project URL**: die URL aus Schritt 3
+   - **anon public key**: der Key aus Schritt 3
+   - **Room-Code**: irgendein Name, den nur du + deine Frau kennt, z.B. `minh-jane-london2026` (nur Kleinbuchstaben, Zahlen, Bindestrich)
+4. "Aktivieren" tippen.
+
+Oben im Header erscheint jetzt ein ☁️-Symbol — Sync ist aktiv.
+
+### Schritt 5: Bei deiner Frau genauso
+Sie macht nichts Neues in Supabase. Sie öffnet nur deine App (pages.dev- oder GitHub-Pages-URL), geht ins Sync-Setup und trägt **dieselbe URL, denselben Key und denselben Room-Code** ein. Dann sieht sie ab sofort alle deine Einträge, und du alle ihre — automatisch im Hintergrund.
+
+### Wie oft wird synchronisiert?
+- Beim Öffnen der App: sofort
+- Im Hintergrund: alle 15 Sekunden
+- Beim Zurückwechseln von einer anderen App: sofort
+- Beim Bearbeiten von dir: ~1 Sekunde nachdem du fertig bist
+
+### Das ☁️-Icon antippen → Force-Sync
+Wenn du dir sicher sein willst, dass alles frisch ist: einfach das Cloud-Icon oben antippen.
+
+### Wenn du Sync deaktivieren willst
+Einstellungen → Cloud-Sync einrichten → "Sync deaktivieren" unten. Lokale Daten bleiben bestehen.
+
+### Konflikte
+Wenn ihr beide im gleichen Eintrag gleichzeitig tippt, gewinnt der spätere Stand. Bei normalem Gebrauch (ihr bearbeitet verschiedene Einträge) passiert das praktisch nie.
+
 ---
 
 ## FAQ
 
 **Was passiert mit meinen Daten?**
-Alles wird lokal auf deinem Handy gespeichert (im Browser-Storage). Nichts geht an einen Server außer die Suchanfragen an OpenStreetMap (nur der Suchtext, z.B. "Shake Shack London"). Wenn du den Share-Link schickst, sind deine Daten in der URL codiert – der Empfänger sieht sie, sonst niemand.
+Ohne Cloud-Sync: Alles wird lokal auf deinem Handy gespeichert (im Browser-Storage). Nichts geht an einen Server außer die Suchanfragen an OpenStreetMap.
+Mit Cloud-Sync: Dein kompletter State wird in deine eigene Supabase-Datenbank geschrieben. Nur Geräte mit deinem Room-Code + Key sehen ihn. Supabase gehört dir, die Daten gehören dir.
 
 **Ich habe versehentlich auf "Alles zurücksetzen" getippt!**
-Dann sind lokale Daten weg. Wenn du vorher einen Share-Link gespeichert hast: einfach wieder öffnen und alle Daten sind zurück.
+Dann sind lokale Daten weg. Mit Cloud-Sync einfach neu einrichten (gleiche URL, Key, Room-Code) — Daten kommen zurück.
 
 **Öffnungszeiten fehlen manchmal.**
 OpenStreetMap ist ein Community-Projekt – nicht jeder Ort hat Öffnungszeiten hinterlegt. Du kannst sie manuell in das Notizfeld schreiben.
@@ -133,15 +206,16 @@ Für Installation als App muss es Safari sein (nicht Chrome/Firefox auf iOS, die
 **Kann ich statt London eine andere Stadt nutzen?**
 Ja: oben rechts ⚙ tippen → Stadt ändern → Speichern. Die Karte zentriert sich dann auf die neue Stadt.
 
+**Ich sehe die Einträge meiner Frau nicht.**
+Das ist ohne Cloud-Sync normal — die App speichert nur lokal. Richte Teil 5 ein (Cloud-Sync), dann synct automatisch.
+
 ---
 
 ## Was als nächstes möglich wäre (Version 2)
 
-Falls du die App weiter ausbauen willst, wären sinnvolle nächste Schritte:
-- Echter Cloud-Sync (mit Supabase-Free-Tier, ohne Kreditkarte) – dann Sync automatisch statt per Link
+- Live-Sync per Supabase Realtime (statt Polling alle 15 s)
 - Foto pro Eintrag
 - Öffentliche Verkehrsmittel-Routen zwischen Punkten
 - Ausgaben-Tracker für die Reise
-- Packliste
 
 Sag einfach Bescheid, was als Nächstes dran sein soll.

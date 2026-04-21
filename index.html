@@ -201,6 +201,75 @@
   .map-legend .lg-dot { width: 12px; height: 12px; border-radius: 50%; border: 2px solid white;
     box-shadow: 0 0 0 1px rgba(0,0,0,0.1); }
 
+  /* Packliste view */
+  .packlist-wrap { padding: 12px; padding-bottom: 88px; }
+  .pack-progress {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    padding: 12px 14px; margin-bottom: 12px;
+  }
+  .pack-progress .p-head {
+    display: flex; justify-content: space-between; align-items: center; font-size: 13px;
+    color: var(--text-muted); margin-bottom: 8px;
+  }
+  .pack-progress .p-head strong { color: var(--text); font-size: 14px; }
+  .pack-bar {
+    height: 8px; background: var(--bg); border-radius: 4px; overflow: hidden;
+  }
+  .pack-bar > div {
+    height: 100%; background: linear-gradient(90deg, #0ea5e9, #10b981); transition: width 0.25s;
+  }
+  .pack-cat {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+    margin-bottom: 12px; overflow: hidden;
+  }
+  .pack-cat > h2 {
+    margin: 0; padding: 12px 14px; font-size: 14px; display: flex; gap: 8px; align-items: center;
+    border-bottom: 1px solid var(--border);
+  }
+  .pack-cat h2 .badge {
+    background: var(--bg); color: var(--text-muted); border-radius: 999px;
+    padding: 2px 8px; font-size: 11px; font-weight: 500; margin-left: auto;
+  }
+  .pack-empty { padding: 18px 14px; color: var(--text-muted); font-size: 13px; font-style: italic; }
+  .pack-item {
+    display: flex; align-items: center; gap: 10px; padding: 11px 14px;
+    border-top: 1px solid var(--border); cursor: pointer;
+  }
+  .pack-item:first-of-type { border-top: none; }
+  .pack-item:active { background: #f1f5f9; }
+  .pack-check {
+    width: 22px; height: 22px; border-radius: 6px; border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    background: white; font-size: 14px; color: white;
+  }
+  .pack-item.checked .pack-check {
+    background: var(--primary); border-color: var(--primary);
+  }
+  .pack-item.checked .p-name { text-decoration: line-through; color: var(--text-muted); }
+  .p-name { flex: 1; font-size: 14px; line-height: 1.3; min-width: 0; }
+  .p-name .p-qty {
+    background: var(--bg); color: var(--text-muted); border-radius: 6px;
+    padding: 1px 6px; font-size: 11px; margin-right: 6px; font-weight: 500;
+  }
+  .p-name .p-note { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+  .p-name .p-by { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+  .p-edit {
+    width: 28px; height: 28px; border-radius: 6px; color: var(--text-muted);
+    display: flex; align-items: center; justify-content: center; font-size: 14px;
+  }
+  .p-edit:active { background: var(--bg); }
+  .pack-suggest-wrap {
+    background: #fef3c7; border: 1px solid #fde68a; border-radius: 12px;
+    padding: 12px 14px; margin-bottom: 12px;
+  }
+  .pack-suggest-wrap strong { font-size: 13px; display: block; margin-bottom: 8px; }
+  .pack-suggest-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .pack-chip {
+    background: white; border: 1px solid #fde68a; border-radius: 999px;
+    padding: 5px 10px; font-size: 12px; cursor: pointer;
+  }
+  .pack-chip:active { background: #fde68a; }
+
   /* Category colors */
   .cat-sight { color: var(--sight); }
   .cat-food { color: var(--food); }
@@ -241,6 +310,7 @@
       <small id="trip-city">London, UK</small>
     </div>
     <div class="actions">
+      <button class="icon-btn" id="sync-status" title="Cloud-Sync" style="display:none;">☁️</button>
       <button class="icon-btn" id="share-btn" title="Teilen">↗</button>
       <button class="icon-btn" id="settings-btn" title="Einstellungen">⚙</button>
     </div>
@@ -264,6 +334,10 @@
         <div class="lg-row"><span class="lg-dot bg-other"></span>Sonstiges</div>
       </div>
     </section>
+
+    <section class="view" id="view-packlist">
+      <div class="packlist-wrap" id="packlist-container"></div>
+    </section>
   </main>
 
   <button class="fab" id="fab" title="Hinzufügen">+</button>
@@ -272,6 +346,7 @@
     <button class="tab active" data-view="list"><span class="ico">📋</span>Liste</button>
     <button class="tab" data-view="calendar"><span class="ico">📅</span>Kalender</button>
     <button class="tab" data-view="map"><span class="ico">🗺️</span>Karte</button>
+    <button class="tab" data-view="packlist"><span class="ico">🎒</span>Packliste</button>
   </nav>
 </div>
 
@@ -348,8 +423,70 @@
       <button class="btn secondary" id="close-settings">Schließen</button>
       <button class="btn primary" id="save-settings">Speichern</button>
     </div>
+    <hr style="border:none; border-top:1px solid var(--border); margin:14px 0 10px;" />
+    <div style="font-size:12px; color:var(--text-muted); margin-bottom:8px;" id="sync-status-text">
+      ☁️ Cloud-Sync: deaktiviert – Listen sind nur auf diesem Gerät.
+    </div>
+    <div class="modal-actions">
+      <button class="btn secondary" id="open-sync-setup" style="width:100%;">Cloud-Sync einrichten</button>
+    </div>
     <div class="modal-actions">
       <button class="btn danger" id="reset-app">Alles zurücksetzen</button>
+    </div>
+  </div>
+</div>
+
+<!-- Cloud-Sync setup modal -->
+<div class="modal-backdrop" id="sync-modal">
+  <div class="modal">
+    <h3>☁️ Cloud-Sync einrichten</h3>
+    <p style="color:var(--text-muted); font-size:13px; margin:0 0 10px;">
+      Einmalig einrichten — dann seht ihr automatisch die Einträge des anderen, ohne Link zu schicken. Kostenlos via Supabase, keine Kreditkarte.
+    </p>
+    <details style="margin-bottom:12px;">
+      <summary style="cursor:pointer; padding:6px 0; color:var(--primary); font-weight:500;">Anleitung anzeigen (5 Min, kostenlos)</summary>
+      <ol style="font-size:13px; line-height:1.55; padding-left:18px; margin:8px 0;">
+        <li>Öffne <strong>supabase.com</strong> → oben rechts "Start your project".</li>
+        <li>Mit GitHub oder E-Mail einloggen (kostenlos, keine Karte).</li>
+        <li>"New Project" → Name: <code>tripmate</code> → DB-Passwort setzen → Region Europa wählen → "Create".</li>
+        <li>~1 Minute warten, bis das Projekt bereit ist.</li>
+        <li>Links im Menü: "SQL Editor" → "+ New query" → folgenden Code einfügen, dann "Run":
+          <pre style="background:#f1f5f9; padding:8px; font-size:11px; overflow:auto; border-radius:6px; white-space:pre;">create table trips (
+  room_code text primary key,
+  state jsonb,
+  updated_at timestamptz default now()
+);
+alter table trips enable row level security;
+create policy "r" on trips for select using (true);
+create policy "i" on trips for insert with check (true);
+create policy "u" on trips for update using (true);</pre>
+        </li>
+        <li>Links "Project Settings" (⚙) → "API". Dort kopieren:
+          <ul style="padding-left:18px;">
+            <li><strong>Project URL</strong> (z.B. https://abcd.supabase.co)</li>
+            <li><strong>anon public</strong> Key</li>
+          </ul>
+        </li>
+        <li>Felder unten ausfüllen + "Aktivieren" tippen.</li>
+        <li>Deiner Frau gibst du: <strong>dieselbe URL</strong>, <strong>denselben Key</strong> und <strong>denselben Room-Code</strong>. Sie füllt sie hier ein — fertig, ab dann automatisch Sync.</li>
+      </ol>
+    </details>
+
+    <label>Supabase Project URL</label>
+    <input type="text" id="sync-url" placeholder="https://xxxx.supabase.co" autocomplete="off" autocapitalize="off" spellcheck="false" />
+
+    <label>anon public key</label>
+    <input type="text" id="sync-key" placeholder="eyJhbGci..." autocomplete="off" autocapitalize="off" spellcheck="false" />
+
+    <label>Room-Code (beide gleich!)</label>
+    <input type="text" id="sync-room" placeholder="z.B. minh-jane-london" autocomplete="off" autocapitalize="off" spellcheck="false" />
+
+    <div class="modal-actions">
+      <button class="btn secondary" id="sync-cancel">Abbrechen</button>
+      <button class="btn primary" id="sync-enable">Aktivieren</button>
+    </div>
+    <div class="modal-actions" id="sync-disable-wrap" style="display:none;">
+      <button class="btn danger" id="sync-disable">Sync deaktivieren</button>
     </div>
   </div>
 </div>
@@ -365,6 +502,40 @@
     <div class="modal-actions">
       <button class="btn secondary" id="close-share">Schließen</button>
       <button class="btn primary" id="copy-share">Link kopieren</button>
+    </div>
+  </div>
+</div>
+
+<!-- Packliste Modal -->
+<div class="modal-backdrop" id="pack-modal">
+  <div class="modal">
+    <h3 id="pack-modal-title">Packlisten-Eintrag</h3>
+    <label>Was?</label>
+    <input type="text" id="pack-name" placeholder="z.B. T-Shirts" autocomplete="off" />
+    <div class="row">
+      <div>
+        <label>Menge</label>
+        <input type="number" id="pack-qty" min="1" value="1" />
+      </div>
+      <div>
+        <label>Kategorie</label>
+        <select id="pack-category">
+          <option value="clothing">Kleidung</option>
+          <option value="docs">Dokumente & Geld</option>
+          <option value="tech">Technik</option>
+          <option value="hygiene">Hygiene</option>
+          <option value="other">Sonstiges</option>
+        </select>
+      </div>
+    </div>
+    <label>Notiz (optional)</label>
+    <textarea id="pack-notes" placeholder="z.B. nur 2 bei Gepäck-Limit"></textarea>
+    <div class="modal-actions">
+      <button class="btn secondary" id="pack-cancel">Abbrechen</button>
+      <button class="btn primary" id="pack-save">Speichern</button>
+    </div>
+    <div class="modal-actions" id="pack-delete-wrap" style="display:none;">
+      <button class="btn danger" id="pack-delete">Löschen</button>
     </div>
   </div>
 </div>
@@ -398,6 +569,33 @@ const CATEGORIES = {
   shop:  { label: 'Shopping',         icon: '🛍️', color: '#ec4899' },
   other: { label: 'Sonstiges',        icon: '📌', color: '#64748b' }
 };
+
+const PACK_CATEGORIES = {
+  clothing: { label: 'Kleidung',         icon: '👕' },
+  docs:     { label: 'Dokumente & Geld', icon: '🪪' },
+  tech:     { label: 'Technik',          icon: '🔌' },
+  hygiene:  { label: 'Hygiene',          icon: '🧴' },
+  other:    { label: 'Sonstiges',        icon: '📦' }
+};
+
+const PACK_SUGGESTIONS = [
+  { name: 'Reisepass', category: 'docs' },
+  { name: 'Kreditkarte', category: 'docs' },
+  { name: 'Führerschein', category: 'docs' },
+  { name: 'Bargeld', category: 'docs' },
+  { name: 'Handy-Ladegerät', category: 'tech' },
+  { name: 'Universal-Adapter', category: 'tech' },
+  { name: 'Kopfhörer', category: 'tech' },
+  { name: 'Powerbank', category: 'tech' },
+  { name: 'Zahnbürste', category: 'hygiene' },
+  { name: 'Zahnpasta', category: 'hygiene' },
+  { name: 'Deo', category: 'hygiene' },
+  { name: 'T-Shirts', category: 'clothing' },
+  { name: 'Unterwäsche', category: 'clothing' },
+  { name: 'Socken', category: 'clothing' },
+  { name: 'Pyjama', category: 'clothing' },
+  { name: 'Regenjacke', category: 'clothing' }
+];
 
 const DEFAULT_STATE = {
   tripName: 'London Trip',
@@ -434,6 +632,11 @@ const DEFAULT_STATE = {
       scheduledTime: '',
       createdAt: Date.now() - 2000
     }
+  ],
+  packlist: [
+    { id: 'pk-demo1', name: 'Reisepass',        qty: 1, category: 'docs',     checked: false, notes: '', addedBy: 'Minh', createdAt: Date.now() - 5000 },
+    { id: 'pk-demo2', name: 'Handy-Ladegerät',  qty: 1, category: 'tech',     checked: false, notes: '', addedBy: 'Minh', createdAt: Date.now() - 4000 },
+    { id: 'pk-demo3', name: 'Zahnbürste',       qty: 1, category: 'hygiene',  checked: false, notes: '', addedBy: 'Minh', createdAt: Date.now() - 3000 }
   ]
 };
 
@@ -450,13 +653,224 @@ let searchTimeout = null;
 function loadState() {
   try {
     const saved = localStorage.getItem('tm_state');
-    if (saved) return JSON.parse(saved);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      // Migration: ensure packlist exists for older stored states
+      if (!Array.isArray(parsed.packlist)) parsed.packlist = [];
+      if (!Array.isArray(parsed.items)) parsed.items = [];
+      if (!Array.isArray(parsed._tombs)) parsed._tombs = [];
+      if (typeof parsed._metaUpdatedAt !== 'number') parsed._metaUpdatedAt = 0;
+      return parsed;
+    }
   } catch(e) {}
-  return structuredClone(DEFAULT_STATE);
+  const fresh = structuredClone(DEFAULT_STATE);
+  fresh._tombs = [];
+  fresh._metaUpdatedAt = 0;
+  return fresh;
 }
-function saveState() {
+function saveStateLocal() {
   localStorage.setItem('tm_state', JSON.stringify(state));
 }
+function saveState() {
+  saveStateLocal();
+  cloudPushDebounced();
+}
+
+// ============ Cloud Sync (Supabase) ============
+const CLOUD = {
+  url: localStorage.getItem('tm_cloud_url') || '',
+  key: localStorage.getItem('tm_cloud_key') || '',
+  room: localStorage.getItem('tm_cloud_room') || '',
+  lastPulledAt: parseInt(localStorage.getItem('tm_cloud_last_pulled') || '0', 10),
+  pushDebounceTimer: null,
+  pollTimer: null,
+  syncing: false,
+  skipNextPush: false
+};
+function cloudEnabled() { return !!(CLOUD.url && CLOUD.key && CLOUD.room); }
+function cloudFullUrl(path) { return CLOUD.url.replace(/\/+$/, '') + path; }
+function cloudHeaders(extra) {
+  const h = {
+    apikey: CLOUD.key,
+    Authorization: 'Bearer ' + CLOUD.key,
+    'Content-Type': 'application/json'
+  };
+  if (extra) Object.assign(h, extra);
+  return h;
+}
+function updateSyncIndicator() {
+  const btn = document.getElementById('sync-status');
+  const stat = document.getElementById('sync-status-text');
+  if (!cloudEnabled()) {
+    if (btn) btn.style.display = 'none';
+    if (stat) stat.textContent = '☁️ Cloud-Sync: deaktiviert – Listen sind nur auf diesem Gerät.';
+    return;
+  }
+  if (btn) {
+    btn.style.display = 'flex';
+    btn.textContent = CLOUD.syncing ? '🔄' : '☁️';
+    btn.title = 'Cloud-Sync aktiv – Raum: ' + CLOUD.room;
+  }
+  if (stat) stat.textContent = '☁️ Cloud-Sync aktiv (Raum: ' + CLOUD.room + ')';
+}
+async function cloudPull(silent) {
+  if (!cloudEnabled() || CLOUD.syncing) return;
+  CLOUD.syncing = true; updateSyncIndicator();
+  try {
+    const r = await fetch(
+      cloudFullUrl('/rest/v1/trips?room_code=eq.' + encodeURIComponent(CLOUD.room) + '&select=state,updated_at'),
+      { headers: cloudHeaders() }
+    );
+    if (!r.ok) throw new Error('pull ' + r.status);
+    const rows = await r.json();
+    if (!rows || rows.length === 0) {
+      // nothing in cloud yet — push our current state
+      CLOUD.syncing = false;
+      await cloudPushImmediate();
+      return;
+    }
+    const remote = rows[0];
+    const remoteAt = new Date(remote.updated_at).getTime();
+    if (remoteAt > CLOUD.lastPulledAt) {
+      const changed = mergeRemoteState(remote.state);
+      CLOUD.lastPulledAt = remoteAt;
+      localStorage.setItem('tm_cloud_last_pulled', String(remoteAt));
+      if (changed) {
+        CLOUD.skipNextPush = true;
+        saveStateLocal();
+        refreshCurrentView();
+        if (!silent) toast('☁️ Von Cloud aktualisiert');
+      }
+    }
+  } catch (e) {
+    console.error('cloudPull error', e);
+    if (!silent) toast('Sync-Fehler beim Laden');
+  } finally {
+    CLOUD.syncing = false; updateSyncIndicator();
+  }
+}
+async function cloudPushImmediate() {
+  if (!cloudEnabled()) return;
+  CLOUD.syncing = true; updateSyncIndicator();
+  try {
+    const body = [{
+      room_code: CLOUD.room,
+      state: state,
+      updated_at: new Date().toISOString()
+    }];
+    const r = await fetch(
+      cloudFullUrl('/rest/v1/trips?on_conflict=room_code'),
+      {
+        method: 'POST',
+        headers: cloudHeaders({ Prefer: 'resolution=merge-duplicates,return=representation' }),
+        body: JSON.stringify(body)
+      }
+    );
+    if (!r.ok) {
+      const txt = await r.text().catch(() => '');
+      throw new Error('push ' + r.status + ' ' + txt.slice(0, 200));
+    }
+    const rows = await r.json().catch(() => []);
+    if (rows && rows[0] && rows[0].updated_at) {
+      CLOUD.lastPulledAt = new Date(rows[0].updated_at).getTime();
+      localStorage.setItem('tm_cloud_last_pulled', String(CLOUD.lastPulledAt));
+    }
+  } catch (e) {
+    console.error('cloudPush error', e);
+    toast('Sync-Fehler beim Speichern');
+  } finally {
+    CLOUD.syncing = false; updateSyncIndicator();
+  }
+}
+function cloudPushDebounced() {
+  if (!cloudEnabled()) return;
+  if (CLOUD.skipNextPush) { CLOUD.skipNextPush = false; return; }
+  clearTimeout(CLOUD.pushDebounceTimer);
+  CLOUD.pushDebounceTimer = setTimeout(cloudPushImmediate, 1200);
+}
+function mergeRemoteState(remote) {
+  if (!remote || typeof remote !== 'object') return false;
+  let changed = false;
+
+  // Tombstones: union
+  if (!Array.isArray(state._tombs)) state._tombs = [];
+  const myTombs = new Set(state._tombs);
+  (remote._tombs || []).forEach(function(t) {
+    if (!myTombs.has(t)) { state._tombs.push(t); myTombs.add(t); changed = true; }
+  });
+
+  // Items merge by id, newest updatedAt/createdAt wins
+  const localItemMap = new Map(state.items.map(function(i){ return [i.id, i]; }));
+  (remote.items || []).forEach(function(it) {
+    const local = localItemMap.get(it.id);
+    if (!local) {
+      if (!myTombs.has('i:' + it.id)) { state.items.push(it); changed = true; }
+    } else {
+      const rTs = it.updatedAt || it.createdAt || 0;
+      const lTs = local.updatedAt || local.createdAt || 0;
+      if (rTs > lTs) { Object.assign(local, it); changed = true; }
+    }
+  });
+
+  // Packlist merge
+  if (!Array.isArray(state.packlist)) state.packlist = [];
+  const localPackMap = new Map(state.packlist.map(function(p){ return [p.id, p]; }));
+  (remote.packlist || []).forEach(function(p) {
+    const local = localPackMap.get(p.id);
+    if (!local) {
+      if (!myTombs.has('p:' + p.id)) { state.packlist.push(p); changed = true; }
+    } else {
+      const rTs = p.updatedAt || p.createdAt || 0;
+      const lTs = local.updatedAt || local.createdAt || 0;
+      if (rTs > lTs) { Object.assign(local, p); changed = true; }
+    }
+  });
+
+  // Apply tombstones (remove deleted items from local lists)
+  const beforeI = state.items.length, beforeP = state.packlist.length;
+  state.items = state.items.filter(function(i){ return !myTombs.has('i:' + i.id); });
+  state.packlist = state.packlist.filter(function(p){ return !myTombs.has('p:' + p.id); });
+  if (state.items.length !== beforeI || state.packlist.length !== beforeP) changed = true;
+
+  // Trip metadata: whoever edited last wins
+  const rMeta = remote._metaUpdatedAt || 0;
+  const lMeta = state._metaUpdatedAt || 0;
+  if (rMeta > lMeta) {
+    ['tripName','tripCity','tripCenter','tripStart','tripEnd'].forEach(function(k){
+      if (remote[k] !== undefined) state[k] = remote[k];
+    });
+    state._metaUpdatedAt = rMeta;
+    changed = true;
+  }
+  return changed;
+}
+function refreshCurrentView() {
+  renderHeader();
+  if (currentView === 'list') renderList();
+  else if (currentView === 'calendar') renderCalendar();
+  else if (currentView === 'map') renderMap();
+  else if (currentView === 'packlist') renderPacklist();
+}
+function startCloudPolling() {
+  clearInterval(CLOUD.pollTimer);
+  if (!cloudEnabled()) return;
+  cloudPull(true);
+  CLOUD.pollTimer = setInterval(function(){
+    if (document.visibilityState === 'visible') cloudPull(true);
+  }, 15000);
+}
+document.addEventListener('visibilitychange', function(){
+  if (document.visibilityState === 'visible' && cloudEnabled()) cloudPull(true);
+});
+function tombstoneItem(id) {
+  if (!Array.isArray(state._tombs)) state._tombs = [];
+  if (!state._tombs.includes('i:' + id)) state._tombs.push('i:' + id);
+}
+function tombstonePack(id) {
+  if (!Array.isArray(state._tombs)) state._tombs = [];
+  if (!state._tombs.includes('p:' + id)) state._tombs.push('p:' + id);
+}
+// ============ end Cloud Sync ============
 
 // ============ Helpers ============
 function uid() { return Math.random().toString(36).slice(2, 10); }
@@ -483,6 +897,7 @@ function switchView(name) {
   if (name === 'list') renderList();
   if (name === 'calendar') renderCalendar();
   if (name === 'map') { setTimeout(() => { initMap(); renderMap(); }, 60); }
+  if (name === 'packlist') renderPacklist();
 }
 document.querySelectorAll('nav.tabs .tab').forEach(b => b.addEventListener('click', () => switchView(b.dataset.view)));
 
@@ -600,6 +1015,7 @@ function showDetail(id) {
   document.getElementById('d-edit').onclick = () => { closeModal('detail-modal'); openAddModal(item.id); };
   document.getElementById('d-delete').onclick = () => {
     if (confirm('Eintrag wirklich löschen?')) {
+      tombstoneItem(id);
       state.items = state.items.filter(i => i.id !== id);
       saveState(); closeModal('detail-modal'); renderList(); renderMap();
       toast('Eintrag gelöscht');
@@ -627,7 +1043,10 @@ function openAddModal(editId=null) {
   setTimeout(() => document.getElementById('search-input').focus(), 100);
 }
 
-document.getElementById('fab').addEventListener('click', () => openAddModal());
+document.getElementById('fab').addEventListener('click', () => {
+  if (currentView === 'packlist') openPackModal();
+  else openAddModal();
+});
 document.getElementById('cancel-add').addEventListener('click', () => closeModal('add-modal'));
 
 // Search via Nominatim
@@ -722,7 +1141,7 @@ document.getElementById('save-item').addEventListener('click', () => {
   if (editingItemId) {
     const item = state.items.find(i => i.id === editingItemId);
     if (item) {
-      Object.assign(item, { name, category, address, scheduledDate, scheduledTime, notes });
+      Object.assign(item, { name, category, address, scheduledDate, scheduledTime, notes, updatedAt: Date.now() });
       if (selectedPlace) {
         if (selectedPlace.lat) { item.lat = selectedPlace.lat; item.lng = selectedPlace.lng; }
         if (selectedPlace.openingHours !== undefined) item.openingHours = selectedPlace.openingHours;
@@ -730,13 +1149,14 @@ document.getElementById('save-item').addEventListener('click', () => {
       }
     }
   } else {
+    const now = Date.now();
     const newItem = {
       id: uid(), name, category, address,
       lat: selectedPlace?.lat || null, lng: selectedPlace?.lng || null,
       openingHours: selectedPlace?.openingHours || '',
       website: selectedPlace?.website || '',
       notes, addedBy: myName || 'Ich',
-      scheduledDate, scheduledTime, createdAt: Date.now()
+      scheduledDate, scheduledTime, createdAt: now, updatedAt: now
     };
     state.items.push(newItem);
   }
@@ -901,6 +1321,7 @@ document.getElementById('save-settings').addEventListener('click', async () => {
   }
   state.tripStart = document.getElementById('s-trip-start').value;
   state.tripEnd = document.getElementById('s-trip-end').value;
+  state._metaUpdatedAt = Date.now();
   saveState();
   renderHeader();
   if (currentView === 'list') renderList();
@@ -913,8 +1334,61 @@ document.getElementById('reset-app').addEventListener('click', () => {
   if (confirm('Alle Daten wirklich löschen? Dies kann nicht rückgängig gemacht werden.')) {
     localStorage.removeItem('tm_state');
     localStorage.removeItem('tm_my_name');
+    localStorage.removeItem('tm_cloud_last_pulled');
     location.reload();
   }
+});
+
+// ============ Sync Setup Modal ============
+document.getElementById('open-sync-setup').addEventListener('click', () => {
+  document.getElementById('sync-url').value = CLOUD.url;
+  document.getElementById('sync-key').value = CLOUD.key;
+  document.getElementById('sync-room').value = CLOUD.room;
+  document.getElementById('sync-disable-wrap').style.display = cloudEnabled() ? 'flex' : 'none';
+  closeModal('settings-modal');
+  document.getElementById('sync-modal').classList.add('open');
+});
+document.getElementById('sync-cancel').addEventListener('click', () => closeModal('sync-modal'));
+document.getElementById('sync-enable').addEventListener('click', async () => {
+  const url = document.getElementById('sync-url').value.trim().replace(/\/+$/, '');
+  const key = document.getElementById('sync-key').value.trim();
+  const room = document.getElementById('sync-room').value.trim().toLowerCase().replace(/[^a-z0-9-_]/g, '-');
+  if (!url || !key || !room) { toast('Bitte alle Felder füllen'); return; }
+  if (!/^https:\/\/.+\.supabase\.co$/i.test(url)) {
+    if (!confirm('URL sieht ungewöhnlich aus. Trotzdem speichern?')) return;
+  }
+  CLOUD.url = url; CLOUD.key = key; CLOUD.room = room;
+  CLOUD.lastPulledAt = 0;
+  localStorage.setItem('tm_cloud_url', url);
+  localStorage.setItem('tm_cloud_key', key);
+  localStorage.setItem('tm_cloud_room', room);
+  localStorage.setItem('tm_cloud_last_pulled', '0');
+  closeModal('sync-modal');
+  toast('🔄 Verbinde mit Cloud...');
+  updateSyncIndicator();
+  await cloudPull(false);
+  // After first pull (or push if empty), ensure our local additions are up there too
+  await cloudPushImmediate();
+  startCloudPolling();
+  toast('☁️ Cloud-Sync aktiv!');
+});
+document.getElementById('sync-disable').addEventListener('click', () => {
+  if (!confirm('Cloud-Sync deaktivieren? Deine lokalen Daten bleiben erhalten.')) return;
+  clearInterval(CLOUD.pollTimer);
+  clearTimeout(CLOUD.pushDebounceTimer);
+  CLOUD.url = ''; CLOUD.key = ''; CLOUD.room = ''; CLOUD.lastPulledAt = 0;
+  localStorage.removeItem('tm_cloud_url');
+  localStorage.removeItem('tm_cloud_key');
+  localStorage.removeItem('tm_cloud_room');
+  localStorage.removeItem('tm_cloud_last_pulled');
+  updateSyncIndicator();
+  closeModal('sync-modal');
+  toast('Cloud-Sync deaktiviert');
+});
+// Tap indicator to force-sync now
+document.getElementById('sync-status').addEventListener('click', () => {
+  if (!cloudEnabled()) return;
+  cloudPull(false);
 });
 
 // ============ Share ============
@@ -936,6 +1410,163 @@ document.getElementById('copy-share').addEventListener('click', async () => {
     document.getElementById('share-url').select();
     document.execCommand('copy');
     toast('Link kopiert ✓');
+  }
+});
+
+// ============ Packliste ============
+let editingPackId = null;
+
+function renderPacklist() {
+  const container = document.getElementById('packlist-container');
+  container.innerHTML = '';
+
+  const list = state.packlist || [];
+  const total = list.length;
+  const done = list.filter(p => p.checked).length;
+  const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+
+  // Progress summary
+  const progress = document.createElement('div');
+  progress.className = 'pack-progress';
+  progress.innerHTML = `
+    <div class="p-head"><strong>🎒 Packfortschritt</strong><span>${done} / ${total} gepackt (${pct}%)</span></div>
+    <div class="pack-bar"><div style="width:${pct}%;"></div></div>
+  `;
+  container.appendChild(progress);
+
+  // Suggestion chips — names that are NOT already in the packlist
+  const usedNames = new Set(list.map(p => p.name.toLowerCase()));
+  const available = PACK_SUGGESTIONS.filter(s => !usedNames.has(s.name.toLowerCase())).slice(0, 10);
+  if (available.length > 0) {
+    const sg = document.createElement('div');
+    sg.className = 'pack-suggest-wrap';
+    sg.innerHTML = `<strong>💡 Schnell hinzufügen</strong><div class="pack-suggest-chips"></div>`;
+    const chipWrap = sg.querySelector('.pack-suggest-chips');
+    available.forEach(s => {
+      const chip = document.createElement('button');
+      chip.className = 'pack-chip';
+      chip.textContent = `+ ${s.name}`;
+      chip.addEventListener('click', () => quickAddPack(s.name, s.category));
+      chipWrap.appendChild(chip);
+    });
+    container.appendChild(sg);
+  }
+
+  // Category sections
+  Object.entries(PACK_CATEGORIES).forEach(([key, cat]) => {
+    const items = list.filter(p => p.category === key)
+      .sort((a, b) => (a.checked - b.checked) || (a.createdAt - b.createdAt));
+    if (items.length === 0 && total > 0) return;
+    const catDone = items.filter(p => p.checked).length;
+    const section = document.createElement('div');
+    section.className = 'pack-cat';
+    section.innerHTML = `
+      <h2>${cat.icon} ${cat.label}<span class="badge">${catDone} / ${items.length}</span></h2>
+      <div class="pack-items"></div>
+    `;
+    const body = section.querySelector('.pack-items');
+    if (items.length === 0) {
+      body.innerHTML = `<div class="pack-empty">Nichts in ${cat.label}. Tippe unten auf +</div>`;
+    } else {
+      items.forEach(it => {
+        const row = document.createElement('div');
+        row.className = 'pack-item' + (it.checked ? ' checked' : '');
+        row.innerHTML = `
+          <div class="pack-check">${it.checked ? '✓' : ''}</div>
+          <div class="p-name">
+            ${it.qty > 1 ? `<span class="p-qty">×${it.qty}</span>` : ''}${escapeHtml(it.name)}
+            ${it.notes ? `<div class="p-note">${escapeHtml(it.notes)}</div>` : ''}
+            <div class="p-by">von ${escapeHtml(it.addedBy || 'Unbekannt')}</div>
+          </div>
+          <button class="p-edit" title="Bearbeiten">✏️</button>
+        `;
+        row.addEventListener('click', (e) => {
+          if (e.target.closest('.p-edit')) { openPackModal(it.id); return; }
+          togglePackCheck(it.id);
+        });
+        body.appendChild(row);
+      });
+    }
+    container.appendChild(section);
+  });
+
+  if (total === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'pack-empty';
+    empty.style.textAlign = 'center';
+    empty.style.padding = '40px 20px';
+    empty.innerHTML = 'Noch nichts auf der Packliste.<br/>Tipp auf <strong>+</strong> unten rechts, oder nutze die Schnell-Chips oben.';
+    container.appendChild(empty);
+  }
+}
+
+function togglePackCheck(id) {
+  const item = state.packlist.find(p => p.id === id);
+  if (!item) return;
+  item.checked = !item.checked;
+  item.updatedAt = Date.now();
+  saveState();
+  renderPacklist();
+}
+
+function quickAddPack(name, category) {
+  const now = Date.now();
+  state.packlist.push({
+    id: uid(), name, qty: 1, category, checked: false, notes: '',
+    addedBy: myName || 'Ich', createdAt: now, updatedAt: now
+  });
+  saveState();
+  renderPacklist();
+  toast(`"${name}" hinzugefügt`);
+}
+
+function openPackModal(editId = null) {
+  editingPackId = editId;
+  const item = editId ? state.packlist.find(p => p.id === editId) : null;
+  document.getElementById('pack-modal-title').textContent = editId ? 'Bearbeiten' : 'Packlisten-Eintrag';
+  document.getElementById('pack-name').value = item?.name || '';
+  document.getElementById('pack-qty').value = item?.qty || 1;
+  document.getElementById('pack-category').value = item?.category || 'clothing';
+  document.getElementById('pack-notes').value = item?.notes || '';
+  document.getElementById('pack-delete-wrap').style.display = editId ? 'flex' : 'none';
+  document.getElementById('pack-modal').classList.add('open');
+  setTimeout(() => document.getElementById('pack-name').focus(), 100);
+}
+
+document.getElementById('pack-cancel').addEventListener('click', () => closeModal('pack-modal'));
+document.getElementById('pack-save').addEventListener('click', () => {
+  const name = document.getElementById('pack-name').value.trim();
+  if (!name) { toast('Bitte Namen eingeben'); return; }
+  const qty = Math.max(1, parseInt(document.getElementById('pack-qty').value) || 1);
+  const category = document.getElementById('pack-category').value;
+  const notes = document.getElementById('pack-notes').value.trim();
+
+  if (editingPackId) {
+    const item = state.packlist.find(p => p.id === editingPackId);
+    if (item) Object.assign(item, { name, qty, category, notes, updatedAt: Date.now() });
+  } else {
+    const now = Date.now();
+    state.packlist.push({
+      id: uid(), name, qty, category, checked: false, notes,
+      addedBy: myName || 'Ich', createdAt: now, updatedAt: now
+    });
+  }
+  saveState();
+  closeModal('pack-modal');
+  renderPacklist();
+  toast(editingPackId ? 'Gespeichert ✓' : 'Hinzugefügt ✓');
+  editingPackId = null;
+});
+document.getElementById('pack-delete').addEventListener('click', () => {
+  if (!editingPackId) return;
+  if (confirm('Eintrag wirklich löschen?')) {
+    tombstonePack(editingPackId);
+    state.packlist = state.packlist.filter(p => p.id !== editingPackId);
+    saveState();
+    closeModal('pack-modal');
+    renderPacklist();
+    toast('Gelöscht');
+    editingPackId = null;
   }
 });
 
@@ -963,6 +1594,19 @@ function importFromHash() {
         state.items.push(it); added++;
       }
     });
+    // Merge packlist too
+    if (!Array.isArray(state.packlist)) state.packlist = [];
+    const existingPackIds = new Set(state.packlist.map(p => p.id));
+    const incomingPack = payload.state.packlist || [];
+    let packAdded = 0, packUpdated = 0;
+    incomingPack.forEach(p => {
+      if (existingPackIds.has(p.id)) {
+        const ex = state.packlist.find(x => x.id === p.id);
+        if ((p.createdAt || 0) > (ex.createdAt || 0)) { Object.assign(ex, p); packUpdated++; }
+      } else {
+        state.packlist.push(p); packAdded++;
+      }
+    });
     // Adopt trip metadata if we had defaults
     if (state.tripName === DEFAULT_STATE.tripName && payload.state.tripName) {
       state.tripName = payload.state.tripName;
@@ -974,7 +1618,8 @@ function importFromHash() {
     saveState();
     history.replaceState(null, '', location.pathname);
     const by = payload.sharedBy || 'jemandem';
-    setTimeout(() => toast(`Import von ${by}: ${added} neu, ${updated} aktualisiert`, 3500), 500);
+    const packMsg = (packAdded || packUpdated) ? ` + Packliste: ${packAdded} neu, ${packUpdated} aktualisiert` : '';
+    setTimeout(() => toast(`Import von ${by}: ${added} neu, ${updated} aktualisiert${packMsg}`, 4000), 500);
   } catch(e) {
     console.error('Import failed:', e);
     toast('Import fehlgeschlagen');
@@ -1001,6 +1646,8 @@ importFromHash();
 renderHeader();
 renderList();
 showWelcomeIfNeeded();
+updateSyncIndicator();
+startCloudPolling();
 
 // Register service worker
 if ('serviceWorker' in navigator) {
