@@ -673,6 +673,9 @@ function saveStateLocal() {
 }
 function saveState() {
   saveStateLocal();
+  // Dirty sofort setzen — falls der Tab geschlossen wird, bevor der Debounce-Timer
+  // feuert, holt die nächste Session den Push nach.
+  if (localStorage.getItem('tm_cloud_url')) localStorage.setItem('tm_cloud_dirty', '1');
   cloudPushDebounced();
 }
 
@@ -731,16 +734,19 @@ async function cloudPull(silent) {
     }
     const remote = rows[0];
     const remoteAt = new Date(remote.updated_at).getTime();
-    if (remoteAt > CLOUD.lastPulledAt) {
-      const changed = mergeRemoteState(remote.state);
+    // Always merge — mergeRemoteState ist idempotent und entscheidet pro-Item,
+    // ob Remote tatsächlich neuer ist. Das vermeidet Clock-Skew-Probleme zwischen
+    // zwei Geräten, deren Uhren nicht exakt gleich gehen.
+    const changed = mergeRemoteState(remote.state);
+    if (!isNaN(remoteAt)) {
       CLOUD.lastPulledAt = remoteAt;
       localStorage.setItem('tm_cloud_last_pulled', String(remoteAt));
-      if (changed) {
-        CLOUD.skipNextPush = true;
-        saveStateLocal();
-        refreshCurrentView();
-        if (!silent) toast('☁️ Von Cloud aktualisiert');
-      }
+    }
+    if (changed) {
+      CLOUD.skipNextPush = true;
+      saveStateLocal();
+      refreshCurrentView();
+      if (!silent) toast('☁️ Von Cloud aktualisiert');
     }
   } catch (e) {
     console.error('cloudPull error', e);
@@ -751,8 +757,16 @@ async function cloudPull(silent) {
 }
 async function cloudPushImmediate() {
   if (!cloudEnabled()) return;
+  if (!navigator.onLine) {
+    // Offline: Dirty-Flag setzen, damit wir beim nächsten Online-Kommen nachholen
+    localStorage.setItem('tm_cloud_dirty', '1');
+    return;
+  }
   CLOUD.syncing = true; updateSyncIndicator();
   try {
+    // updated_at als Client-Zeit senden (DEFAULT now() würde bei UPDATE nicht feuern).
+    // Der eigentliche Merge-Check basiert pro-Item auf state.items[i].updatedAt,
+    // deshalb ist Clock-Skew nur für das Hinting, nicht für die Korrektheit relevant.
     const body = [{
       room_code: CLOUD.room,
       state: state,
@@ -775,8 +789,10 @@ async function cloudPushImmediate() {
       CLOUD.lastPulledAt = new Date(rows[0].updated_at).getTime();
       localStorage.setItem('tm_cloud_last_pulled', String(CLOUD.lastPulledAt));
     }
+    localStorage.removeItem('tm_cloud_dirty');
   } catch (e) {
     console.error('cloudPush error', e);
+    localStorage.setItem('tm_cloud_dirty', '1');
     toast('Sync-Fehler beim Speichern');
   } finally {
     CLOUD.syncing = false; updateSyncIndicator();
@@ -854,13 +870,30 @@ function refreshCurrentView() {
 function startCloudPolling() {
   clearInterval(CLOUD.pollTimer);
   if (!cloudEnabled()) return;
-  cloudPull(true);
+  // Initialer Pull — wenn wir dirty sind (z.B. Offline-Edit, Hash-Import), danach pushen
+  (async function initialSync() {
+    await cloudPull(true);
+    if (localStorage.getItem('tm_cloud_dirty') === '1') {
+      await cloudPushImmediate();
+    }
+  })();
   CLOUD.pollTimer = setInterval(function(){
     if (document.visibilityState === 'visible') cloudPull(true);
   }, 15000);
 }
 document.addEventListener('visibilitychange', function(){
-  if (document.visibilityState === 'visible' && cloudEnabled()) cloudPull(true);
+  if (document.visibilityState === 'visible' && cloudEnabled()) {
+    cloudPull(true);
+    // Bei Rückkehr: falls wir offline was geändert haben, nachholen
+    if (navigator.onLine && localStorage.getItem('tm_cloud_dirty') === '1') {
+      cloudPushImmediate();
+    }
+  }
+});
+window.addEventListener('online', function(){
+  if (cloudEnabled() && localStorage.getItem('tm_cloud_dirty') === '1') {
+    cloudPushImmediate();
+  }
 });
 function tombstoneItem(id) {
   if (!Array.isArray(state._tombs)) state._tombs = [];
@@ -1330,13 +1363,30 @@ document.getElementById('save-settings').addEventListener('click', async () => {
   closeModal('settings-modal');
   toast('Einstellungen gespeichert ✓');
 });
-document.getElementById('reset-app').addEventListener('click', () => {
-  if (confirm('Alle Daten wirklich löschen? Dies kann nicht rückgängig gemacht werden.')) {
-    localStorage.removeItem('tm_state');
-    localStorage.removeItem('tm_my_name');
-    localStorage.removeItem('tm_cloud_last_pulled');
-    location.reload();
+document.getElementById('reset-app').addEventListener('click', async () => {
+  if (!confirm('Alle Daten wirklich löschen? Dies kann nicht rückgängig gemacht werden.')) return;
+  // Wenn Cloud-Sync an ist, eine "leere" Version mit allen Tombstones pushen,
+  // damit das Reset auch beim Partner ankommt — sonst würde die Cloud die
+  // alten Daten im nächsten Poll sofort wieder reinmergen.
+  if (cloudEnabled()) {
+    try {
+      const existingIds = (state.items || []).map(i => 'i:' + i.id);
+      const existingPackIds = (state.packlist || []).map(p => 'p:' + p.id);
+      state._tombs = Array.from(new Set([...(state._tombs || []), ...existingIds, ...existingPackIds]));
+      state.items = [];
+      state.packlist = [];
+      state._metaUpdatedAt = Date.now();
+      saveStateLocal();
+      toast('🔄 Synchronisiere Reset ...');
+      await cloudPushImmediate();
+    } catch(e) { console.error('reset push failed', e); }
   }
+  localStorage.removeItem('tm_state');
+  localStorage.removeItem('tm_my_name');
+  localStorage.removeItem('tm_cloud_last_pulled');
+  localStorage.removeItem('tm_cloud_dirty');
+  // Cloud-Config bleibt erhalten, damit der Partner weiter den gleichen Raum teilt
+  location.reload();
 });
 
 // ============ Sync Setup Modal ============
@@ -1350,15 +1400,26 @@ document.getElementById('open-sync-setup').addEventListener('click', () => {
 });
 document.getElementById('sync-cancel').addEventListener('click', () => closeModal('sync-modal'));
 document.getElementById('sync-enable').addEventListener('click', async () => {
-  const url = document.getElementById('sync-url').value.trim().replace(/\/+$/, '');
+  // URL normalisieren: proto + host (kein Pfad/Query)
+  let urlRaw = document.getElementById('sync-url').value.trim();
+  let url = '';
+  if (urlRaw) {
+    try {
+      const u = new URL(urlRaw.startsWith('http') ? urlRaw : 'https://' + urlRaw);
+      url = u.protocol + '//' + u.host;
+    } catch(e) { url = urlRaw.replace(/\/+$/, ''); }
+  }
   const key = document.getElementById('sync-key').value.trim();
-  const room = document.getElementById('sync-room').value.trim().toLowerCase().replace(/[^a-z0-9-_]/g, '-');
-  if (!url || !key || !room) { toast('Bitte alle Felder füllen'); return; }
-  if (!/^https:\/\/.+\.supabase\.co$/i.test(url)) {
+  // Room: nur a-z 0-9 _ und -, keine führenden/trailing Dashes, nicht leer
+  let room = document.getElementById('sync-room').value.trim().toLowerCase().replace(/[^a-z0-9_-]+/g, '-').replace(/^-+|-+$/g, '');
+  if (!url || !key || !room) { toast('Bitte alle Felder füllen (und Room darf nicht nur aus Zeichen bestehen)'); return; }
+  if (!/^https:\/\/.+\.supabase\.(co|in)$/i.test(url)) {
     if (!confirm('URL sieht ungewöhnlich aus. Trotzdem speichern?')) return;
   }
   CLOUD.url = url; CLOUD.key = key; CLOUD.room = room;
   CLOUD.lastPulledAt = 0;
+  CLOUD.syncing = false; // force-reset, falls hängend
+  clearTimeout(CLOUD.pushDebounceTimer);
   localStorage.setItem('tm_cloud_url', url);
   localStorage.setItem('tm_cloud_key', key);
   localStorage.setItem('tm_cloud_room', room);
@@ -1366,8 +1427,11 @@ document.getElementById('sync-enable').addEventListener('click', async () => {
   closeModal('sync-modal');
   toast('🔄 Verbinde mit Cloud...');
   updateSyncIndicator();
+  // Sequenziell: erst Pull (der pusht intern, falls Cloud leer war), dann ggf. ein zusätzlicher Push
+  // um lokale Additionen, die im Pull-Merge dazugekommen sind, hochzuladen
   await cloudPull(false);
-  // After first pull (or push if empty), ensure our local additions are up there too
+  // nur extra-pushen, wenn unsere lokalen Daten von der Cloud abweichen könnten
+  // (Pull setzt skipNextPush=true wenn er remote reinmerged, also einmal direkt pushen ist OK)
   await cloudPushImmediate();
   startCloudPolling();
   toast('☁️ Cloud-Sync aktiv!');
@@ -1579,43 +1643,67 @@ function importFromHash() {
     const payload = JSON.parse(json);
     if (!payload.state) throw new Error('invalid');
 
-    // Merge: import all items, dedupe by id
-    const existingIds = new Set(state.items.map(i => i.id));
+    // Tombstones vereinen — verhindert, dass gelöschte Einträge per Link wiederauferstehen
+    if (!Array.isArray(state._tombs)) state._tombs = [];
+    const myTombs = new Set(state._tombs);
+    (payload.state._tombs || []).forEach(t => {
+      if (!myTombs.has(t)) { state._tombs.push(t); myTombs.add(t); }
+    });
+
+    // Items mergen nach id + max(updatedAt, createdAt) — konsistent mit mergeRemoteState
+    const existingItems = new Map(state.items.map(i => [i.id, i]));
     const incoming = payload.state.items || [];
-    let added = 0, updated = 0;
+    let added = 0, updated = 0, skipped = 0;
     incoming.forEach(it => {
-      if (existingIds.has(it.id)) {
-        const existing = state.items.find(i => i.id === it.id);
-        // take newer
-        if ((it.createdAt || 0) > (existing.createdAt || 0)) {
-          Object.assign(existing, it); updated++;
-        }
+      if (myTombs.has('i:' + it.id)) { skipped++; return; } // wurde hier gelöscht
+      const existing = existingItems.get(it.id);
+      if (existing) {
+        const rTs = it.updatedAt || it.createdAt || 0;
+        const lTs = existing.updatedAt || existing.createdAt || 0;
+        if (rTs > lTs) { Object.assign(existing, it); updated++; }
       } else {
         state.items.push(it); added++;
       }
     });
-    // Merge packlist too
+    // Pack-Items mergen nach id + max(updatedAt, createdAt)
     if (!Array.isArray(state.packlist)) state.packlist = [];
-    const existingPackIds = new Set(state.packlist.map(p => p.id));
+    const existingPack = new Map(state.packlist.map(p => [p.id, p]));
     const incomingPack = payload.state.packlist || [];
     let packAdded = 0, packUpdated = 0;
     incomingPack.forEach(p => {
-      if (existingPackIds.has(p.id)) {
-        const ex = state.packlist.find(x => x.id === p.id);
-        if ((p.createdAt || 0) > (ex.createdAt || 0)) { Object.assign(ex, p); packUpdated++; }
+      if (myTombs.has('p:' + p.id)) return;
+      const ex = existingPack.get(p.id);
+      if (ex) {
+        const rTs = p.updatedAt || p.createdAt || 0;
+        const lTs = ex.updatedAt || ex.createdAt || 0;
+        if (rTs > lTs) { Object.assign(ex, p); packUpdated++; }
       } else {
         state.packlist.push(p); packAdded++;
       }
     });
-    // Adopt trip metadata if we had defaults
+    // Tombstones nachträglich anwenden (auf den ganzen Listen)
+    state.items = state.items.filter(i => !myTombs.has('i:' + i.id));
+    state.packlist = state.packlist.filter(p => !myTombs.has('p:' + p.id));
+
+    // Trip-Metadaten nur adoptieren, wenn wir noch Defaults haben
     if (state.tripName === DEFAULT_STATE.tripName && payload.state.tripName) {
       state.tripName = payload.state.tripName;
       state.tripCity = payload.state.tripCity;
       state.tripCenter = payload.state.tripCenter;
       state.tripStart = payload.state.tripStart || '';
       state.tripEnd = payload.state.tripEnd || '';
+      state._metaUpdatedAt = Date.now();
     }
-    saveState();
+    // Nur lokal speichern, nicht sofort pushen — der erste cloudPull soll zuerst
+    // die Cloud-Version mergen, bevor wir unsere Import-Version hochschieben und
+    // damit Partner-Daten überschreiben. Nach dem Pull pusht startCloudPolling
+    // (siehe unten) unseren gemergten State.
+    if (cloudEnabled()) {
+      saveStateLocal();
+      localStorage.setItem('tm_cloud_dirty', '1'); // Nach erstem Pull pushen
+    } else {
+      saveState();
+    }
     history.replaceState(null, '', location.pathname);
     const by = payload.sharedBy || 'jemandem';
     const packMsg = (packAdded || packUpdated) ? ` + Packliste: ${packAdded} neu, ${packUpdated} aktualisiert` : '';

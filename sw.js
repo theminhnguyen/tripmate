@@ -1,5 +1,5 @@
 // TripMate Service Worker — einfaches Offline-Caching
-const CACHE = 'tripmate-v1';
+const CACHE = 'tripmate-v2';
 const ASSETS = [
   './',
   './index.html',
@@ -25,11 +25,14 @@ self.addEventListener('activate', (e) => {
 
 self.addEventListener('fetch', (e) => {
   const url = new URL(e.request.url);
-  // Don't cache API requests (Nominatim, Overpass) — always live
+  // Don't cache API requests (Nominatim, Overpass, Supabase) — always live
   if (url.hostname.includes('nominatim') || url.hostname.includes('overpass') ||
-      url.hostname.includes('tile.openstreetmap.org')) {
+      url.hostname.includes('tile.openstreetmap.org') ||
+      url.hostname.includes('supabase.co') || url.hostname.includes('supabase.in')) {
     return; // network-only
   }
+  // Never cache non-GET requests
+  if (e.request.method !== 'GET') return;
   e.respondWith(
     caches.match(e.request).then(cached => {
       if (cached) return cached;
