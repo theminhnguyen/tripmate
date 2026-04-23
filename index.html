@@ -45,6 +45,22 @@
   }
   header .title { font-size: 18px; font-weight: 600; display: flex; flex-direction: column; }
   header .title small { font-size: 12px; opacity: 0.9; font-weight: 400; }
+  header .title-btn {
+    display: flex; align-items: center; gap: 8px; color: white;
+    padding: 6px 10px 6px 4px; border-radius: 10px; min-width: 0;
+    max-width: calc(100vw - 160px); text-align: left;
+  }
+  header .title-btn:active { background: rgba(255,255,255,0.12); }
+  header .title-btn .title-texts { display: flex; flex-direction: column; min-width: 0; }
+  header .title-btn #trip-name {
+    font-size: 18px; font-weight: 600;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  header .title-btn #trip-city {
+    font-size: 12px; opacity: 0.9; font-weight: 400;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  header .title-caret { font-size: 14px; opacity: 0.85; flex-shrink: 0; }
   header .actions { display: flex; gap: 8px; }
   header .icon-btn {
     width: 36px; height: 36px; border-radius: 10px; background: rgba(255,255,255,0.18);
@@ -300,15 +316,38 @@
   .welcome-content .big { font-size: 48px; }
   .welcome-content h3 { margin: 8px 0; }
   .welcome-content p { color: var(--text-muted); font-size: 14px; margin: 4px 0; }
+
+  /* Trip-Manager */
+  .trip-list { display: flex; flex-direction: column; gap: 8px; margin: 6px 0 12px; max-height: 55vh; overflow-y: auto; }
+  .trip-row {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 12px; border: 1px solid var(--border); border-radius: 12px;
+    background: var(--surface);
+  }
+  .trip-row.current { border-color: var(--primary); background: #eff6ff; }
+  .trip-row .tr-main { flex: 1; min-width: 0; cursor: pointer; }
+  .trip-row .tr-name { font-weight: 600; font-size: 14px; display: flex; align-items: center; gap: 6px; }
+  .trip-row .tr-meta { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+  .trip-row .tr-edit {
+    width: 34px; height: 34px; border-radius: 8px; background: var(--bg);
+    display: flex; align-items: center; justify-content: center; font-size: 15px;
+  }
+  .trip-row .tr-badge {
+    font-size: 10px; padding: 1px 6px; border-radius: 999px;
+    background: var(--primary); color: white; font-weight: 500;
+  }
 </style>
 </head>
 <body>
 <div id="app">
   <header>
-    <div class="title" id="trip-title-btn">
-      <span id="trip-name">London Trip</span>
-      <small id="trip-city">London, UK</small>
-    </div>
+    <button class="title title-btn" id="trip-title-btn" title="Reise wechseln">
+      <span class="title-texts">
+        <span id="trip-name">London Trip</span>
+        <small id="trip-city">London, UK</small>
+      </span>
+      <span class="title-caret" aria-hidden="true">▾</span>
+    </button>
     <div class="actions">
       <button class="icon-btn" id="sync-status" title="Cloud-Sync" style="display:none;">☁️</button>
       <button class="icon-btn" id="share-btn" title="Teilen">↗</button>
@@ -398,7 +437,8 @@
   <div class="modal" id="detail-content"></div>
 </div>
 
-<!-- Settings modal -->
+<!-- Settings modal: nur noch App-weite Einstellungen (Name + Sync + Reset).
+     Reise-spezifische Felder (Name/Stadt/Datum) sind im Trip-Edit-Modal. -->
 <div class="modal-backdrop" id="settings-modal">
   <div class="modal">
     <h3>Einstellungen</h3>
@@ -406,22 +446,13 @@
     <label>Dein Name</label>
     <input type="text" id="s-my-name" placeholder="Wer bist du?" />
 
-    <label>Reise-Name</label>
-    <input type="text" id="s-trip-name" placeholder="z.B. London Trip" />
-
-    <label>Stadt / Reiseziel</label>
-    <input type="text" id="s-trip-city" placeholder="z.B. London, UK" />
-    <div class="search-results" id="city-results"></div>
-
-    <label>Reisezeitraum</label>
-    <div class="row">
-      <input type="date" id="s-trip-start" />
-      <input type="date" id="s-trip-end" />
-    </div>
-
     <div class="modal-actions">
       <button class="btn secondary" id="close-settings">Schließen</button>
       <button class="btn primary" id="save-settings">Speichern</button>
+    </div>
+    <hr style="border:none; border-top:1px solid var(--border); margin:14px 0 10px;" />
+    <div class="modal-actions">
+      <button class="btn secondary" id="open-trip-manager-from-settings" style="width:100%;">🧳 Reisen verwalten</button>
     </div>
     <hr style="border:none; border-top:1px solid var(--border); margin:14px 0 10px;" />
     <div style="font-size:12px; color:var(--text-muted); margin-bottom:8px;" id="sync-status-text">
@@ -432,6 +463,48 @@
     </div>
     <div class="modal-actions">
       <button class="btn danger" id="reset-app">Alles zurücksetzen</button>
+    </div>
+  </div>
+</div>
+
+<!-- Trip-Manager modal: alle Reisen anzeigen, wechseln, umbenennen, löschen -->
+<div class="modal-backdrop" id="trip-manager-modal">
+  <div class="modal">
+    <h3>🧳 Meine Reisen</h3>
+    <p style="color:var(--text-muted); font-size:13px; margin:0 0 10px;">
+      Tippe auf eine Reise, um zu wechseln. Jede Reise hat eigene Einträge, Kalender und Packliste.
+    </p>
+    <div id="trip-list" class="trip-list"></div>
+    <div class="modal-actions">
+      <button class="btn secondary" id="close-trip-manager">Schließen</button>
+      <button class="btn primary" id="open-new-trip">+ Neue Reise</button>
+    </div>
+  </div>
+</div>
+
+<!-- Trip-Edit modal: Name / Stadt / Zeitraum einer Reise bearbeiten -->
+<div class="modal-backdrop" id="trip-edit-modal">
+  <div class="modal">
+    <h3 id="trip-edit-title">Reise bearbeiten</h3>
+
+    <label>Name der Reise</label>
+    <input type="text" id="te-name" placeholder="z.B. London 2026" />
+
+    <label>Stadt / Reiseziel</label>
+    <input type="text" id="te-city" placeholder="z.B. London, UK" />
+
+    <label>Reisezeitraum</label>
+    <div class="row">
+      <input type="date" id="te-start" />
+      <input type="date" id="te-end" />
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn secondary" id="trip-edit-cancel">Abbrechen</button>
+      <button class="btn primary" id="trip-edit-save">Speichern</button>
+    </div>
+    <div class="modal-actions" id="trip-edit-delete-wrap" style="display:none;">
+      <button class="btn danger" id="trip-edit-delete">Reise löschen</button>
     </div>
   </div>
 </div>
@@ -597,12 +670,16 @@ const PACK_SUGGESTIONS = [
   { name: 'Regenjacke', category: 'clothing' }
 ];
 
-const DEFAULT_STATE = {
-  tripName: 'London Trip',
-  tripCity: 'London, UK',
-  tripCenter: [51.5074, -0.1278],
-  tripStart: '',
-  tripEnd: '',
+// Eine Reise = alles was sich pro Urlaub unterscheidet
+const DEFAULT_TRIP = {
+  id: 't1',
+  name: 'London Trip',
+  city: 'London, UK',
+  center: [51.5074, -0.1278],
+  start: '',
+  end: '',
+  _tombs: [],
+  _metaUpdatedAt: 0,
   items: [
     {
       id: 'demo1',
@@ -639,6 +716,93 @@ const DEFAULT_STATE = {
     { id: 'pk-demo3', name: 'Zahnbürste',       qty: 1, category: 'hygiene',  checked: false, notes: '', addedBy: 'Minh', createdAt: Date.now() - 3000 }
   ]
 };
+// Gesamter App-State = mehrere Reisen + welche aktuell ausgewählt
+const DEFAULT_STATE = {
+  currentTripId: 't1',
+  trips: { t1: DEFAULT_TRIP },
+  _tripTombs: [] // Gelöschte Trip-IDs, damit die Löschung auch zur Partnerin wandert
+};
+function freshTrip(overrides) {
+  const t = {
+    id: 't' + Math.random().toString(36).slice(2, 10),
+    name: 'Neue Reise',
+    city: '',
+    center: [51.5074, -0.1278],
+    start: '',
+    end: '',
+    items: [],
+    packlist: [],
+    _tombs: [],
+    _metaUpdatedAt: Date.now()
+  };
+  if (overrides) Object.assign(t, overrides);
+  return t;
+}
+// T() gibt die aktuelle Reise zurück — benutzt überall statt state.XXX
+function T() {
+  if (!state.trips) state.trips = {};
+  let t = state.trips[state.currentTripId];
+  if (!t) {
+    const first = Object.keys(state.trips)[0];
+    if (first) { state.currentTripId = first; t = state.trips[first]; }
+    else {
+      const nt = freshTrip({ name: 'Meine Reise' });
+      state.trips[nt.id] = nt;
+      state.currentTripId = nt.id;
+      t = nt;
+    }
+  }
+  // Defensiv: stelle sicher, dass Arrays existieren
+  if (!Array.isArray(t.items)) t.items = [];
+  if (!Array.isArray(t.packlist)) t.packlist = [];
+  if (!Array.isArray(t._tombs)) t._tombs = [];
+  if (typeof t._metaUpdatedAt !== 'number') t._metaUpdatedAt = 0;
+  return t;
+}
+function allTrips() {
+  return Object.values(state.trips || {}).sort(function(a,b){
+    return (a.start || '').localeCompare(b.start || '') || a.name.localeCompare(b.name);
+  });
+}
+function createTrip(opts) {
+  const nt = freshTrip(opts || {});
+  // id-Kollisionen vermeiden (nach Import oder Merge)
+  while (state.trips[nt.id]) nt.id = 't' + Math.random().toString(36).slice(2, 10);
+  state.trips[nt.id] = nt;
+  state.currentTripId = nt.id;
+  saveState();
+  return nt;
+}
+function switchTrip(id) {
+  if (!state.trips[id]) return false;
+  state.currentTripId = id;
+  saveStateLocal(); // Wechsel ist nur lokal, kein Cloud-Push nötig
+  return true;
+}
+function renameTrip(id, newName) {
+  const t = state.trips[id];
+  if (!t) return;
+  t.name = (newName || '').trim() || 'Reise';
+  t._metaUpdatedAt = Date.now();
+  saveState();
+}
+function deleteTrip(id) {
+  if (!state.trips[id]) return;
+  // Tombstone für Sync + lokal entfernen
+  tombstoneTrip(id);
+  delete state.trips[id];
+  // Falls wir die aktive Reise löschen, wechsle auf eine andere (oder lege eine neue an)
+  if (state.currentTripId === id) {
+    const first = Object.keys(state.trips)[0];
+    if (first) state.currentTripId = first;
+    else {
+      const nt = freshTrip({ name: 'Meine Reise' });
+      state.trips[nt.id] = nt;
+      state.currentTripId = nt.id;
+    }
+  }
+  saveState();
+}
 
 // ============ State ============
 let state = loadState();
@@ -655,18 +819,49 @@ function loadState() {
     const saved = localStorage.getItem('tm_state');
     if (saved) {
       const parsed = JSON.parse(saved);
-      // Migration: ensure packlist exists for older stored states
-      if (!Array.isArray(parsed.packlist)) parsed.packlist = [];
-      if (!Array.isArray(parsed.items)) parsed.items = [];
-      if (!Array.isArray(parsed._tombs)) parsed._tombs = [];
-      if (typeof parsed._metaUpdatedAt !== 'number') parsed._metaUpdatedAt = 0;
+      // Migration von v1 (flat: tripName/items/... auf state) → v2 (state.trips)
+      if (!parsed.trips && (Array.isArray(parsed.items) || parsed.tripName)) {
+        const migrated = {
+          id: 't1',
+          name: parsed.tripName || 'Meine Reise',
+          city: parsed.tripCity || '',
+          center: parsed.tripCenter || [51.5074, -0.1278],
+          start: parsed.tripStart || '',
+          end: parsed.tripEnd || '',
+          items: Array.isArray(parsed.items) ? parsed.items : [],
+          packlist: Array.isArray(parsed.packlist) ? parsed.packlist : [],
+          _tombs: Array.isArray(parsed._tombs) ? parsed._tombs : [],
+          _metaUpdatedAt: typeof parsed._metaUpdatedAt === 'number' ? parsed._metaUpdatedAt : 0
+        };
+        return { currentTripId: 't1', trips: { t1: migrated }, _tripTombs: [] };
+      }
+      // v2: defensive Defaults
+      if (!parsed.trips || typeof parsed.trips !== 'object') parsed.trips = {};
+      if (!Array.isArray(parsed._tripTombs)) parsed._tripTombs = [];
+      // Falls currentTripId nicht existiert, auf die erste Trip setzen
+      if (!parsed.trips[parsed.currentTripId]) {
+        const first = Object.keys(parsed.trips)[0];
+        if (first) parsed.currentTripId = first;
+      }
+      // Pro-Trip-Defaults
+      Object.keys(parsed.trips).forEach(function(id){
+        const t = parsed.trips[id];
+        if (!Array.isArray(t.items)) t.items = [];
+        if (!Array.isArray(t.packlist)) t.packlist = [];
+        if (!Array.isArray(t._tombs)) t._tombs = [];
+        if (typeof t._metaUpdatedAt !== 'number') t._metaUpdatedAt = 0;
+        if (!t.id) t.id = id;
+      });
+      // Falls gar keine Reisen drin sind, eine Default anlegen
+      if (Object.keys(parsed.trips).length === 0) {
+        const dt = structuredClone(DEFAULT_TRIP);
+        parsed.trips[dt.id] = dt;
+        parsed.currentTripId = dt.id;
+      }
       return parsed;
     }
-  } catch(e) {}
-  const fresh = structuredClone(DEFAULT_STATE);
-  fresh._tombs = [];
-  fresh._metaUpdatedAt = 0;
-  return fresh;
+  } catch(e) { console.error('loadState', e); }
+  return structuredClone(DEFAULT_STATE);
 }
 function saveStateLocal() {
   localStorage.setItem('tm_state', JSON.stringify(state));
@@ -765,7 +960,7 @@ async function cloudPushImmediate() {
   CLOUD.syncing = true; updateSyncIndicator();
   try {
     // updated_at als Client-Zeit senden (DEFAULT now() würde bei UPDATE nicht feuern).
-    // Der eigentliche Merge-Check basiert pro-Item auf state.items[i].updatedAt,
+    // Der eigentliche Merge-Check basiert pro-Item auf t.items[i].updatedAt,
     // deshalb ist Clock-Skew nur für das Hinting, nicht für die Korrektheit relevant.
     const body = [{
       room_code: CLOUD.room,
@@ -804,59 +999,117 @@ function cloudPushDebounced() {
   clearTimeout(CLOUD.pushDebounceTimer);
   CLOUD.pushDebounceTimer = setTimeout(cloudPushImmediate, 1200);
 }
-function mergeRemoteState(remote) {
-  if (!remote || typeof remote !== 'object') return false;
+function mergeOneTrip(lT, rT) {
   let changed = false;
-
-  // Tombstones: union
-  if (!Array.isArray(state._tombs)) state._tombs = [];
-  const myTombs = new Set(state._tombs);
-  (remote._tombs || []).forEach(function(t) {
-    if (!myTombs.has(t)) { state._tombs.push(t); myTombs.add(t); changed = true; }
+  if (!Array.isArray(lT._tombs)) lT._tombs = [];
+  const myTombs = new Set(lT._tombs);
+  (rT._tombs || []).forEach(function(t){
+    if (!myTombs.has(t)) { lT._tombs.push(t); myTombs.add(t); changed = true; }
   });
-
-  // Items merge by id, newest updatedAt/createdAt wins
-  const localItemMap = new Map(state.items.map(function(i){ return [i.id, i]; }));
-  (remote.items || []).forEach(function(it) {
+  if (!Array.isArray(lT.items)) lT.items = [];
+  const localItemMap = new Map(lT.items.map(function(i){ return [i.id, i]; }));
+  (rT.items || []).forEach(function(it){
     const local = localItemMap.get(it.id);
     if (!local) {
-      if (!myTombs.has('i:' + it.id)) { state.items.push(it); changed = true; }
+      if (!myTombs.has('i:' + it.id)) { lT.items.push(it); changed = true; }
     } else {
       const rTs = it.updatedAt || it.createdAt || 0;
       const lTs = local.updatedAt || local.createdAt || 0;
       if (rTs > lTs) { Object.assign(local, it); changed = true; }
     }
   });
-
-  // Packlist merge
-  if (!Array.isArray(state.packlist)) state.packlist = [];
-  const localPackMap = new Map(state.packlist.map(function(p){ return [p.id, p]; }));
-  (remote.packlist || []).forEach(function(p) {
+  if (!Array.isArray(lT.packlist)) lT.packlist = [];
+  const localPackMap = new Map(lT.packlist.map(function(p){ return [p.id, p]; }));
+  (rT.packlist || []).forEach(function(p){
     const local = localPackMap.get(p.id);
     if (!local) {
-      if (!myTombs.has('p:' + p.id)) { state.packlist.push(p); changed = true; }
+      if (!myTombs.has('p:' + p.id)) { lT.packlist.push(p); changed = true; }
     } else {
       const rTs = p.updatedAt || p.createdAt || 0;
       const lTs = local.updatedAt || local.createdAt || 0;
       if (rTs > lTs) { Object.assign(local, p); changed = true; }
     }
   });
-
-  // Apply tombstones (remove deleted items from local lists)
-  const beforeI = state.items.length, beforeP = state.packlist.length;
-  state.items = state.items.filter(function(i){ return !myTombs.has('i:' + i.id); });
-  state.packlist = state.packlist.filter(function(p){ return !myTombs.has('p:' + p.id); });
-  if (state.items.length !== beforeI || state.packlist.length !== beforeP) changed = true;
-
-  // Trip metadata: whoever edited last wins
-  const rMeta = remote._metaUpdatedAt || 0;
-  const lMeta = state._metaUpdatedAt || 0;
+  const beforeI = lT.items.length, beforeP = lT.packlist.length;
+  lT.items = lT.items.filter(function(i){ return !myTombs.has('i:' + i.id); });
+  lT.packlist = lT.packlist.filter(function(p){ return !myTombs.has('p:' + p.id); });
+  if (lT.items.length !== beforeI || lT.packlist.length !== beforeP) changed = true;
+  const rMeta = rT._metaUpdatedAt || 0;
+  const lMeta = lT._metaUpdatedAt || 0;
   if (rMeta > lMeta) {
-    ['tripName','tripCity','tripCenter','tripStart','tripEnd'].forEach(function(k){
-      if (remote[k] !== undefined) state[k] = remote[k];
+    ['name','city','center','start','end'].forEach(function(k){
+      if (rT[k] !== undefined) lT[k] = rT[k];
     });
-    state._metaUpdatedAt = rMeta;
+    lT._metaUpdatedAt = rMeta;
     changed = true;
+  }
+  return changed;
+}
+function mergeRemoteState(remote) {
+  if (!remote || typeof remote !== 'object') return false;
+  // Rückwärts-Kompatibilität: alter Flat-State → in Trip-Form bringen
+  if (!remote.trips && (Array.isArray(remote.items) || remote.tripName)) {
+    remote = {
+      currentTripId: 't1',
+      trips: { t1: {
+        id: 't1',
+        name: remote.tripName || 'Reise',
+        city: remote.tripCity || '',
+        center: remote.tripCenter || [51.5074, -0.1278],
+        start: remote.tripStart || '',
+        end: remote.tripEnd || '',
+        items: remote.items || [],
+        packlist: remote.packlist || [],
+        _tombs: remote._tombs || [],
+        _metaUpdatedAt: remote._metaUpdatedAt || 0
+      }},
+      _tripTombs: []
+    };
+  }
+  if (!remote.trips) return false;
+  let changed = false;
+  if (!state.trips) state.trips = {};
+  if (!Array.isArray(state._tripTombs)) state._tripTombs = [];
+
+  // Trip-Tombstones vereinen
+  const tripTombs = new Set(state._tripTombs);
+  (remote._tripTombs || []).forEach(function(id){
+    if (!tripTombs.has(id)) { state._tripTombs.push(id); tripTombs.add(id); changed = true; }
+  });
+
+  // Pro Trip: neu anlegen oder mergen
+  Object.keys(remote.trips).forEach(function(tripId){
+    if (tripTombs.has(tripId)) return; // wurde gelöscht, nicht wieder anlegen
+    const rT = remote.trips[tripId];
+    if (!state.trips[tripId]) {
+      state.trips[tripId] = JSON.parse(JSON.stringify(rT));
+      if (!state.trips[tripId].id) state.trips[tripId].id = tripId;
+      if (!Array.isArray(state.trips[tripId].items)) state.trips[tripId].items = [];
+      if (!Array.isArray(state.trips[tripId].packlist)) state.trips[tripId].packlist = [];
+      if (!Array.isArray(state.trips[tripId]._tombs)) state.trips[tripId]._tombs = [];
+      changed = true;
+    } else {
+      if (mergeOneTrip(state.trips[tripId], rT)) changed = true;
+    }
+  });
+
+  // Trip-Tombstones anwenden: gelöschte Trips lokal entfernen
+  Object.keys(state.trips).forEach(function(id){
+    if (tripTombs.has(id)) { delete state.trips[id]; changed = true; }
+  });
+
+  // Falls currentTrip gelöscht wurde oder keine Reisen mehr existieren
+  if (!state.trips[state.currentTripId]) {
+    const first = Object.keys(state.trips)[0];
+    if (first) {
+      state.currentTripId = first;
+      changed = true;
+    } else {
+      const nt = freshTrip({ name: 'Meine Reise' });
+      state.trips[nt.id] = nt;
+      state.currentTripId = nt.id;
+      changed = true;
+    }
   }
   return changed;
 }
@@ -896,12 +1149,18 @@ window.addEventListener('online', function(){
   }
 });
 function tombstoneItem(id) {
-  if (!Array.isArray(state._tombs)) state._tombs = [];
-  if (!state._tombs.includes('i:' + id)) state._tombs.push('i:' + id);
+  const t = T();
+  if (!Array.isArray(t._tombs)) t._tombs = [];
+  if (!t._tombs.includes('i:' + id)) t._tombs.push('i:' + id);
 }
 function tombstonePack(id) {
-  if (!Array.isArray(state._tombs)) state._tombs = [];
-  if (!state._tombs.includes('p:' + id)) state._tombs.push('p:' + id);
+  const t = T();
+  if (!Array.isArray(t._tombs)) t._tombs = [];
+  if (!t._tombs.includes('p:' + id)) t._tombs.push('p:' + id);
+}
+function tombstoneTrip(id) {
+  if (!Array.isArray(state._tripTombs)) state._tripTombs = [];
+  if (!state._tripTombs.includes(id)) state._tripTombs.push(id);
 }
 // ============ end Cloud Sync ============
 
@@ -936,8 +1195,8 @@ document.querySelectorAll('nav.tabs .tab').forEach(b => b.addEventListener('clic
 
 // ============ Header ============
 function renderHeader() {
-  document.getElementById('trip-name').textContent = state.tripName;
-  document.getElementById('trip-city').textContent = state.tripCity;
+  document.getElementById('trip-name').textContent = T().name;
+  document.getElementById('trip-city').textContent = T().city;
 }
 
 // ============ List view ============
@@ -945,7 +1204,7 @@ function renderList() {
   const container = document.getElementById('list-container');
   container.innerHTML = '';
   Object.entries(CATEGORIES).forEach(([key, cat]) => {
-    const items = state.items.filter(i => i.category === key)
+    const items = T().items.filter(i => i.category === key)
       .sort((a,b) => (a.scheduledDate || 'z').localeCompare(b.scheduledDate || 'z') || a.createdAt - b.createdAt);
     const section = document.createElement('div');
     section.className = 'category';
@@ -989,7 +1248,7 @@ function escapeHtml(s) {
 
 // ============ Detail view ============
 function showDetail(id) {
-  const item = state.items.find(i => i.id === id);
+  const item = T().items.find(i => i.id === id);
   if (!item) return;
   const cat = CATEGORIES[item.category];
   const content = document.getElementById('detail-content');
@@ -1049,7 +1308,7 @@ function showDetail(id) {
   document.getElementById('d-delete').onclick = () => {
     if (confirm('Eintrag wirklich löschen?')) {
       tombstoneItem(id);
-      state.items = state.items.filter(i => i.id !== id);
+      T().items = T().items.filter(i => i.id !== id);
       saveState(); closeModal('detail-modal'); renderList(); renderMap();
       toast('Eintrag gelöscht');
     }
@@ -1062,7 +1321,7 @@ function openAddModal(editId=null) {
   selectedPlace = null;
   const modal = document.getElementById('add-modal');
   modal.querySelector('h3').textContent = editId ? 'Bearbeiten' : 'Neuer Eintrag';
-  const item = editId ? state.items.find(i => i.id === editId) : null;
+  const item = editId ? T().items.find(i => i.id === editId) : null;
   document.getElementById('search-input').value = '';
   document.getElementById('search-results').innerHTML = '';
   document.getElementById('item-name').value = item?.name || '';
@@ -1096,7 +1355,7 @@ async function searchPlaces(query) {
   const resultsEl = document.getElementById('search-results');
   try {
     // Bias search towards trip city
-    const near = state.tripCity ? `, ${state.tripCity}` : '';
+    const near = T().city ? `, ${T().city}` : '';
     const url = `https://nominatim.openstreetmap.org/search?format=json&limit=6&addressdetails=1&extratags=1&q=${encodeURIComponent(query + near)}`;
     const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
     const data = await res.json();
@@ -1172,7 +1431,7 @@ document.getElementById('save-item').addEventListener('click', () => {
   const notes = document.getElementById('item-notes').value.trim();
 
   if (editingItemId) {
-    const item = state.items.find(i => i.id === editingItemId);
+    const item = T().items.find(i => i.id === editingItemId);
     if (item) {
       Object.assign(item, { name, category, address, scheduledDate, scheduledTime, notes, updatedAt: Date.now() });
       if (selectedPlace) {
@@ -1191,7 +1450,7 @@ document.getElementById('save-item').addEventListener('click', () => {
       notes, addedBy: myName || 'Ich',
       scheduledDate, scheduledTime, createdAt: now, updatedAt: now
     };
-    state.items.push(newItem);
+    T().items.push(newItem);
   }
   saveState();
   closeModal('add-modal');
@@ -1215,9 +1474,9 @@ function renderCalendar() {
   // Determine date range
   const today = new Date(); today.setHours(0,0,0,0);
   let start, end;
-  if (state.tripStart && state.tripEnd) {
-    start = new Date(state.tripStart);
-    end = new Date(state.tripEnd);
+  if (T().start && T().end) {
+    start = new Date(T().start);
+    end = new Date(T().end);
   } else {
     start = new Date(today);
     end = new Date(today); end.setDate(end.getDate() + 13);
@@ -1234,7 +1493,7 @@ function renderCalendar() {
   header.querySelector('#cal-settings-btn').onclick = () => openSettings();
 
   // Unassigned
-  const unassigned = state.items.filter(i => !i.scheduledDate);
+  const unassigned = T().items.filter(i => !i.scheduledDate);
   if (unassigned.length > 0) {
     const u = document.createElement('div');
     u.className = 'cal-unassigned';
@@ -1249,7 +1508,7 @@ function renderCalendar() {
   const cur = new Date(start);
   while (cur <= end) {
     const iso = cur.toISOString().slice(0,10);
-    const dayItems = state.items
+    const dayItems = T().items
       .filter(i => i.scheduledDate === iso)
       .sort((a,b) => (a.scheduledTime || 'zz').localeCompare(b.scheduledTime || 'zz'));
     const day = document.createElement('div');
@@ -1286,7 +1545,7 @@ function renderCalendar() {
 // ============ Map view ============
 function initMap() {
   if (map) return;
-  map = L.map('map', { zoomControl: true }).setView(state.tripCenter, 13);
+  map = L.map('map', { zoomControl: true }).setView(T().center, 13);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© OpenStreetMap',
     maxZoom: 19
@@ -1298,7 +1557,7 @@ function renderMap() {
   markers.forEach(m => map.removeLayer(m));
   markers = [];
   const bounds = [];
-  state.items.forEach(item => {
+  T().items.forEach(item => {
     if (!item.lat || !item.lng) return;
     const color = catColor(item.category);
     const icon = L.divIcon({
@@ -1323,7 +1582,7 @@ function renderMap() {
   if (bounds.length > 0) {
     map.fitBounds(bounds, { padding: [50, 50], maxZoom: 15 });
   } else {
-    map.setView(state.tripCenter, 13);
+    map.setView(T().center, 13);
   }
   setTimeout(() => map.invalidateSize(), 100);
 }
@@ -1331,51 +1590,33 @@ function renderMap() {
 // ============ Settings ============
 function openSettings() {
   document.getElementById('s-my-name').value = myName;
-  document.getElementById('s-trip-name').value = state.tripName;
-  document.getElementById('s-trip-city').value = state.tripCity;
-  document.getElementById('s-trip-start').value = state.tripStart || '';
-  document.getElementById('s-trip-end').value = state.tripEnd || '';
   document.getElementById('settings-modal').classList.add('open');
 }
 document.getElementById('settings-btn').addEventListener('click', openSettings);
 document.getElementById('close-settings').addEventListener('click', () => closeModal('settings-modal'));
-document.getElementById('save-settings').addEventListener('click', async () => {
+document.getElementById('save-settings').addEventListener('click', () => {
   myName = document.getElementById('s-my-name').value.trim() || 'Ich';
   localStorage.setItem('tm_my_name', myName);
-  state.tripName = document.getElementById('s-trip-name').value.trim() || 'Meine Reise';
-  const newCity = document.getElementById('s-trip-city').value.trim();
-  if (newCity !== state.tripCity && newCity) {
-    state.tripCity = newCity;
-    try {
-      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(newCity)}`);
-      const data = await res.json();
-      if (data[0]) state.tripCenter = [parseFloat(data[0].lat), parseFloat(data[0].lon)];
-    } catch(e) {}
-  }
-  state.tripStart = document.getElementById('s-trip-start').value;
-  state.tripEnd = document.getElementById('s-trip-end').value;
-  state._metaUpdatedAt = Date.now();
-  saveState();
-  renderHeader();
-  if (currentView === 'list') renderList();
-  if (currentView === 'calendar') renderCalendar();
-  if (currentView === 'map') { if (map) map.setView(state.tripCenter, 13); renderMap(); }
   closeModal('settings-modal');
   toast('Einstellungen gespeichert ✓');
 });
 document.getElementById('reset-app').addEventListener('click', async () => {
-  if (!confirm('Alle Daten wirklich löschen? Dies kann nicht rückgängig gemacht werden.')) return;
-  // Wenn Cloud-Sync an ist, eine "leere" Version mit allen Tombstones pushen,
-  // damit das Reset auch beim Partner ankommt — sonst würde die Cloud die
-  // alten Daten im nächsten Poll sofort wieder reinmergen.
+  if (!confirm('Alle Reisen und Daten wirklich löschen? Dies kann nicht rückgängig gemacht werden.')) return;
+  // Wenn Cloud-Sync an ist, ALLE Reisen tombstonen + pushen, damit das Reset auch
+  // beim Partner ankommt — sonst würde die Cloud die alten Daten wieder reinmergen.
   if (cloudEnabled()) {
     try {
-      const existingIds = (state.items || []).map(i => 'i:' + i.id);
-      const existingPackIds = (state.packlist || []).map(p => 'p:' + p.id);
-      state._tombs = Array.from(new Set([...(state._tombs || []), ...existingIds, ...existingPackIds]));
-      state.items = [];
-      state.packlist = [];
-      state._metaUpdatedAt = Date.now();
+      if (!Array.isArray(state._tripTombs)) state._tripTombs = [];
+      const existingTripIds = Object.keys(state.trips || {});
+      existingTripIds.forEach(id => {
+        if (!state._tripTombs.includes(id)) state._tripTombs.push(id);
+      });
+      // Trips lokal leeren (aber _tripTombs behalten, damit das Push die Info trägt)
+      state.trips = {};
+      // Eine leere Default-Reise anlegen, damit T() nicht crasht nach Push
+      const nt = freshTrip({ name: 'Meine Reise' });
+      state.trips[nt.id] = nt;
+      state.currentTripId = nt.id;
       saveStateLocal();
       toast('🔄 Synchronisiere Reset ...');
       await cloudPushImmediate();
@@ -1387,6 +1628,147 @@ document.getElementById('reset-app').addEventListener('click', async () => {
   localStorage.removeItem('tm_cloud_dirty');
   // Cloud-Config bleibt erhalten, damit der Partner weiter den gleichen Raum teilt
   location.reload();
+});
+
+// ============ Trip-Manager ============
+function openTripManager() {
+  renderTripList();
+  document.getElementById('trip-manager-modal').classList.add('open');
+}
+function renderTripList() {
+  const container = document.getElementById('trip-list');
+  container.innerHTML = '';
+  const trips = allTrips();
+  if (trips.length === 0) {
+    const empty = document.createElement('div');
+    empty.style.cssText = 'padding:20px; color:var(--text-muted); text-align:center; font-size:13px;';
+    empty.textContent = 'Noch keine Reise. Tippe auf "+ Neue Reise".';
+    container.appendChild(empty);
+    return;
+  }
+  trips.forEach(t => {
+    const row = document.createElement('div');
+    row.className = 'trip-row' + (t.id === state.currentTripId ? ' current' : '');
+    const itemCount = (t.items || []).length;
+    const packCount = (t.packlist || []).length;
+    const dateRange = (t.start && t.end) ? `${fmtDate(t.start)} – ${fmtDate(t.end)}` : (t.start ? `ab ${fmtDate(t.start)}` : '');
+    row.innerHTML = `
+      <div class="tr-main">
+        <div class="tr-name">
+          ${escapeHtml(t.name)}
+          ${t.id === state.currentTripId ? '<span class="tr-badge">Aktiv</span>' : ''}
+        </div>
+        <div class="tr-meta">
+          ${escapeHtml(t.city || 'kein Ziel')}
+          ${dateRange ? ' · ' + dateRange : ''}
+          · ${itemCount} Einträge · ${packCount} Packliste
+        </div>
+      </div>
+      <button class="tr-edit" title="Bearbeiten">✏️</button>
+    `;
+    // Haupt-Bereich: umschalten
+    row.querySelector('.tr-main').addEventListener('click', () => {
+      if (t.id !== state.currentTripId) {
+        switchTrip(t.id);
+        refreshCurrentView();
+        // Map-Center neu setzen, falls Map-View offen
+        if (currentView === 'map' && map) { map.setView(T().center, 13); renderMap(); }
+        toast(`Reise "${t.name}" aktiv`);
+      }
+      closeModal('trip-manager-modal');
+    });
+    // Edit-Button: Trip-Edit-Modal öffnen
+    row.querySelector('.tr-edit').addEventListener('click', (e) => {
+      e.stopPropagation();
+      closeModal('trip-manager-modal');
+      openTripEdit(t.id);
+    });
+    container.appendChild(row);
+  });
+}
+document.getElementById('trip-title-btn').addEventListener('click', openTripManager);
+document.getElementById('close-trip-manager').addEventListener('click', () => closeModal('trip-manager-modal'));
+document.getElementById('open-trip-manager-from-settings').addEventListener('click', () => {
+  closeModal('settings-modal');
+  openTripManager();
+});
+document.getElementById('open-new-trip').addEventListener('click', () => {
+  closeModal('trip-manager-modal');
+  openTripEdit(null); // null = neue Reise
+});
+
+// ============ Trip-Edit ============
+let editingTripId = null;
+function openTripEdit(tripId) {
+  editingTripId = tripId;
+  const t = tripId ? state.trips[tripId] : null;
+  document.getElementById('trip-edit-title').textContent = t ? 'Reise bearbeiten' : 'Neue Reise';
+  document.getElementById('te-name').value = t ? (t.name || '') : '';
+  document.getElementById('te-city').value = t ? (t.city || '') : '';
+  document.getElementById('te-start').value = t ? (t.start || '') : '';
+  document.getElementById('te-end').value = t ? (t.end || '') : '';
+  // Löschen nur anzeigen, wenn editieren + mehr als 1 Reise existiert (letzte Reise nicht löschbar)
+  const canDelete = !!tripId && Object.keys(state.trips).length > 1;
+  document.getElementById('trip-edit-delete-wrap').style.display = canDelete ? 'flex' : 'none';
+  document.getElementById('trip-edit-modal').classList.add('open');
+  setTimeout(() => document.getElementById('te-name').focus(), 100);
+}
+document.getElementById('trip-edit-cancel').addEventListener('click', () => {
+  closeModal('trip-edit-modal');
+  editingTripId = null;
+});
+document.getElementById('trip-edit-save').addEventListener('click', async () => {
+  const name = document.getElementById('te-name').value.trim() || 'Meine Reise';
+  const city = document.getElementById('te-city').value.trim();
+  const start = document.getElementById('te-start').value;
+  const end = document.getElementById('te-end').value;
+
+  let trip;
+  if (editingTripId && state.trips[editingTripId]) {
+    trip = state.trips[editingTripId];
+  } else {
+    // Neue Reise — Center erstmal auf London, wird gleich via Nominatim überschrieben
+    trip = createTrip({ name: name, city: city, start: start, end: end, center: [51.5074, -0.1278] });
+    editingTripId = trip.id;
+  }
+
+  const cityChanged = city && city !== trip.city;
+  trip.name = name;
+  trip.city = city;
+  trip.start = start;
+  trip.end = end;
+  trip._metaUpdatedAt = Date.now();
+
+  // Bei Stadt-Änderung Center via Nominatim holen
+  if (cityChanged) {
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(city)}`);
+      const data = await res.json();
+      if (data[0]) trip.center = [parseFloat(data[0].lat), parseFloat(data[0].lon)];
+    } catch(e) {}
+  }
+
+  // Auf diese Reise umschalten (falls noch nicht aktiv)
+  if (state.currentTripId !== trip.id) state.currentTripId = trip.id;
+
+  saveState();
+  closeModal('trip-edit-modal');
+  refreshCurrentView();
+  if (currentView === 'map' && map) { map.setView(T().center, 13); renderMap(); }
+  toast('Reise gespeichert ✓');
+  editingTripId = null;
+});
+document.getElementById('trip-edit-delete').addEventListener('click', () => {
+  if (!editingTripId) return;
+  const t = state.trips[editingTripId];
+  if (!t) return;
+  if (!confirm(`Reise "${t.name}" wirklich löschen? Alle Einträge + Packliste dieser Reise gehen verloren.`)) return;
+  deleteTrip(editingTripId);
+  closeModal('trip-edit-modal');
+  refreshCurrentView();
+  if (currentView === 'map' && map) { map.setView(T().center, 13); renderMap(); }
+  toast('Reise gelöscht');
+  editingTripId = null;
 });
 
 // ============ Sync Setup Modal ============
@@ -1457,7 +1839,9 @@ document.getElementById('sync-status').addEventListener('click', () => {
 
 // ============ Share ============
 document.getElementById('share-btn').addEventListener('click', () => {
-  const payload = { state, sharedBy: myName, sharedAt: Date.now() };
+  // Nur die aktuelle Reise teilen — nicht alle Reisen des Users.
+  // Der Empfänger bekommt sie als eigene Reise (oder mergt, falls gleiche id).
+  const payload = { state: T(), sharedBy: myName, sharedAt: Date.now() };
   const json = JSON.stringify(payload);
   const compressed = LZString.compressToEncodedURIComponent(json);
   const url = `${location.origin}${location.pathname}#data=${compressed}`;
@@ -1484,7 +1868,7 @@ function renderPacklist() {
   const container = document.getElementById('packlist-container');
   container.innerHTML = '';
 
-  const list = state.packlist || [];
+  const list = T().packlist || [];
   const total = list.length;
   const done = list.filter(p => p.checked).length;
   const pct = total > 0 ? Math.round((done / total) * 100) : 0;
@@ -1565,7 +1949,7 @@ function renderPacklist() {
 }
 
 function togglePackCheck(id) {
-  const item = state.packlist.find(p => p.id === id);
+  const item = T().packlist.find(p => p.id === id);
   if (!item) return;
   item.checked = !item.checked;
   item.updatedAt = Date.now();
@@ -1575,7 +1959,7 @@ function togglePackCheck(id) {
 
 function quickAddPack(name, category) {
   const now = Date.now();
-  state.packlist.push({
+  T().packlist.push({
     id: uid(), name, qty: 1, category, checked: false, notes: '',
     addedBy: myName || 'Ich', createdAt: now, updatedAt: now
   });
@@ -1586,7 +1970,7 @@ function quickAddPack(name, category) {
 
 function openPackModal(editId = null) {
   editingPackId = editId;
-  const item = editId ? state.packlist.find(p => p.id === editId) : null;
+  const item = editId ? T().packlist.find(p => p.id === editId) : null;
   document.getElementById('pack-modal-title').textContent = editId ? 'Bearbeiten' : 'Packlisten-Eintrag';
   document.getElementById('pack-name').value = item?.name || '';
   document.getElementById('pack-qty').value = item?.qty || 1;
@@ -1606,11 +1990,11 @@ document.getElementById('pack-save').addEventListener('click', () => {
   const notes = document.getElementById('pack-notes').value.trim();
 
   if (editingPackId) {
-    const item = state.packlist.find(p => p.id === editingPackId);
+    const item = T().packlist.find(p => p.id === editingPackId);
     if (item) Object.assign(item, { name, qty, category, notes, updatedAt: Date.now() });
   } else {
     const now = Date.now();
-    state.packlist.push({
+    T().packlist.push({
       id: uid(), name, qty, category, checked: false, notes,
       addedBy: myName || 'Ich', createdAt: now, updatedAt: now
     });
@@ -1625,7 +2009,7 @@ document.getElementById('pack-delete').addEventListener('click', () => {
   if (!editingPackId) return;
   if (confirm('Eintrag wirklich löschen?')) {
     tombstonePack(editingPackId);
-    state.packlist = state.packlist.filter(p => p.id !== editingPackId);
+    T().packlist = T().packlist.filter(p => p.id !== editingPackId);
     saveState();
     closeModal('pack-modal');
     renderPacklist();
@@ -1643,56 +2027,85 @@ function importFromHash() {
     const payload = JSON.parse(json);
     if (!payload.state) throw new Error('invalid');
 
-    // Tombstones vereinen — verhindert, dass gelöschte Einträge per Link wiederauferstehen
-    if (!Array.isArray(state._tombs)) state._tombs = [];
-    const myTombs = new Set(state._tombs);
-    (payload.state._tombs || []).forEach(t => {
-      if (!myTombs.has(t)) { state._tombs.push(t); myTombs.add(t); }
-    });
+    // Die geteilte Reise extrahieren. Neu (v2): payload.state enthält eine einzelne Reise mit
+    // {name, city, center, start, end, items, packlist, _tombs, _metaUpdatedAt, id?}
+    // Alt (v1): payload.state hatte tripName/items/packlist direkt — zu einem Trip konvertieren.
+    let incomingTrip = payload.state;
+    if (!incomingTrip.items && !incomingTrip.name && incomingTrip.tripName) {
+      incomingTrip = {
+        name: incomingTrip.tripName,
+        city: incomingTrip.tripCity || '',
+        center: incomingTrip.tripCenter || [51.5074, -0.1278],
+        start: incomingTrip.tripStart || '',
+        end: incomingTrip.tripEnd || '',
+        items: incomingTrip.items || [],
+        packlist: incomingTrip.packlist || [],
+        _tombs: incomingTrip._tombs || [],
+        _metaUpdatedAt: incomingTrip._metaUpdatedAt || 0
+      };
+    }
+    if (!Array.isArray(incomingTrip.items)) incomingTrip.items = [];
+    if (!Array.isArray(incomingTrip.packlist)) incomingTrip.packlist = [];
 
-    // Items mergen nach id + max(updatedAt, createdAt) — konsistent mit mergeRemoteState
-    const existingItems = new Map(state.items.map(i => [i.id, i]));
-    const incoming = payload.state.items || [];
-    let added = 0, updated = 0, skipped = 0;
-    incoming.forEach(it => {
-      if (myTombs.has('i:' + it.id)) { skipped++; return; } // wurde hier gelöscht
-      const existing = existingItems.get(it.id);
-      if (existing) {
-        const rTs = it.updatedAt || it.createdAt || 0;
-        const lTs = existing.updatedAt || existing.createdAt || 0;
-        if (rTs > lTs) { Object.assign(existing, it); updated++; }
-      } else {
-        state.items.push(it); added++;
-      }
-    });
-    // Pack-Items mergen nach id + max(updatedAt, createdAt)
-    if (!Array.isArray(state.packlist)) state.packlist = [];
-    const existingPack = new Map(state.packlist.map(p => [p.id, p]));
-    const incomingPack = payload.state.packlist || [];
-    let packAdded = 0, packUpdated = 0;
-    incomingPack.forEach(p => {
-      if (myTombs.has('p:' + p.id)) return;
-      const ex = existingPack.get(p.id);
-      if (ex) {
-        const rTs = p.updatedAt || p.createdAt || 0;
-        const lTs = ex.updatedAt || ex.createdAt || 0;
-        if (rTs > lTs) { Object.assign(ex, p); packUpdated++; }
-      } else {
-        state.packlist.push(p); packAdded++;
-      }
-    });
-    // Tombstones nachträglich anwenden (auf den ganzen Listen)
-    state.items = state.items.filter(i => !myTombs.has('i:' + i.id));
-    state.packlist = state.packlist.filter(p => !myTombs.has('p:' + p.id));
-
-    // Trip-Metadaten nur adoptieren, wenn wir noch Defaults haben
-    if (state.tripName === DEFAULT_STATE.tripName && payload.state.tripName) {
-      state.tripName = payload.state.tripName;
-      state.tripCity = payload.state.tripCity;
-      state.tripCenter = payload.state.tripCenter;
-      state.tripStart = payload.state.tripStart || '';
-      state.tripEnd = payload.state.tripEnd || '';
-      state._metaUpdatedAt = Date.now();
+    // Falls die geteilte Reise eine id hat und wir sie schon kennen → mergen.
+    // Sonst: als neue Reise anlegen.
+    let target, added = 0, updated = 0, packAdded = 0, packUpdated = 0;
+    const incomingId = incomingTrip.id;
+    if (incomingId && state.trips[incomingId]) {
+      target = state.trips[incomingId];
+      // Tombstones mergen
+      if (!Array.isArray(target._tombs)) target._tombs = [];
+      const myTombs = new Set(target._tombs);
+      (incomingTrip._tombs || []).forEach(t => {
+        if (!myTombs.has(t)) { target._tombs.push(t); myTombs.add(t); }
+      });
+      // Items nach id + max(updatedAt, createdAt)
+      const existingItems = new Map(target.items.map(i => [i.id, i]));
+      incomingTrip.items.forEach(it => {
+        if (myTombs.has('i:' + it.id)) return;
+        const existing = existingItems.get(it.id);
+        if (existing) {
+          const rTs = it.updatedAt || it.createdAt || 0;
+          const lTs = existing.updatedAt || existing.createdAt || 0;
+          if (rTs > lTs) { Object.assign(existing, it); updated++; }
+        } else {
+          target.items.push(it); added++;
+        }
+      });
+      const existingPack = new Map(target.packlist.map(p => [p.id, p]));
+      incomingTrip.packlist.forEach(p => {
+        if (myTombs.has('p:' + p.id)) return;
+        const ex = existingPack.get(p.id);
+        if (ex) {
+          const rTs = p.updatedAt || p.createdAt || 0;
+          const lTs = ex.updatedAt || ex.createdAt || 0;
+          if (rTs > lTs) { Object.assign(ex, p); packUpdated++; }
+        } else {
+          target.packlist.push(p); packAdded++;
+        }
+      });
+      target.items = target.items.filter(i => !myTombs.has('i:' + i.id));
+      target.packlist = target.packlist.filter(p => !myTombs.has('p:' + p.id));
+    } else {
+      // Neue Reise anlegen. Neue id, damit es keinen Konflikt gibt, falls später
+      // der Original-Owner die gleiche Reise per Cloud wieder rübersynct.
+      const newId = incomingId || ('t' + Math.random().toString(36).slice(2, 10));
+      target = {
+        id: newId,
+        name: incomingTrip.name || 'Importierte Reise',
+        city: incomingTrip.city || '',
+        center: incomingTrip.center || [51.5074, -0.1278],
+        start: incomingTrip.start || '',
+        end: incomingTrip.end || '',
+        items: incomingTrip.items || [],
+        packlist: incomingTrip.packlist || [],
+        _tombs: incomingTrip._tombs || [],
+        _metaUpdatedAt: Date.now()
+      };
+      added = target.items.length;
+      packAdded = target.packlist.length;
+      state.trips[newId] = target;
+      state.currentTripId = newId;
     }
     // Nur lokal speichern, nicht sofort pushen — der erste cloudPull soll zuerst
     // die Cloud-Version mergen, bevor wir unsere Import-Version hochschieben und
