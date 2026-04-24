@@ -25,6 +25,7 @@
     --sight: #8b5cf6;
     --food: #f97316;
     --shop: #ec4899;
+    --buy: #10b981;
     --other: #64748b;
     --safe-top: env(safe-area-inset-top);
     --safe-bottom: env(safe-area-inset-bottom);
@@ -216,6 +217,13 @@
   .map-legend .lg-row { display: flex; align-items: center; gap: 6px; }
   .map-legend .lg-dot { width: 12px; height: 12px; border-radius: 50%; border: 2px solid white;
     box-shadow: 0 0 0 1px rgba(0,0,0,0.1); }
+  .map-loc-btn {
+    position: absolute; bottom: 20px; right: 16px; z-index: 500;
+    width: 44px; height: 44px; border-radius: 50%; background: white;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2); font-size: 22px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .map-loc-btn:active { background: #f1f5f9; }
 
   /* Packliste view */
   .packlist-wrap { padding: 12px; padding-bottom: 88px; }
@@ -294,6 +302,7 @@
   .bg-sight { background: var(--sight); }
   .bg-food { background: var(--food); }
   .bg-shop { background: var(--shop); }
+  .bg-buy { background: var(--buy); }
   .bg-other { background: var(--other); }
 
   /* Detail view */
@@ -316,6 +325,140 @@
   .welcome-content .big { font-size: 48px; }
   .welcome-content h3 { margin: 8px 0; }
   .welcome-content p { color: var(--text-muted); font-size: 14px; margin: 4px 0; }
+
+  /* Done-Status + Rating */
+  .item.done .name { text-decoration: line-through; color: var(--text-muted); }
+  .item.done .meta { opacity: 0.6; }
+  .done-check {
+    width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--border);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 14px; color: transparent; flex-shrink: 0;
+    background: var(--surface);
+  }
+  .done-check.checked { background: #10b981; border-color: #10b981; color: white; }
+  .item .stars { color: #f59e0b; font-size: 12px; margin-top: 2px; }
+  .item .comment-snippet { font-size: 12px; color: var(--text-muted); font-style: italic; margin-top: 3px; }
+  .rating-picker { display: flex; gap: 6px; font-size: 24px; justify-content: center; padding: 8px 0; }
+  .rating-picker .star { cursor: pointer; color: var(--border); transition: color 0.15s; }
+  .rating-picker .star.active { color: #f59e0b; }
+
+  /* Copy-Button */
+  .copy-inline {
+    display: inline-flex; align-items: center; gap: 4px; margin-left: 6px;
+    padding: 2px 8px; font-size: 12px; border-radius: 6px; background: var(--bg);
+    color: var(--primary); border: 1px solid var(--border);
+  }
+  .copy-inline:active { background: var(--border); }
+
+  /* Länder-Tipps-Panel */
+  .country-panel {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border: 1px solid #fbbf24; border-radius: 14px; padding: 14px; margin-bottom: 12px;
+    font-size: 13px; line-height: 1.5;
+  }
+  .country-panel h3 { margin: 0 0 8px; font-size: 14px; display: flex; align-items: center; gap: 6px; }
+  .country-panel .cp-row { display: flex; gap: 8px; padding: 4px 0; }
+  .country-panel .cp-row strong { min-width: 110px; color: #78350f; }
+  .country-panel .cp-drive-left { color: #b91c1c; font-weight: 600; }
+  .country-panel .cp-extra { margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(120, 53, 15, 0.2); font-style: italic; }
+
+  /* Unterkunft */
+  .accom-list { margin: 8px 0; display: flex; flex-direction: column; gap: 8px; }
+  .accom-row {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px;
+    display: flex; gap: 10px; align-items: flex-start;
+  }
+  .accom-row .name { font-weight: 600; font-size: 14px; }
+  .accom-row .meta { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+  .accom-row .actions { display: flex; gap: 6px; margin-left: auto; }
+
+  /* Einkaufsliste-Style (buy) */
+  .item.buy .name::before { content: '🛒 '; }
+  .item.buy-linked { border-left: 3px solid var(--buy); }
+
+  /* Kind-Marker */
+  .pack-item.for-kid { background: linear-gradient(to right, rgba(167, 243, 208, 0.15), transparent); }
+  .pack-item .kid-ico { color: #059669; font-size: 14px; margin-left: 4px; }
+  .inline-check {
+    display: flex !important; align-items: center; gap: 8px;
+    margin: 10px 0 4px !important; font-size: 13px !important; color: var(--text) !important;
+    font-weight: 500; cursor: pointer;
+  }
+  .inline-check input[type="checkbox"] { width: 18px !important; height: 18px; margin: 0; padding: 0 !important; flex: none !important; }
+  .pack-filter {
+    display: flex; gap: 6px; margin-bottom: 10px; background: var(--bg);
+    padding: 4px; border-radius: 10px;
+  }
+  .pack-filter button {
+    flex: 1; padding: 6px 8px; border-radius: 8px; font-size: 12px;
+    color: var(--text-muted);
+  }
+  .pack-filter button.active { background: var(--surface); color: var(--text); font-weight: 600; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+
+  /* Smart-Suggestions */
+  .pack-chip.smart { background: #ede9fe; color: #6d28d9; border-color: #c4b5fd; }
+  .pack-chip .freq { font-size: 10px; opacity: 0.7; margin-left: 3px; }
+  .smart-suggestions {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border: 1px solid #fcd34d; border-radius: 14px;
+    padding: 12px 14px; margin-bottom: 12px;
+  }
+  .smart-suggestions .ss-head { font-weight: 600; font-size: 14px; color: #92400e; margin-bottom: 2px; }
+  .smart-suggestions .ss-sub { font-size: 12px; color: #92400e; opacity: 0.85; margin-bottom: 8px; }
+  .smart-suggestions .ss-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .smart-suggestions .ss-chip {
+    background: white; border: 1px solid #fbbf24; border-radius: 999px;
+    padding: 5px 10px; font-size: 12px; color: #78350f; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 3px;
+  }
+  .smart-suggestions .ss-chip:active { background: #fcd34d; }
+  .smart-suggestions .ss-rate { color: #f59e0b; font-size: 10px; letter-spacing: -1px; }
+
+  /* Kalender Drag-and-Drop */
+  .cal-pool {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    padding: 10px 12px; margin-bottom: 12px;
+  }
+  .cal-pool h4 { margin: 0 0 8px; font-size: 13px; display: flex; justify-content: space-between; }
+  .cal-pool-empty { font-size: 12px; color: var(--text-muted); font-style: italic; padding: 6px 0; }
+  .cal-pool-cat { margin-bottom: 6px; }
+  .cal-pool-cat-label { font-size: 11px; color: var(--text-muted); margin-bottom: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; }
+  .cal-pool-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .cal-chip {
+    padding: 5px 9px; background: var(--bg); border: 1px solid var(--border);
+    border-radius: 999px; font-size: 12px; cursor: grab;
+    user-select: none; -webkit-user-select: none; touch-action: none;
+    display: inline-flex; align-items: center; gap: 4px;
+  }
+  .cal-chip:active, .cal-chip.dragging { background: var(--primary); color: white; border-color: var(--primary); cursor: grabbing; }
+  .cal-day.drop-active { background: rgba(14, 165, 233, 0.15); outline: 2px dashed var(--primary); outline-offset: -2px; }
+  .cal-day-event {
+    background: #fef3c7; border-left: 3px solid #f59e0b;
+    padding: 4px 8px; margin-top: 4px; border-radius: 6px; font-size: 12px;
+  }
+
+  /* Visueller Datum-Picker */
+  .date-picker-wrap { display: flex; flex-direction: column; gap: 8px; margin: 8px 0; }
+  .dp-nav { display: flex; justify-content: space-between; align-items: center; }
+  .dp-nav button { padding: 6px 10px; border-radius: 8px; background: var(--bg); font-size: 16px; }
+  .dp-month-label { font-weight: 600; font-size: 14px; }
+  .dp-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+  .dp-dow { font-size: 10px; color: var(--text-muted); text-align: center; padding: 2px 0; font-weight: 600; }
+  .dp-cell {
+    aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+    font-size: 12px; border-radius: 6px; cursor: pointer; background: var(--surface);
+  }
+  .dp-cell.other-month { color: var(--text-muted); opacity: 0.4; }
+  .dp-cell.today { font-weight: 700; color: var(--primary); }
+  .dp-cell.in-range { background: #dbeafe; }
+  .dp-cell.range-start, .dp-cell.range-end { background: var(--primary); color: white; font-weight: 600; }
+  .dp-hint { font-size: 11px; color: var(--text-muted); text-align: center; }
+
+  /* Version-Badge */
+  .version-badge {
+    font-size: 10px; color: var(--text-muted); text-align: center;
+    padding: 4px 0; opacity: 0.7;
+  }
 
   /* Trip-Manager */
   .trip-list { display: flex; flex-direction: column; gap: 8px; margin: 6px 0 12px; max-height: 55vh; overflow-y: auto; }
@@ -366,11 +509,13 @@
 
     <section class="view" id="view-map">
       <div id="map"></div>
+      <button class="map-loc-btn" id="my-location-btn" title="Eigenen Standort anzeigen">📍</button>
       <div class="map-legend">
         <div class="lg-row"><span class="lg-dot bg-sight"></span>Sehenswürdigkeit</div>
         <div class="lg-row"><span class="lg-dot bg-food"></span>Restaurant</div>
         <div class="lg-row"><span class="lg-dot bg-shop"></span>Shopping</div>
-        <div class="lg-row"><span class="lg-dot bg-other"></span>Sonstiges</div>
+        <div class="lg-row"><span class="lg-dot bg-buy"></span>Vor Ort kaufen</div>
+        <div class="lg-row"><span class="lg-dot" style="background:#0ea5e9;"></span>🏨 Unterkunft</div>
       </div>
     </section>
 
@@ -405,7 +550,13 @@
       <option value="sight">Sehenswürdigkeit</option>
       <option value="food">Restaurant / Essen</option>
       <option value="shop">Shopping</option>
+      <option value="buy">🛒 Vor Ort kaufen</option>
       <option value="other">Sonstiges</option>
+    </select>
+
+    <label id="buy-link-label" style="display:none;">Verknüpfen mit Shop (optional)</label>
+    <select id="item-buy-link" style="display:none;">
+      <option value="">— Kein Laden —</option>
     </select>
 
     <label>Adresse</label>
@@ -446,9 +597,18 @@
     <label>Dein Name</label>
     <input type="text" id="s-my-name" placeholder="Wer bist du?" />
 
+    <label class="inline-check">
+      <input type="checkbox" id="s-suggestions-on" />
+      <span>💡 Smarte Vorschläge anzeigen (Packliste &amp; wiederholte Städte)</span>
+    </label>
+
     <div class="modal-actions">
       <button class="btn secondary" id="close-settings">Schließen</button>
       <button class="btn primary" id="save-settings">Speichern</button>
+    </div>
+
+    <div style="font-size:11px; color:var(--text-muted); text-align:center; margin-top:6px;" id="version-label">
+      <!-- wird per JS gefüllt -->
     </div>
     <hr style="border:none; border-top:1px solid var(--border); margin:14px 0 10px;" />
     <div class="modal-actions">
@@ -493,10 +653,20 @@
     <label>Stadt / Reiseziel</label>
     <input type="text" id="te-city" placeholder="z.B. London, UK" />
 
+    <label>Land (für Reiseinfos: Steckdose, Verkehr, …)</label>
+    <select id="te-country">
+      <option value="">— Kein Land —</option>
+    </select>
+
     <label>Reisezeitraum</label>
     <div class="row">
       <input type="date" id="te-start" />
       <input type="date" id="te-end" />
+    </div>
+
+    <div class="date-range-picker" id="te-date-picker"></div>
+    <div style="font-size:11px; color:var(--text-muted); margin-top:4px;">
+      Tipp: Im Kalender unten zuerst Start-Tag, dann End-Tag antippen.
     </div>
 
     <div class="modal-actions">
@@ -601,6 +771,10 @@ create policy "u" on trips for update using (true);</pre>
         </select>
       </div>
     </div>
+    <label class="inline-check">
+      <input type="checkbox" id="pack-for-kid" />
+      <span>👶 Für das Kind</span>
+    </label>
     <label>Notiz (optional)</label>
     <textarea id="pack-notes" placeholder="z.B. nur 2 bei Gepäck-Limit"></textarea>
     <div class="modal-actions">
@@ -609,6 +783,96 @@ create policy "u" on trips for update using (true);</pre>
     </div>
     <div class="modal-actions" id="pack-delete-wrap" style="display:none;">
       <button class="btn danger" id="pack-delete">Löschen</button>
+    </div>
+  </div>
+</div>
+
+<!-- Kalender-Event (Flug/Zug/Transfer) Modal -->
+<div class="modal-backdrop" id="event-modal">
+  <div class="modal">
+    <h3 id="event-modal-title">✈️ Kalender-Eintrag</h3>
+
+    <label>Typ</label>
+    <select id="event-type">
+      <option value="flight">✈️ Flug</option>
+      <option value="train">🚆 Zug</option>
+      <option value="transfer">🚕 Transfer</option>
+      <option value="other">📌 Sonstiges</option>
+    </select>
+
+    <label>Titel</label>
+    <input type="text" id="event-title" placeholder="z.B. Lufthansa LH400 FRA → LHR" />
+
+    <div class="row">
+      <div>
+        <label>Datum</label>
+        <input type="date" id="event-date" />
+      </div>
+      <div>
+        <label>Uhrzeit</label>
+        <input type="time" id="event-time" />
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label>Von (optional)</label>
+        <input type="text" id="event-from" placeholder="Flughafen / Bahnhof" />
+      </div>
+      <div>
+        <label>Nach (optional)</label>
+        <input type="text" id="event-to" placeholder="Ziel" />
+      </div>
+    </div>
+
+    <label>Notiz / Buchungsnummer</label>
+    <textarea id="event-notes" placeholder="z.B. Sitzplatz 12A, Gate wird noch bekanntgegeben"></textarea>
+
+    <div class="modal-actions">
+      <button class="btn secondary" id="event-cancel">Abbrechen</button>
+      <button class="btn primary" id="event-save">Speichern</button>
+    </div>
+    <div class="modal-actions" id="event-delete-wrap" style="display:none;">
+      <button class="btn danger" id="event-delete">Löschen</button>
+    </div>
+  </div>
+</div>
+
+<!-- Unterkunft (Accommodation) Modal -->
+<div class="modal-backdrop" id="accom-modal">
+  <div class="modal">
+    <h3 id="accom-modal-title">🏨 Unterkunft</h3>
+
+    <label>Name</label>
+    <input type="text" id="accom-name" placeholder="z.B. Hotel Central" autocomplete="off" />
+
+    <label>Adresse</label>
+    <input type="text" id="accom-address" placeholder="Straße, PLZ, Ort" />
+
+    <label>Koordinaten suchen (optional)</label>
+    <input type="text" id="accom-search" placeholder="Ort/Name tippen, dann Ergebnis wählen" autocomplete="off" />
+    <div id="accom-search-results" class="search-results"></div>
+
+    <div class="row">
+      <div>
+        <label>Check-in</label>
+        <input type="date" id="accom-start" />
+      </div>
+      <div>
+        <label>Check-out</label>
+        <input type="date" id="accom-end" />
+      </div>
+    </div>
+
+    <label>Notiz (optional)</label>
+    <textarea id="accom-notes" placeholder="z.B. Buchungsnummer, WLAN-Code, Check-in-Zeit"></textarea>
+
+    <div class="modal-actions">
+      <button class="btn secondary" id="accom-cancel">Abbrechen</button>
+      <button class="btn primary" id="accom-save">Speichern</button>
+    </div>
+    <div class="modal-actions" id="accom-delete-wrap" style="display:none;">
+      <button class="btn danger" id="accom-delete">Löschen</button>
     </div>
   </div>
 </div>
@@ -635,11 +899,18 @@ create policy "u" on trips for update using (true);</pre>
   integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
 <script>
+// ============ App-Version ============
+// Bei Schema-Änderungen SCHEMA_VERSION hochzählen + Migration ergänzen.
+// APP_VERSION ist die User-sichtbare Version.
+const APP_VERSION = '0.4.0';
+const SCHEMA_VERSION = 3;
+
 // ============ Constants & Demo Data ============
 const CATEGORIES = {
   sight: { label: 'Sehenswürdigkeit', icon: '🏛️', color: '#8b5cf6' },
   food:  { label: 'Restaurant',       icon: '🍽️', color: '#f97316' },
   shop:  { label: 'Shopping',         icon: '🛍️', color: '#ec4899' },
+  buy:   { label: 'Vor Ort kaufen',   icon: '🛒', color: '#10b981' },
   other: { label: 'Sonstiges',        icon: '📌', color: '#64748b' }
 };
 
@@ -670,14 +941,83 @@ const PACK_SUGGESTIONS = [
   { name: 'Regenjacke', category: 'clothing' }
 ];
 
+// ============ Länder-Datenbank ============
+// Kompakt: nur Kern-Felder. Keys ISO-2 für Matching, labels auf Deutsch.
+// Feldnamen: plug (Stecker-Typ), volt (V/Hz), drive (left/right), tip (Trinkgeld-Norm),
+// reserv (Reservierungs-Kultur), lang (Sprachen), emergency (Notruf), curr (Währung), extra.
+const COUNTRIES = {
+  'DE': { name:'Deutschland', plug:'Typ C/F', volt:'230V/50Hz', drive:'rechts', tip:'5–10% üblich', reserv:'Beliebte Restaurants: reservieren', lang:'Deutsch', emergency:'112', curr:'EUR' },
+  'AT': { name:'Österreich',  plug:'Typ C/F', volt:'230V/50Hz', drive:'rechts', tip:'5–10% üblich', reserv:'Beliebte Restaurants: reservieren', lang:'Deutsch', emergency:'112', curr:'EUR' },
+  'CH': { name:'Schweiz',     plug:'Typ J',   volt:'230V/50Hz', drive:'rechts', tip:'Trinkgeld im Preis, 5–10% zusätzlich üblich', reserv:'Restaurants: reservieren empfehlenswert', lang:'Deutsch/Französisch/Italienisch', emergency:'112', curr:'CHF' },
+  'FR': { name:'Frankreich',  plug:'Typ E',   volt:'230V/50Hz', drive:'rechts', tip:'Service inklusive; kleines Extra möglich', reserv:'Bistros + gehobene Restaurants: reservieren', lang:'Französisch', emergency:'112', curr:'EUR' },
+  'IT': { name:'Italien',     plug:'Typ F/L', volt:'230V/50Hz', drive:'rechts', tip:'Coperto üblich; 5–10% für sehr guten Service', reserv:'Hauptsaison: für Abend reservieren', lang:'Italienisch', emergency:'112', curr:'EUR' },
+  'ES': { name:'Spanien',     plug:'Typ C/F', volt:'230V/50Hz', drive:'rechts', tip:'Aufrunden oder 5–10%', reserv:'Populäre Orte: reservieren', lang:'Spanisch', emergency:'112', curr:'EUR' },
+  'PT': { name:'Portugal',    plug:'Typ C/F', volt:'230V/50Hz', drive:'rechts', tip:'Aufrunden oder 5–10%', reserv:'In Lissabon/Porto oft ratsam', lang:'Portugiesisch', emergency:'112', curr:'EUR' },
+  'NL': { name:'Niederlande', plug:'Typ C/F', volt:'230V/50Hz', drive:'rechts', tip:'5–10% für guten Service', reserv:'Restaurants: reservieren in Amsterdam', lang:'Niederländisch/Englisch', emergency:'112', curr:'EUR' },
+  'BE': { name:'Belgien',     plug:'Typ E',   volt:'230V/50Hz', drive:'rechts', tip:'5–10% üblich', reserv:'Restaurants: oft nötig', lang:'Niederländisch/Französisch', emergency:'112', curr:'EUR' },
+  'LU': { name:'Luxemburg',   plug:'Typ C/F', volt:'230V/50Hz', drive:'rechts', tip:'5–10%', reserv:'Üblich', lang:'Luxemburgisch/Deutsch/Französisch', emergency:'112', curr:'EUR' },
+  'DK': { name:'Dänemark',    plug:'Typ C/E/F/K', volt:'230V/50Hz', drive:'rechts', tip:'Service inklusive; aufrunden optional', reserv:'Beliebte Restaurants: vorher reservieren', lang:'Dänisch/Englisch', emergency:'112', curr:'DKK' },
+  'SE': { name:'Schweden',    plug:'Typ C/F', volt:'230V/50Hz', drive:'rechts', tip:'Service inklusive, 5–10% bei gutem Service', reserv:'Stockholmer Top-Orte: reservieren', lang:'Schwedisch/Englisch', emergency:'112', curr:'SEK' },
+  'NO': { name:'Norwegen',    plug:'Typ C/F', volt:'230V/50Hz', drive:'rechts', tip:'Service inklusive', reserv:'Oslo: Restaurants reservieren', lang:'Norwegisch/Englisch', emergency:'112', curr:'NOK' },
+  'FI': { name:'Finnland',    plug:'Typ C/F', volt:'230V/50Hz', drive:'rechts', tip:'Service inklusive', reserv:'Populäre Restaurants', lang:'Finnisch/Schwedisch', emergency:'112', curr:'EUR' },
+  'IS': { name:'Island',      plug:'Typ C/F', volt:'230V/50Hz', drive:'rechts', tip:'Service inklusive; kein Trinkgeld nötig', reserv:'Reykjavik: oft nötig', lang:'Isländisch/Englisch', emergency:'112', curr:'ISK' },
+  'PL': { name:'Polen',       plug:'Typ C/E', volt:'230V/50Hz', drive:'rechts', tip:'10% üblich', reserv:'Beliebte Orte: reservieren', lang:'Polnisch', emergency:'112', curr:'PLN' },
+  'CZ': { name:'Tschechien',  plug:'Typ C/E', volt:'230V/50Hz', drive:'rechts', tip:'Aufrunden oder 10%', reserv:'Prag: für gute Lokale reservieren', lang:'Tschechisch', emergency:'112', curr:'CZK' },
+  'HU': { name:'Ungarn',      plug:'Typ C/F', volt:'230V/50Hz', drive:'rechts', tip:'10% üblich', reserv:'Budapest: für gute Lokale reservieren', lang:'Ungarisch', emergency:'112', curr:'HUF' },
+  'GR': { name:'Griechenland',plug:'Typ C/F', volt:'230V/50Hz', drive:'rechts', tip:'5–10% üblich', reserv:'Tavernen meist ohne Reservierung', lang:'Griechisch', emergency:'112', curr:'EUR' },
+  'HR': { name:'Kroatien',    plug:'Typ C/F', volt:'230V/50Hz', drive:'rechts', tip:'10% üblich', reserv:'Touristen-Saison: reservieren', lang:'Kroatisch', emergency:'112', curr:'EUR' },
+  'TR': { name:'Türkei',      plug:'Typ C/F', volt:'230V/50Hz', drive:'rechts', tip:'5–10% üblich', reserv:'Beliebte Istanbuler Restaurants: reservieren', lang:'Türkisch', emergency:'112', curr:'TRY' },
+  'GB': { name:'Großbritannien', plug:'Typ G',   volt:'230V/50Hz', drive:'LINKS (!)', tip:'10–15% üblich, oft im Bill als "service charge"', reserv:'London: für gute Restaurants + Pubs reservieren', lang:'Englisch', emergency:'112 oder 999', curr:'GBP', extra:'Oyster-Card/Contactless für Tube nutzen.' },
+  'IE': { name:'Irland',      plug:'Typ G',   volt:'230V/50Hz', drive:'LINKS (!)', tip:'10–15%', reserv:'Dublin: abends reservieren', lang:'Englisch/Gaeilge', emergency:'112 oder 999', curr:'EUR' },
+  'US': { name:'USA',          plug:'Typ A/B', volt:'120V/60Hz', drive:'rechts', tip:'18–22% ERWARTET (Restaurants)', reserv:'Beliebte Restaurants: OpenTable/Resy nutzen', lang:'Englisch', emergency:'911', curr:'USD', extra:'Steuer wird oft erst an der Kasse draufgeschlagen.' },
+  'CA': { name:'Kanada',       plug:'Typ A/B', volt:'120V/60Hz', drive:'rechts', tip:'15–20%', reserv:'Empfehlenswert', lang:'Englisch/Französisch', emergency:'911', curr:'CAD' },
+  'MX': { name:'Mexiko',       plug:'Typ A/B', volt:'127V/60Hz', drive:'rechts', tip:'10–15%', reserv:'Touristenorte: reservieren', lang:'Spanisch', emergency:'911', curr:'MXN', extra:'Leitungswasser nicht trinken.' },
+  'JP': { name:'Japan',        plug:'Typ A',   volt:'100V/50–60Hz', drive:'LINKS (!)', tip:'KEIN Trinkgeld — teils als beleidigend empfunden', reserv:'Beliebte Restaurants: unbedingt reservieren, teils nur über Concierge', lang:'Japanisch', emergency:'110 (Polizei) / 119 (Notarzt)', curr:'JPY', extra:'IC-Card (Suica/Pasmo) für öffentliche Verkehrsmittel.' },
+  'KR': { name:'Südkorea',     plug:'Typ C/F', volt:'220V/60Hz', drive:'rechts', tip:'Kein Trinkgeld nötig', reserv:'Seoul: populäre Orte reservieren', lang:'Koreanisch', emergency:'112 (Polizei) / 119 (Notarzt)', curr:'KRW' },
+  'CN': { name:'China',        plug:'Typ A/C/I', volt:'220V/50Hz', drive:'rechts', tip:'Kein Trinkgeld üblich', reserv:'Beliebte Orte: reservieren', lang:'Chinesisch', emergency:'110/120', curr:'CNY', extra:'VPN vorher installieren (Google, WhatsApp etc. blockiert).' },
+  'TH': { name:'Thailand',     plug:'Typ A/B/C', volt:'220V/50Hz', drive:'LINKS (!)', tip:'Aufrunden oder 10%', reserv:'Bangkok: gute Restaurants reservieren', lang:'Thai', emergency:'191 (Polizei) / 1669 (Notarzt)', curr:'THB', extra:'Leitungswasser NICHT trinken.' },
+  'VN': { name:'Vietnam',      plug:'Typ A/C',  volt:'220V/50Hz', drive:'rechts', tip:'5–10% oder Aufrunden', reserv:'Nicht unbedingt nötig', lang:'Vietnamesisch', emergency:'113/115', curr:'VND', extra:'Leitungswasser nicht trinken.' },
+  'ID': { name:'Indonesien',   plug:'Typ C/F',  volt:'230V/50Hz', drive:'LINKS (!)', tip:'5–10%', reserv:'Bali-Hotspots: reservieren', lang:'Bahasa Indonesia', emergency:'112', curr:'IDR' },
+  'SG': { name:'Singapur',     plug:'Typ G',    volt:'230V/50Hz', drive:'LINKS (!)', tip:'Kein Trinkgeld; 10% Service Charge im Bill', reserv:'Gute Restaurants reservieren', lang:'Englisch/Chinesisch/Malaiisch', emergency:'999/995', curr:'SGD' },
+  'IN': { name:'Indien',       plug:'Typ C/D/M', volt:'230V/50Hz', drive:'LINKS (!)', tip:'5–10%', reserv:'Hotel-Restaurants meist OK; gute Orte reservieren', lang:'Hindi/Englisch', emergency:'112', curr:'INR', extra:'Leitungswasser NICHT trinken.' },
+  'AE': { name:'VAE',          plug:'Typ G',    volt:'230V/50Hz', drive:'rechts', tip:'10–15%, oft als Service Charge dabei', reserv:'Dubai: Top-Restaurants reservieren', lang:'Arabisch/Englisch', emergency:'999', curr:'AED' },
+  'AU': { name:'Australien',   plug:'Typ I',    volt:'230V/50Hz', drive:'LINKS (!)', tip:'Kein Trinkgeld üblich', reserv:'Sydney/Melbourne: reservieren', lang:'Englisch', emergency:'000', curr:'AUD' },
+  'NZ': { name:'Neuseeland',   plug:'Typ I',    volt:'230V/50Hz', drive:'LINKS (!)', tip:'Kein Trinkgeld üblich', reserv:'Beliebte Lokale: reservieren', lang:'Englisch', emergency:'111', curr:'NZD' },
+  'ZA': { name:'Südafrika',    plug:'Typ M/N',  volt:'230V/50Hz', drive:'LINKS (!)', tip:'10–15%', reserv:'Kapstadt: Top-Restaurants reservieren', lang:'Englisch/Afrikaans u.a.', emergency:'112', curr:'ZAR' },
+  'BR': { name:'Brasilien',    plug:'Typ N',    volt:'127V/220V/60Hz', drive:'rechts', tip:'10% oft im Preis', reserv:'São Paulo/Rio: reservieren', lang:'Portugiesisch', emergency:'190/192', curr:'BRL' },
+  'AR': { name:'Argentinien',  plug:'Typ C/I',  volt:'220V/50Hz', drive:'rechts', tip:'10%', reserv:'Beliebte Steakhouses reservieren', lang:'Spanisch', emergency:'911', curr:'ARS' }
+};
+function findCountry(input) {
+  if (!input) return null;
+  const v = String(input).trim();
+  if (!v) return null;
+  // ISO-2 direkt?
+  if (v.length === 2 && COUNTRIES[v.toUpperCase()]) return { code: v.toUpperCase(), ...COUNTRIES[v.toUpperCase()] };
+  // Name match
+  const lc = v.toLowerCase();
+  for (const code of Object.keys(COUNTRIES)) {
+    if (COUNTRIES[code].name.toLowerCase() === lc) return { code, ...COUNTRIES[code] };
+  }
+  // partial
+  for (const code of Object.keys(COUNTRIES)) {
+    if (COUNTRIES[code].name.toLowerCase().includes(lc) || lc.includes(COUNTRIES[code].name.toLowerCase())) {
+      return { code, ...COUNTRIES[code] };
+    }
+  }
+  return null;
+}
+
 // Eine Reise = alles was sich pro Urlaub unterscheidet
 const DEFAULT_TRIP = {
   id: 't1',
   name: 'London Trip',
   city: 'London, UK',
+  country: 'GB',         // NEU v0.4: ISO-2-Ländercode für Tipps
   center: [51.5074, -0.1278],
   start: '',
   end: '',
+  accommodations: [],    // NEU v0.4: {id, name, address, lat, lng, notes, start, end, updatedAt, createdAt}
+  events: [],            // NEU v0.4: {id, type:'flight'|'train'|'transfer', title, date, time, notes, updatedAt, createdAt}
   _tombs: [],
   _metaUpdatedAt: 0,
   items: [
@@ -718,6 +1058,7 @@ const DEFAULT_TRIP = {
 };
 // Gesamter App-State = mehrere Reisen + welche aktuell ausgewählt
 const DEFAULT_STATE = {
+  schemaVersion: SCHEMA_VERSION,
   currentTripId: 't1',
   trips: { t1: DEFAULT_TRIP },
   _tripTombs: [] // Gelöschte Trip-IDs, damit die Löschung auch zur Partnerin wandert
@@ -727,15 +1068,31 @@ function freshTrip(overrides) {
     id: 't' + Math.random().toString(36).slice(2, 10),
     name: 'Neue Reise',
     city: '',
+    country: '',
     center: [51.5074, -0.1278],
     start: '',
     end: '',
     items: [],
     packlist: [],
+    accommodations: [],
+    events: [],
     _tombs: [],
     _metaUpdatedAt: Date.now()
   };
   if (overrides) Object.assign(t, overrides);
+  return t;
+}
+// Defensive Defaults für ein einzelnes Trip-Objekt — garantiert, dass ein alter
+// State ohne neue Felder nicht crasht, sondern sie stillschweigend ergänzt werden.
+function ensureTripDefaults(t) {
+  if (!t) return t;
+  if (!Array.isArray(t.items)) t.items = [];
+  if (!Array.isArray(t.packlist)) t.packlist = [];
+  if (!Array.isArray(t.accommodations)) t.accommodations = [];
+  if (!Array.isArray(t.events)) t.events = [];
+  if (!Array.isArray(t._tombs)) t._tombs = [];
+  if (typeof t._metaUpdatedAt !== 'number') t._metaUpdatedAt = 0;
+  if (typeof t.country !== 'string') t.country = '';
   return t;
 }
 // T() gibt die aktuelle Reise zurück — benutzt überall statt state.XXX
@@ -752,12 +1109,7 @@ function T() {
       t = nt;
     }
   }
-  // Defensiv: stelle sicher, dass Arrays existieren
-  if (!Array.isArray(t.items)) t.items = [];
-  if (!Array.isArray(t.packlist)) t.packlist = [];
-  if (!Array.isArray(t._tombs)) t._tombs = [];
-  if (typeof t._metaUpdatedAt !== 'number') t._metaUpdatedAt = 0;
-  return t;
+  return ensureTripDefaults(t);
 }
 function allTrips() {
   return Object.values(state.trips || {}).sort(function(a,b){
@@ -810,8 +1162,12 @@ let myName = localStorage.getItem('tm_my_name') || '';
 let currentView = 'list';
 let selectedPlace = null;
 let editingItemId = null;
-let map = null, markers = [];
+let map = null, markers = [], accomMarkers = [], myLocationMarker = null;
 let searchTimeout = null;
+// Vorschläge global aktivierbar (default: an)
+let suggestionsEnabled = localStorage.getItem('tm_suggestions') !== '0';
+// Packliste-Kind-Filter (Ansicht)
+let packFilterKid = 'all'; // 'all' | 'adults' | 'kids'
 
 // ============ Persistence ============
 function loadState() {
@@ -835,22 +1191,21 @@ function loadState() {
         };
         return { currentTripId: 't1', trips: { t1: migrated }, _tripTombs: [] };
       }
-      // v2: defensive Defaults
+      // v2/v3: defensive Defaults — neue Felder werden still hinzugefügt,
+      // alte Daten bleiben UNANGETASTET (wichtig für App-Updates!).
       if (!parsed.trips || typeof parsed.trips !== 'object') parsed.trips = {};
       if (!Array.isArray(parsed._tripTombs)) parsed._tripTombs = [];
+      if (typeof parsed.schemaVersion !== 'number') parsed.schemaVersion = 2;
       // Falls currentTripId nicht existiert, auf die erste Trip setzen
       if (!parsed.trips[parsed.currentTripId]) {
         const first = Object.keys(parsed.trips)[0];
         if (first) parsed.currentTripId = first;
       }
-      // Pro-Trip-Defaults
+      // Pro-Trip-Defaults (ensureTripDefaults ergänzt neue v0.4-Felder)
       Object.keys(parsed.trips).forEach(function(id){
         const t = parsed.trips[id];
-        if (!Array.isArray(t.items)) t.items = [];
-        if (!Array.isArray(t.packlist)) t.packlist = [];
-        if (!Array.isArray(t._tombs)) t._tombs = [];
-        if (typeof t._metaUpdatedAt !== 'number') t._metaUpdatedAt = 0;
         if (!t.id) t.id = id;
+        ensureTripDefaults(t);
       });
       // Falls gar keine Reisen drin sind, eine Default anlegen
       if (Object.keys(parsed.trips).length === 0) {
@@ -858,6 +1213,8 @@ function loadState() {
         parsed.trips[dt.id] = dt;
         parsed.currentTripId = dt.id;
       }
+      // Schema-Version hochsetzen
+      parsed.schemaVersion = SCHEMA_VERSION;
       return parsed;
     }
   } catch(e) { console.error('loadState', e); }
@@ -999,45 +1356,45 @@ function cloudPushDebounced() {
   clearTimeout(CLOUD.pushDebounceTimer);
   CLOUD.pushDebounceTimer = setTimeout(cloudPushImmediate, 1200);
 }
-function mergeOneTrip(lT, rT) {
+// Generischer Array-Merge per id + Tombstone-Präfix.
+// prefix ist z.B. 'i' (items), 'p' (pack), 'a' (accommodations), 'e' (events).
+function mergeArrayById(lArr, rArr, myTombs, prefix) {
   let changed = false;
-  if (!Array.isArray(lT._tombs)) lT._tombs = [];
-  const myTombs = new Set(lT._tombs);
-  (rT._tombs || []).forEach(function(t){
-    if (!myTombs.has(t)) { lT._tombs.push(t); myTombs.add(t); changed = true; }
-  });
-  if (!Array.isArray(lT.items)) lT.items = [];
-  const localItemMap = new Map(lT.items.map(function(i){ return [i.id, i]; }));
-  (rT.items || []).forEach(function(it){
-    const local = localItemMap.get(it.id);
+  const localMap = new Map(lArr.map(function(x){ return [x.id, x]; }));
+  (rArr || []).forEach(function(it){
+    const local = localMap.get(it.id);
     if (!local) {
-      if (!myTombs.has('i:' + it.id)) { lT.items.push(it); changed = true; }
+      if (!myTombs.has(prefix + ':' + it.id)) { lArr.push(it); changed = true; }
     } else {
       const rTs = it.updatedAt || it.createdAt || 0;
       const lTs = local.updatedAt || local.createdAt || 0;
       if (rTs > lTs) { Object.assign(local, it); changed = true; }
     }
   });
-  if (!Array.isArray(lT.packlist)) lT.packlist = [];
-  const localPackMap = new Map(lT.packlist.map(function(p){ return [p.id, p]; }));
-  (rT.packlist || []).forEach(function(p){
-    const local = localPackMap.get(p.id);
-    if (!local) {
-      if (!myTombs.has('p:' + p.id)) { lT.packlist.push(p); changed = true; }
-    } else {
-      const rTs = p.updatedAt || p.createdAt || 0;
-      const lTs = local.updatedAt || local.createdAt || 0;
-      if (rTs > lTs) { Object.assign(local, p); changed = true; }
-    }
+  const before = lArr.length;
+  const filtered = lArr.filter(function(x){ return !myTombs.has(prefix + ':' + x.id); });
+  if (filtered.length !== before) changed = true;
+  return { changed, filtered };
+}
+function mergeOneTrip(lT, rT) {
+  ensureTripDefaults(lT);
+  let changed = false;
+  const myTombs = new Set(lT._tombs);
+  (rT._tombs || []).forEach(function(t){
+    if (!myTombs.has(t)) { lT._tombs.push(t); myTombs.add(t); changed = true; }
   });
-  const beforeI = lT.items.length, beforeP = lT.packlist.length;
-  lT.items = lT.items.filter(function(i){ return !myTombs.has('i:' + i.id); });
-  lT.packlist = lT.packlist.filter(function(p){ return !myTombs.has('p:' + p.id); });
-  if (lT.items.length !== beforeI || lT.packlist.length !== beforeP) changed = true;
+  const itemsRes = mergeArrayById(lT.items, rT.items || [], myTombs, 'i');
+  lT.items = itemsRes.filtered; if (itemsRes.changed) changed = true;
+  const packRes = mergeArrayById(lT.packlist, rT.packlist || [], myTombs, 'p');
+  lT.packlist = packRes.filtered; if (packRes.changed) changed = true;
+  const accRes = mergeArrayById(lT.accommodations, rT.accommodations || [], myTombs, 'a');
+  lT.accommodations = accRes.filtered; if (accRes.changed) changed = true;
+  const evRes = mergeArrayById(lT.events, rT.events || [], myTombs, 'e');
+  lT.events = evRes.filtered; if (evRes.changed) changed = true;
   const rMeta = rT._metaUpdatedAt || 0;
   const lMeta = lT._metaUpdatedAt || 0;
   if (rMeta > lMeta) {
-    ['name','city','center','start','end'].forEach(function(k){
+    ['name','city','country','center','start','end'].forEach(function(k){
       if (rT[k] !== undefined) lT[k] = rT[k];
     });
     lT._metaUpdatedAt = rMeta;
@@ -1084,9 +1441,7 @@ function mergeRemoteState(remote) {
     if (!state.trips[tripId]) {
       state.trips[tripId] = JSON.parse(JSON.stringify(rT));
       if (!state.trips[tripId].id) state.trips[tripId].id = tripId;
-      if (!Array.isArray(state.trips[tripId].items)) state.trips[tripId].items = [];
-      if (!Array.isArray(state.trips[tripId].packlist)) state.trips[tripId].packlist = [];
-      if (!Array.isArray(state.trips[tripId]._tombs)) state.trips[tripId]._tombs = [];
+      ensureTripDefaults(state.trips[tripId]);
       changed = true;
     } else {
       if (mergeOneTrip(state.trips[tripId], rT)) changed = true;
@@ -1150,13 +1505,19 @@ window.addEventListener('online', function(){
 });
 function tombstoneItem(id) {
   const t = T();
-  if (!Array.isArray(t._tombs)) t._tombs = [];
   if (!t._tombs.includes('i:' + id)) t._tombs.push('i:' + id);
 }
 function tombstonePack(id) {
   const t = T();
-  if (!Array.isArray(t._tombs)) t._tombs = [];
   if (!t._tombs.includes('p:' + id)) t._tombs.push('p:' + id);
+}
+function tombstoneAccommodation(id) {
+  const t = T();
+  if (!t._tombs.includes('a:' + id)) t._tombs.push('a:' + id);
+}
+function tombstoneEvent(id) {
+  const t = T();
+  if (!t._tombs.includes('e:' + id)) t._tombs.push('e:' + id);
 }
 function tombstoneTrip(id) {
   if (!Array.isArray(state._tripTombs)) state._tripTombs = [];
@@ -1178,7 +1539,23 @@ function toast(msg, ms=2200) {
   window._toastTimer = setTimeout(() => t.classList.remove('show'), ms);
 }
 function catColor(cat) { return CATEGORIES[cat]?.color || '#64748b'; }
-function catClass(cat) { return cat === 'sight' ? 'bg-sight' : cat === 'food' ? 'bg-food' : cat === 'shop' ? 'bg-shop' : 'bg-other'; }
+function catClass(cat) {
+  return cat === 'sight' ? 'bg-sight' :
+         cat === 'food'  ? 'bg-food'  :
+         cat === 'shop'  ? 'bg-shop'  :
+         cat === 'buy'   ? 'bg-buy'   : 'bg-other';
+}
+async function copyToClipboard(text) {
+  try { await navigator.clipboard.writeText(text); toast('📋 Kopiert'); return true; }
+  catch(e) {
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = text; document.body.appendChild(ta); ta.select();
+      document.execCommand('copy'); document.body.removeChild(ta);
+      toast('📋 Kopiert'); return true;
+    } catch(e2) { toast('Kopieren fehlgeschlagen'); return false; }
+  }
+}
 
 // ============ View switching ============
 function switchView(name) {
@@ -1203,14 +1580,30 @@ function renderHeader() {
 function renderList() {
   const container = document.getElementById('list-container');
   container.innerHTML = '';
+
+  // Länder-Tipps-Panel wenn Land gesetzt
+  renderCountryPanel(container);
+
+  // Unterkunfts-Kurzansicht (falls vorhanden)
+  renderAccommodationsShort(container);
+
+  // City-Repeat-Vorschläge (wenn dieselbe Stadt schon einmal besucht wurde)
+  renderCityRepeatSuggestions(container);
+
   Object.entries(CATEGORIES).forEach(([key, cat]) => {
     const items = T().items.filter(i => i.category === key)
-      .sort((a,b) => (a.scheduledDate || 'z').localeCompare(b.scheduledDate || 'z') || a.createdAt - b.createdAt);
+      .sort((a,b) => {
+        // Erledigte nach unten sortieren
+        if ((a.done?1:0) !== (b.done?1:0)) return (a.done?1:0) - (b.done?1:0);
+        return (a.scheduledDate || 'z').localeCompare(b.scheduledDate || 'z') || (a.createdAt||0) - (b.createdAt||0);
+      });
     const section = document.createElement('div');
     section.className = 'category';
+    const doneCount = items.filter(i => i.done).length;
+    const countLabel = doneCount > 0 ? `${items.length - doneCount} / ${items.length}` : items.length;
     section.innerHTML = `
       <h2><span class="dot ${catClass(key)}"></span>${cat.icon} ${cat.label}
-        <span class="badge">${items.length}</span></h2>
+        <span class="badge">${countLabel}</span></h2>
       <div class="cat-items"></div>
     `;
     const body = section.querySelector('.cat-items');
@@ -1219,26 +1612,189 @@ function renderList() {
     } else {
       items.forEach(item => {
         const div = document.createElement('div');
-        div.className = 'item';
+        div.className = 'item' + (item.done ? ' done' : '') + (key === 'buy' ? ' buy' : '');
         div.dataset.id = item.id;
         const dateBadge = item.scheduledDate
           ? `<div class="date-pill">${fmtDate(item.scheduledDate)}${item.scheduledTime ? ' · ' + item.scheduledTime : ''}</div>`
           : '';
+        const stars = item.rating ? `<div class="stars">${'★'.repeat(item.rating)}${'☆'.repeat(5 - item.rating)}</div>` : '';
+        const commentSnip = item.comment ? `<div class="comment-snippet">"${escapeHtml(String(item.comment).slice(0, 60))}${item.comment.length > 60 ? '…' : ''}"</div>` : '';
+        const addressHtml = item.address
+          ? `<div class="meta">${escapeHtml(item.address)}<button class="copy-inline" data-copy="${escapeHtml(item.address)}" title="Adresse kopieren">📋</button></div>`
+          : `<div class="meta">Keine Adresse</div>`;
         div.innerHTML = `
+          <button class="done-check ${item.done ? 'checked' : ''}" data-done-id="${item.id}" title="${item.done ? 'Als nicht erledigt markieren' : 'Als erledigt markieren'}">${item.done ? '✓' : ''}</button>
           <div style="flex:1; min-width:0;">
             <div class="name">${escapeHtml(item.name)}</div>
-            <div class="meta">${escapeHtml(item.address || 'Keine Adresse')}</div>
+            ${addressHtml}
             ${item.openingHours ? `<div class="meta">🕓 ${escapeHtml(item.openingHours)}</div>` : ''}
+            ${stars}
+            ${commentSnip}
             <div class="by">von ${escapeHtml(item.addedBy || 'Unbekannt')}</div>
           </div>
           <div class="right">${dateBadge}</div>
         `;
-        div.addEventListener('click', () => showDetail(item.id));
+        // Haupt-Klick öffnet Detail (außer auf done-Button oder copy-Button)
+        div.addEventListener('click', (e) => {
+          if (e.target.closest('.done-check')) return;
+          if (e.target.closest('.copy-inline')) return;
+          showDetail(item.id);
+        });
+        // Done-Button
+        div.querySelector('.done-check').addEventListener('click', (e) => {
+          e.stopPropagation();
+          toggleDone(item.id);
+        });
+        // Copy-Button
+        const copyBtn = div.querySelector('.copy-inline');
+        if (copyBtn) {
+          copyBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            copyToClipboard(copyBtn.dataset.copy);
+          });
+        }
         body.appendChild(div);
       });
     }
     container.appendChild(section);
   });
+}
+
+function toggleDone(id) {
+  const item = T().items.find(i => i.id === id);
+  if (!item) return;
+  item.done = !item.done;
+  item.doneAt = item.done ? Date.now() : undefined;
+  item.updatedAt = Date.now();
+  if (item.done && !item.rating) {
+    // Beim ersten Haken direkt fragen: Wie wars? (optional)
+    setTimeout(() => showDetail(id, true), 100);
+  }
+  saveState();
+  renderList();
+}
+
+function renderCountryPanel(container) {
+  const trip = T();
+  if (!trip.country) return;
+  const info = findCountry(trip.country);
+  if (!info) return;
+  const panel = document.createElement('div');
+  panel.className = 'country-panel';
+  const driveClass = /links/i.test(info.drive) ? 'cp-drive-left' : '';
+  panel.innerHTML = `
+    <h3>🌍 Reiseinfos ${escapeHtml(info.name)}</h3>
+    <div class="cp-row"><strong>Steckdose</strong><span>${escapeHtml(info.plug)} · ${escapeHtml(info.volt)}</span></div>
+    <div class="cp-row"><strong>Verkehr</strong><span class="${driveClass}">Fährt ${escapeHtml(info.drive)}</span></div>
+    <div class="cp-row"><strong>Währung</strong><span>${escapeHtml(info.curr)}</span></div>
+    <div class="cp-row"><strong>Sprache</strong><span>${escapeHtml(info.lang)}</span></div>
+    <div class="cp-row"><strong>Trinkgeld</strong><span>${escapeHtml(info.tip)}</span></div>
+    <div class="cp-row"><strong>Reservierung</strong><span>${escapeHtml(info.reserv)}</span></div>
+    <div class="cp-row"><strong>Notruf</strong><span>${escapeHtml(info.emergency)}</span></div>
+    ${info.extra ? `<div class="cp-extra">💡 ${escapeHtml(info.extra)}</div>` : ''}
+  `;
+  container.appendChild(panel);
+}
+
+function renderCityRepeatSuggestions(container) {
+  if (!suggestionsEnabled) return;
+  const trip = T();
+  if (!trip.city) return;
+  const cityKey = trip.city.toLowerCase().split(/[,\s]+/)[0]; // erster Teil der Stadt
+  if (!cityKey || cityKey.length < 3) return;
+  // Andere Reisen finden, die dieselbe Stadt haben
+  const others = allTrips().filter(t => {
+    if (!t || t.id === trip.id || !t.city) return false;
+    const otherKey = t.city.toLowerCase().split(/[,\s]+/)[0];
+    return otherKey === cityKey;
+  });
+  if (others.length === 0) return;
+  // Items sammeln, die auf dieser Reise NICHT existieren (nach Namen-Match)
+  const existingNames = new Set(trip.items.map(i => i.name.toLowerCase().trim()));
+  const candidates = [];
+  const seen = new Set();
+  others.forEach(t => {
+    (t.items || []).forEach(it => {
+      const key = (it.name || '').toLowerCase().trim();
+      if (!key || existingNames.has(key) || seen.has(key)) return;
+      seen.add(key);
+      candidates.push({ name: it.name, category: it.category, address: it.address || '',
+        lat: it.lat || null, lng: it.lng || null, rating: it.rating || 0,
+        fromTrip: t.name || t.city });
+    });
+  });
+  if (candidates.length === 0) return;
+  // Top 6 nach Rating
+  candidates.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+  const top = candidates.slice(0, 6);
+  const wrap = document.createElement('div');
+  wrap.className = 'smart-suggestions';
+  wrap.innerHTML = `
+    <div class="ss-head">🔁 Aus früheren Besuchen in <strong>${escapeHtml(trip.city.split(',')[0])}</strong></div>
+    <div class="ss-sub">${candidates.length} Orte aus ${others.length} vorherigen Reisen – tippe zum Hinzufügen:</div>
+    <div class="ss-chips"></div>
+  `;
+  const chipWrap = wrap.querySelector('.ss-chips');
+  top.forEach(s => {
+    const chip = document.createElement('button');
+    chip.className = 'ss-chip';
+    chip.innerHTML = `${CATEGORIES[s.category]?.icon || '📌'} ${escapeHtml(s.name)}${s.rating ? ` <span class="ss-rate">${'★'.repeat(s.rating)}</span>` : ''}`;
+    chip.title = `Aus: ${s.fromTrip}`;
+    chip.addEventListener('click', () => {
+      const now = Date.now();
+      trip.items.push({
+        id: uid(), name: s.name, category: s.category, address: s.address,
+        lat: s.lat, lng: s.lng, notes: '', addedBy: myName || 'Ich',
+        scheduledDate: '', scheduledTime: '', createdAt: now, updatedAt: now
+      });
+      saveState();
+      renderList();
+      if (currentView === 'map') renderMap();
+      toast(`"${s.name}" hinzugefügt ✓`);
+    });
+    chipWrap.appendChild(chip);
+  });
+  container.appendChild(wrap);
+}
+
+function renderAccommodationsShort(container) {
+  const acc = T().accommodations || [];
+  if (acc.length === 0) return;
+  const wrap = document.createElement('div');
+  wrap.className = 'category';
+  wrap.innerHTML = `
+    <h2>🏨 Unterkunft <span class="badge">${acc.length}</span></h2>
+    <div class="accom-list" id="accom-short-list"></div>
+  `;
+  const list = wrap.querySelector('#accom-short-list');
+  acc.forEach(a => {
+    const row = document.createElement('div');
+    row.className = 'accom-row';
+    row.innerHTML = `
+      <div style="flex:1; min-width:0;">
+        <div class="name">${escapeHtml(a.name || 'Unterkunft')}</div>
+        ${a.address ? `<div class="meta">${escapeHtml(a.address)}<button class="copy-inline" data-copy="${escapeHtml(a.address)}" title="Adresse kopieren">📋</button></div>` : ''}
+        ${a.start || a.end ? `<div class="meta">${a.start ? fmtDate(a.start) : ''}${a.end ? ' – ' + fmtDate(a.end) : ''}</div>` : ''}
+      </div>
+      <div class="actions">
+        <button class="copy-inline" data-edit="${a.id}">✏️</button>
+      </div>
+    `;
+    const copyBtn = row.querySelector('[data-copy]');
+    if (copyBtn) copyBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      copyToClipboard(copyBtn.dataset.copy);
+    });
+    row.querySelector('[data-edit]').addEventListener('click', () => openAccomModal(a.id));
+    list.appendChild(row);
+  });
+  const addBtn = document.createElement('button');
+  addBtn.className = 'btn secondary';
+  addBtn.style.cssText = 'width:100%; margin-top:6px;';
+  addBtn.textContent = '+ Weitere Unterkunft';
+  addBtn.addEventListener('click', () => openAccomModal(null));
+  wrap.appendChild(addBtn);
+  container.appendChild(wrap);
 }
 
 function escapeHtml(s) {
@@ -1247,13 +1803,17 @@ function escapeHtml(s) {
 }
 
 // ============ Detail view ============
-function showDetail(id) {
+function showDetail(id, scrollToRating) {
   const item = T().items.find(i => i.id === id);
   if (!item) return;
   const cat = CATEGORIES[item.category];
   const content = document.getElementById('detail-content');
+  const currentRating = item.rating || 0;
+  const starsHtml = [1,2,3,4,5].map(n =>
+    `<span class="star ${n <= currentRating ? 'active' : ''}" data-rate="${n}">★</span>`
+  ).join('');
   content.innerHTML = `
-    <h3>${cat.icon} ${escapeHtml(item.name)}</h3>
+    <h3>${cat.icon} ${escapeHtml(item.name)}${item.done ? ' <span style="font-size:14px; color:#10b981;">✓ erledigt</span>' : ''}</h3>
     <div class="detail-section">
       <div class="lbl">Kategorie</div>
       <div class="val">${cat.label}</div>
@@ -1261,7 +1821,7 @@ function showDetail(id) {
     ${item.address ? `
     <div class="detail-section">
       <div class="lbl">Adresse</div>
-      <div class="val">${escapeHtml(item.address)}</div>
+      <div class="val">${escapeHtml(item.address)} <button class="copy-inline" id="d-copy-addr" data-copy="${escapeHtml(item.address)}">📋 Kopieren</button></div>
     </div>` : ''}
     ${item.openingHours ? `
     <div class="detail-section">
@@ -1283,6 +1843,15 @@ function showDetail(id) {
       <div class="lbl">Notiz</div>
       <div class="val">${escapeHtml(item.notes)}</div>
     </div>` : ''}
+    <div class="detail-section" id="rating-section">
+      <div class="lbl">Deine Bewertung ${item.done ? '' : '(nach dem Besuch)'}</div>
+      <div class="rating-picker">${starsHtml}</div>
+      <label>Kommentar fürs nächste Mal</label>
+      <textarea id="d-comment" placeholder="z.B. Sehr lecker, aber laut. Tisch am Fenster vorher reservieren.">${escapeHtml(item.comment || '')}</textarea>
+      <div class="modal-actions" style="margin-top:6px;">
+        <button class="btn secondary" id="d-save-review" style="width:100%;">Bewertung speichern</button>
+      </div>
+    </div>
     <div class="detail-section">
       <div class="lbl">Hinzugefügt von</div>
       <div class="val">${escapeHtml(item.addedBy || 'Unbekannt')}</div>
@@ -1295,6 +1864,9 @@ function showDetail(id) {
       </a>
     </div>` : ''}
     <div class="modal-actions">
+      <button class="btn secondary" id="d-toggle-done">${item.done ? '○ Als nicht erledigt markieren' : '✓ Als erledigt markieren'}</button>
+    </div>
+    <div class="modal-actions">
       <button class="btn secondary" id="d-close">Schließen</button>
       <button class="btn secondary" id="d-edit">Bearbeiten</button>
     </div>
@@ -1305,6 +1877,36 @@ function showDetail(id) {
   document.getElementById('detail-modal').classList.add('open');
   document.getElementById('d-close').onclick = () => closeModal('detail-modal');
   document.getElementById('d-edit').onclick = () => { closeModal('detail-modal'); openAddModal(item.id); };
+  // Sterne klickbar
+  let tempRating = currentRating;
+  content.querySelectorAll('.rating-picker .star').forEach(starEl => {
+    starEl.addEventListener('click', () => {
+      const n = parseInt(starEl.dataset.rate);
+      tempRating = (tempRating === n) ? 0 : n; // zweimaliges Tippen auf gleichen Stern = zurücksetzen
+      content.querySelectorAll('.rating-picker .star').forEach(s => {
+        s.classList.toggle('active', parseInt(s.dataset.rate) <= tempRating);
+      });
+    });
+  });
+  document.getElementById('d-save-review').onclick = () => {
+    item.rating = tempRating;
+    item.comment = document.getElementById('d-comment').value.trim();
+    item.updatedAt = Date.now();
+    saveState();
+    toast('Bewertung gespeichert ✓');
+    renderList();
+  };
+  document.getElementById('d-toggle-done').onclick = () => {
+    item.done = !item.done;
+    item.doneAt = item.done ? Date.now() : undefined;
+    item.updatedAt = Date.now();
+    saveState();
+    closeModal('detail-modal');
+    renderList();
+    toast(item.done ? '✓ Erledigt' : 'Wieder offen');
+  };
+  const copyBtn = document.getElementById('d-copy-addr');
+  if (copyBtn) copyBtn.onclick = () => copyToClipboard(copyBtn.dataset.copy);
   document.getElementById('d-delete').onclick = () => {
     if (confirm('Eintrag wirklich löschen?')) {
       tombstoneItem(id);
@@ -1313,10 +1915,13 @@ function showDetail(id) {
       toast('Eintrag gelöscht');
     }
   };
+  if (scrollToRating) {
+    setTimeout(() => document.getElementById('rating-section')?.scrollIntoView({behavior:'smooth', block:'center'}), 200);
+  }
 }
 
 // ============ Add / Edit modal ============
-function openAddModal(editId=null) {
+function openAddModal(editId=null, presetCategory=null) {
   editingItemId = editId;
   selectedPlace = null;
   const modal = document.getElementById('add-modal');
@@ -1325,15 +1930,31 @@ function openAddModal(editId=null) {
   document.getElementById('search-input').value = '';
   document.getElementById('search-results').innerHTML = '';
   document.getElementById('item-name').value = item?.name || '';
-  document.getElementById('item-category').value = item?.category || 'sight';
+  document.getElementById('item-category').value = item?.category || presetCategory || 'sight';
   document.getElementById('item-address').value = item?.address || '';
   document.getElementById('item-date').value = item?.scheduledDate || '';
   document.getElementById('item-time').value = item?.scheduledTime || '';
   document.getElementById('item-notes').value = item?.notes || '';
-  if (item) selectedPlace = { lat: item.lat, lng: item.lng, openingHours: item.openingHours, website: item.website };
+  // Buy-Link Dropdown populieren (alle Shop-Items der aktuellen Reise)
+  const buyLink = document.getElementById('item-buy-link');
+  buyLink.innerHTML = '<option value="">— Kein Laden —</option>';
+  T().items.filter(i => i.category === 'shop').forEach(shop => {
+    const opt = document.createElement('option');
+    opt.value = shop.id; opt.textContent = shop.name;
+    if (item?.linkedShopId === shop.id) opt.selected = true;
+    buyLink.appendChild(opt);
+  });
+  toggleBuyLinkVisibility();
   modal.classList.add('open');
   setTimeout(() => document.getElementById('search-input').focus(), 100);
 }
+function toggleBuyLinkVisibility() {
+  const cat = document.getElementById('item-category').value;
+  const show = cat === 'buy' && T().items.some(i => i.category === 'shop');
+  document.getElementById('buy-link-label').style.display = show ? '' : 'none';
+  document.getElementById('item-buy-link').style.display = show ? '' : 'none';
+}
+document.getElementById('item-category').addEventListener('change', toggleBuyLinkVisibility);
 
 document.getElementById('fab').addEventListener('click', () => {
   if (currentView === 'packlist') openPackModal();
@@ -1429,11 +2050,14 @@ document.getElementById('save-item').addEventListener('click', () => {
   const scheduledDate = document.getElementById('item-date').value;
   const scheduledTime = document.getElementById('item-time').value;
   const notes = document.getElementById('item-notes').value.trim();
+  const linkedShopId = (category === 'buy')
+    ? (document.getElementById('item-buy-link').value || '')
+    : '';
 
   if (editingItemId) {
     const item = T().items.find(i => i.id === editingItemId);
     if (item) {
-      Object.assign(item, { name, category, address, scheduledDate, scheduledTime, notes, updatedAt: Date.now() });
+      Object.assign(item, { name, category, address, scheduledDate, scheduledTime, notes, linkedShopId, updatedAt: Date.now() });
       if (selectedPlace) {
         if (selectedPlace.lat) { item.lat = selectedPlace.lat; item.lng = selectedPlace.lng; }
         if (selectedPlace.openingHours !== undefined) item.openingHours = selectedPlace.openingHours;
@@ -1448,7 +2072,8 @@ document.getElementById('save-item').addEventListener('click', () => {
       openingHours: selectedPlace?.openingHours || '',
       website: selectedPlace?.website || '',
       notes, addedBy: myName || 'Ich',
-      scheduledDate, scheduledTime, createdAt: now, updatedAt: now
+      scheduledDate, scheduledTime, linkedShopId,
+      createdAt: now, updatedAt: now
     };
     T().items.push(newItem);
   }
@@ -1467,6 +2092,9 @@ document.querySelectorAll('.modal-backdrop').forEach(m => {
 });
 
 // ============ Calendar view ============
+let draggedItemId = null;
+let draggedEventId = null;
+
 function renderCalendar() {
   const container = document.getElementById('calendar-container');
   container.innerHTML = '';
@@ -1487,53 +2115,182 @@ function renderCalendar() {
   header.className = 'cal-header';
   header.innerHTML = `
     <div class="range">${fmtDate(start)} – ${fmtDate(end)}</div>
-    <button id="cal-settings-btn">Zeitraum ändern</button>
+    <div style="display:flex; gap:6px; flex-wrap:wrap;">
+      <button id="cal-add-event">✈️ Flug/Zug</button>
+      <button id="cal-settings-btn">Zeitraum</button>
+    </div>
   `;
   container.appendChild(header);
-  header.querySelector('#cal-settings-btn').onclick = () => openSettings();
+  header.querySelector('#cal-settings-btn').onclick = () => openTripEdit(state.currentTripId);
+  header.querySelector('#cal-add-event').onclick = () => openEventModal(null);
 
-  // Unassigned
+  // Pool: nicht geplante Items, geclustert nach Kategorie (Drag-Quelle)
   const unassigned = T().items.filter(i => !i.scheduledDate);
-  if (unassigned.length > 0) {
-    const u = document.createElement('div');
-    u.className = 'cal-unassigned';
-    u.innerHTML = `<strong>📝 Nicht geplant (${unassigned.length})</strong>
-      <div style="font-size:12px; color:var(--text-muted);">
-        Tippe auf einen Eintrag in der Liste, um ihn einem Tag zuzuweisen.
-      </div>`;
-    container.appendChild(u);
+  const pool = document.createElement('div');
+  pool.className = 'cal-pool';
+  pool.innerHTML = `
+    <h4>📝 Nicht geplant <span style="color:var(--text-muted); font-weight:400;">${unassigned.length} · Drag &amp; Drop oder tippen</span></h4>
+    <div class="cal-pool-body"></div>
+  `;
+  const poolBody = pool.querySelector('.cal-pool-body');
+  if (unassigned.length === 0) {
+    poolBody.innerHTML = '<div class="cal-pool-empty">Alles eingeplant ✓</div>';
+  } else {
+    const grouped = {};
+    unassigned.forEach(it => {
+      (grouped[it.category] = grouped[it.category] || []).push(it);
+    });
+    Object.entries(grouped).forEach(([cat, list]) => {
+      const catBox = document.createElement('div');
+      catBox.className = 'cal-pool-cat';
+      catBox.innerHTML = `<div class="cal-pool-cat-label">${CATEGORIES[cat]?.icon || '📌'} ${CATEGORIES[cat]?.label || cat} · ${list.length}</div>
+        <div class="cal-pool-chips"></div>`;
+      const chipBox = catBox.querySelector('.cal-pool-chips');
+      list.forEach(it => {
+        const chip = document.createElement('div');
+        chip.className = 'cal-chip ' + catClass(it.category);
+        chip.setAttribute('draggable', 'true');
+        chip.dataset.itemId = it.id;
+        chip.innerHTML = `${CATEGORIES[it.category]?.icon || '📌'} ${escapeHtml(it.name)}`;
+        chip.addEventListener('dragstart', (e) => {
+          draggedItemId = it.id;
+          draggedEventId = null;
+          chip.classList.add('dragging');
+          e.dataTransfer.effectAllowed = 'move';
+          try { e.dataTransfer.setData('text/plain', it.id); } catch(_) {}
+        });
+        chip.addEventListener('dragend', () => {
+          chip.classList.remove('dragging');
+          draggedItemId = null;
+        });
+        chip.addEventListener('click', () => assignItemToDayPrompt(it.id, start, end));
+        chipBox.appendChild(chip);
+      });
+      poolBody.appendChild(catBox);
+    });
   }
+  container.appendChild(pool);
 
-  // Days
+  // Kalender-Tage
   const cur = new Date(start);
+  const events = T().events || [];
   while (cur <= end) {
     const iso = cur.toISOString().slice(0,10);
     const dayItems = T().items
       .filter(i => i.scheduledDate === iso)
       .sort((a,b) => (a.scheduledTime || 'zz').localeCompare(b.scheduledTime || 'zz'));
+    const dayEvents = events.filter(e => e.date === iso)
+      .sort((a,b) => (a.time || 'zz').localeCompare(b.time || 'zz'));
+    const dayAcc = (T().accommodations || []).filter(a => {
+      if (!a.start) return false;
+      const s = a.start, e = a.end || a.start;
+      return iso >= s && iso <= e;
+    });
+
     const day = document.createElement('div');
     day.className = 'cal-day';
+    day.dataset.date = iso;
     const isToday = cur.getTime() === today.getTime();
+    const totalCount = dayItems.length + dayEvents.length;
     day.innerHTML = `
       <div class="d-head${isToday ? ' today' : ''}">
         ${cur.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: 'long' })}
-        <small>${dayItems.length} Einträge</small>
+        <small>${totalCount} Einträge</small>
       </div>
       <div class="d-items"></div>
     `;
+    day.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      day.classList.add('drop-hover');
+      if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+    });
+    day.addEventListener('dragleave', () => day.classList.remove('drop-hover'));
+    day.addEventListener('drop', (e) => {
+      e.preventDefault();
+      day.classList.remove('drop-hover');
+      if (draggedItemId) {
+        const it = T().items.find(i => i.id === draggedItemId);
+        if (it) {
+          it.scheduledDate = iso;
+          it.updatedAt = Date.now();
+          saveState();
+          renderCalendar();
+          renderList();
+          toast(`"${it.name}" → ${fmtDate(new Date(iso))}`);
+        }
+        draggedItemId = null;
+      } else if (draggedEventId) {
+        const ev = (T().events || []).find(x => x.id === draggedEventId);
+        if (ev) {
+          ev.date = iso; ev.updatedAt = Date.now();
+          saveState();
+          renderCalendar();
+        }
+        draggedEventId = null;
+      }
+    });
+
     const body = day.querySelector('.d-items');
-    if (dayItems.length === 0) {
-      body.innerHTML = '<div class="d-empty">nichts geplant</div>';
+    if (totalCount === 0 && dayAcc.length === 0) {
+      body.innerHTML = '<div class="d-empty">nichts geplant — hier her ziehen</div>';
     } else {
+      // Übernachtung-Chip (nicht draggable, nur Info)
+      dayAcc.forEach(a => {
+        const row = document.createElement('div');
+        row.className = 'cal-item cal-accom';
+        row.innerHTML = `
+          <span class="time">🏨</span>
+          <span style="flex:1; font-size:12px; color:var(--primary-dark);">
+            ${escapeHtml(a.name || 'Unterkunft')}
+          </span>`;
+        row.addEventListener('click', () => openAccomModal(a.id));
+        body.appendChild(row);
+      });
+      // Events (Flüge/Züge)
+      dayEvents.forEach(ev => {
+        const row = document.createElement('div');
+        row.className = 'cal-item cal-event';
+        row.setAttribute('draggable', 'true');
+        row.dataset.eventId = ev.id;
+        const icon = EVENT_ICONS[ev.type] || '📌';
+        row.innerHTML = `
+          <span class="time">${ev.time || '—'}</span>
+          <span class="cat-dot" style="background:#0284c7;"></span>
+          <span style="flex:1;">${icon} ${escapeHtml(ev.title || ev.type)}${ev.from || ev.to ? ` <small style="color:var(--text-muted);">${escapeHtml(ev.from || '')} → ${escapeHtml(ev.to || '')}</small>` : ''}</span>
+        `;
+        row.addEventListener('dragstart', (e) => {
+          draggedEventId = ev.id; draggedItemId = null;
+          row.classList.add('dragging');
+          try { e.dataTransfer.setData('text/plain', ev.id); } catch(_) {}
+        });
+        row.addEventListener('dragend', () => {
+          row.classList.remove('dragging');
+          draggedEventId = null;
+        });
+        row.addEventListener('click', (e) => { if (!row.classList.contains('dragging')) openEventModal(ev.id); });
+        body.appendChild(row);
+      });
+      // Normale Items
       dayItems.forEach(it => {
         const row = document.createElement('div');
-        row.className = 'cal-item';
+        row.className = 'cal-item' + (it.done ? ' done' : '');
+        row.setAttribute('draggable', 'true');
+        row.dataset.itemId = it.id;
         row.innerHTML = `
           <span class="time">${it.scheduledTime || '—'}</span>
           <span class="cat-dot ${catClass(it.category)}"></span>
           <span style="flex:1;">${escapeHtml(it.name)}</span>
         `;
-        row.addEventListener('click', () => showDetail(it.id));
+        row.addEventListener('dragstart', (e) => {
+          draggedItemId = it.id; draggedEventId = null;
+          row.classList.add('dragging');
+          try { e.dataTransfer.setData('text/plain', it.id); } catch(_) {}
+        });
+        row.addEventListener('dragend', () => {
+          row.classList.remove('dragging');
+          draggedItemId = null;
+        });
+        row.addEventListener('click', (e) => { if (!row.classList.contains('dragging')) showDetail(it.id); });
         body.appendChild(row);
       });
     }
@@ -1541,6 +2298,92 @@ function renderCalendar() {
     cur.setDate(cur.getDate() + 1);
   }
 }
+
+const EVENT_ICONS = { flight: '✈️', train: '🚆', transfer: '🚕', other: '📌' };
+
+// Item per Klick (statt Drag) einem Tag zuweisen: öffnet Kurz-Prompt
+function assignItemToDayPrompt(itemId, start, end) {
+  const days = [];
+  const cur = new Date(start);
+  while (cur <= end) {
+    days.push(cur.toISOString().slice(0,10));
+    cur.setDate(cur.getDate() + 1);
+  }
+  const labels = days.map(d => {
+    const dt = new Date(d);
+    return `${dt.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' })}`;
+  });
+  const choice = prompt(`Welchem Tag zuweisen? (1-${days.length}):\n` +
+    labels.map((l, i) => `${i+1}. ${l}`).join('\n'));
+  const idx = parseInt(choice, 10) - 1;
+  if (idx >= 0 && idx < days.length) {
+    const it = T().items.find(i => i.id === itemId);
+    if (it) {
+      it.scheduledDate = days[idx];
+      it.updatedAt = Date.now();
+      saveState();
+      renderCalendar();
+      renderList();
+      toast(`→ ${labels[idx]}`);
+    }
+  }
+}
+
+// ============ Event (Flug/Zug) Modal ============
+let editingEventId = null;
+function openEventModal(editId) {
+  editingEventId = editId || null;
+  const ev = editId ? (T().events || []).find(e => e.id === editId) : null;
+  document.getElementById('event-modal-title').textContent = editId ? '✈️ Eintrag bearbeiten' : '✈️ Flug/Zug/Transfer';
+  document.getElementById('event-type').value = ev?.type || 'flight';
+  document.getElementById('event-title').value = ev?.title || '';
+  document.getElementById('event-date').value = ev?.date || (T().start || '');
+  document.getElementById('event-time').value = ev?.time || '';
+  document.getElementById('event-from').value = ev?.from || '';
+  document.getElementById('event-to').value = ev?.to || '';
+  document.getElementById('event-notes').value = ev?.notes || '';
+  document.getElementById('event-delete-wrap').style.display = editId ? 'flex' : 'none';
+  document.getElementById('event-modal').classList.add('open');
+  setTimeout(() => document.getElementById('event-title').focus(), 100);
+}
+document.getElementById('event-cancel').addEventListener('click', () => closeModal('event-modal'));
+document.getElementById('event-save').addEventListener('click', () => {
+  const type = document.getElementById('event-type').value;
+  const title = document.getElementById('event-title').value.trim();
+  const date = document.getElementById('event-date').value;
+  const time = document.getElementById('event-time').value;
+  const from = document.getElementById('event-from').value.trim();
+  const to = document.getElementById('event-to').value.trim();
+  const notes = document.getElementById('event-notes').value.trim();
+  if (!title && !from && !to) { toast('Bitte Titel oder Von/Nach'); return; }
+  if (!date) { toast('Bitte Datum wählen'); return; }
+  if (!Array.isArray(T().events)) T().events = [];
+  if (editingEventId) {
+    const ev = T().events.find(e => e.id === editingEventId);
+    if (ev) Object.assign(ev, { type, title, date, time, from, to, notes, updatedAt: Date.now() });
+  } else {
+    const now = Date.now();
+    T().events.push({ id: uid(), type, title, date, time, from, to, notes,
+      addedBy: myName || 'Ich', createdAt: now, updatedAt: now });
+  }
+  saveState();
+  closeModal('event-modal');
+  if (currentView === 'calendar') renderCalendar();
+  toast(editingEventId ? 'Gespeichert ✓' : 'Hinzugefügt ✓');
+  editingEventId = null;
+});
+document.getElementById('event-delete').addEventListener('click', () => {
+  if (!editingEventId) return;
+  if (confirm('Eintrag wirklich löschen?')) {
+    tombstoneEvent(editingEventId);
+    T().events = (T().events || []).filter(e => e.id !== editingEventId);
+    saveState();
+    closeModal('event-modal');
+    renderCalendar();
+    toast('Gelöscht');
+    editingEventId = null;
+  }
+});
 
 // ============ Map view ============
 function initMap() {
@@ -1556,21 +2399,24 @@ function renderMap() {
   if (!map) return;
   markers.forEach(m => map.removeLayer(m));
   markers = [];
+  accomMarkers.forEach(m => map.removeLayer(m));
+  accomMarkers = [];
   const bounds = [];
   T().items.forEach(item => {
     if (!item.lat || !item.lng) return;
     const color = catColor(item.category);
+    const dimmed = item.done ? 'opacity:0.45; filter:grayscale(0.5);' : '';
     const icon = L.divIcon({
       className: 'custom-marker',
       html: `<div style="background:${color}; width:22px; height:22px; border-radius:50%;
-             border:3px solid white; box-shadow:0 2px 6px rgba(0,0,0,0.3);
+             border:3px solid white; box-shadow:0 2px 6px rgba(0,0,0,0.3); ${dimmed}
              display:flex; align-items:center; justify-content:center; font-size:11px;">
              ${CATEGORIES[item.category].icon}</div>`,
       iconSize: [22, 22], iconAnchor: [11, 11]
     });
     const m = L.marker([item.lat, item.lng], { icon }).addTo(map);
     const popup = `<div style="min-width:180px;">
-        <strong>${escapeHtml(item.name)}</strong><br/>
+        <strong>${escapeHtml(item.name)}</strong>${item.done ? ' ✓' : ''}<br/>
         <span style="color:#666; font-size:12px;">${escapeHtml(item.address || '')}</span><br/>
         <span style="color:#888; font-size:11px;">von ${escapeHtml(item.addedBy || '')}</span>
       </div>`;
@@ -1578,6 +2424,27 @@ function renderMap() {
     m.on('click', () => m.openPopup());
     markers.push(m);
     bounds.push([item.lat, item.lng]);
+  });
+  // Unterkunft-Marker (größer, unterscheidbar)
+  (T().accommodations || []).forEach(a => {
+    if (!a.lat || !a.lng) return;
+    const icon = L.divIcon({
+      className: 'custom-marker accom-marker',
+      html: `<div style="background:#0ea5e9; width:30px; height:30px; border-radius:50% 50% 50% 0;
+             transform: rotate(-45deg); border:3px solid white; box-shadow:0 2px 8px rgba(0,0,0,0.4);
+             display:flex; align-items:center; justify-content:center; font-size:14px;">
+             <span style="transform:rotate(45deg);">🏨</span></div>`,
+      iconSize: [30, 30], iconAnchor: [15, 30]
+    });
+    const m = L.marker([a.lat, a.lng], { icon }).addTo(map);
+    const popup = `<div style="min-width:180px;">
+        <strong>🏨 ${escapeHtml(a.name || 'Unterkunft')}</strong><br/>
+        <span style="color:#666; font-size:12px;">${escapeHtml(a.address || '')}</span>
+        ${a.start ? `<br/><span style="color:#888; font-size:11px;">${escapeHtml(fmtDate(a.start))}${a.end ? ' – ' + escapeHtml(fmtDate(a.end)) : ''}</span>` : ''}
+      </div>`;
+    m.bindPopup(popup);
+    accomMarkers.push(m);
+    bounds.push([a.lat, a.lng]);
   });
   if (bounds.length > 0) {
     map.fitBounds(bounds, { padding: [50, 50], maxZoom: 15 });
@@ -1587,9 +2454,40 @@ function renderMap() {
   setTimeout(() => map.invalidateSize(), 100);
 }
 
+// Eigenen Standort auf der Karte anzeigen
+function toggleMyLocation() {
+  if (!map) return;
+  if (myLocationMarker) {
+    map.removeLayer(myLocationMarker); myLocationMarker = null;
+    toast('Standort aus');
+    return;
+  }
+  if (!navigator.geolocation) { toast('Geolocation nicht unterstützt'); return; }
+  toast('📍 Suche Standort...');
+  navigator.geolocation.getCurrentPosition(pos => {
+    const { latitude: lat, longitude: lng } = pos.coords;
+    const icon = L.divIcon({
+      className: 'my-location-marker',
+      html: `<div style="background:#3b82f6; width:18px; height:18px; border-radius:50%;
+             border:3px solid white; box-shadow:0 0 0 4px rgba(59,130,246,0.3);"></div>`,
+      iconSize: [18, 18], iconAnchor: [9, 9]
+    });
+    myLocationMarker = L.marker([lat, lng], { icon, zIndexOffset: 1000 }).addTo(map);
+    myLocationMarker.bindPopup('📍 Du bist hier');
+    map.setView([lat, lng], Math.max(map.getZoom(), 14));
+    toast('Standort gefunden ✓');
+  }, err => {
+    toast('Standort nicht verfügbar');
+    console.warn('geolocation error', err);
+  }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 });
+}
+
 // ============ Settings ============
 function openSettings() {
   document.getElementById('s-my-name').value = myName;
+  document.getElementById('s-suggestions-on').checked = suggestionsEnabled;
+  const vl = document.getElementById('version-label');
+  if (vl) vl.textContent = `TripMate v${APP_VERSION} · Schema ${SCHEMA_VERSION}`;
   document.getElementById('settings-modal').classList.add('open');
 }
 document.getElementById('settings-btn').addEventListener('click', openSettings);
@@ -1597,7 +2495,12 @@ document.getElementById('close-settings').addEventListener('click', () => closeM
 document.getElementById('save-settings').addEventListener('click', () => {
   myName = document.getElementById('s-my-name').value.trim() || 'Ich';
   localStorage.setItem('tm_my_name', myName);
+  suggestionsEnabled = !!document.getElementById('s-suggestions-on').checked;
+  localStorage.setItem('tm_suggestions', suggestionsEnabled ? '1' : '0');
   closeModal('settings-modal');
+  // Re-render aktuelle View, damit Vorschläge sofort erscheinen/verschwinden
+  if (currentView === 'packlist') renderPacklist();
+  if (currentView === 'list') renderList();
   toast('Einstellungen gespeichert ✓');
 });
 document.getElementById('reset-app').addEventListener('click', async () => {
@@ -1699,19 +2602,127 @@ document.getElementById('open-new-trip').addEventListener('click', () => {
 
 // ============ Trip-Edit ============
 let editingTripId = null;
+let tePickerState = { start: '', end: '', anchor: null }; // anchor = erstmonats-iso
+
 function openTripEdit(tripId) {
   editingTripId = tripId;
   const t = tripId ? state.trips[tripId] : null;
   document.getElementById('trip-edit-title').textContent = t ? 'Reise bearbeiten' : 'Neue Reise';
   document.getElementById('te-name').value = t ? (t.name || '') : '';
   document.getElementById('te-city').value = t ? (t.city || '') : '';
+  // Land-Dropdown befüllen
+  const countrySel = document.getElementById('te-country');
+  countrySel.innerHTML = '<option value="">— Kein Land —</option>';
+  Object.entries(COUNTRIES).forEach(([code, info]) => {
+    const opt = document.createElement('option');
+    opt.value = code; opt.textContent = `${info.name} (${code})`;
+    if (t && t.country === code) opt.selected = true;
+    countrySel.appendChild(opt);
+  });
   document.getElementById('te-start').value = t ? (t.start || '') : '';
   document.getElementById('te-end').value = t ? (t.end || '') : '';
+  // Visuellen Datepicker initialisieren
+  tePickerState.start = t?.start || '';
+  tePickerState.end = t?.end || '';
+  const anchorDate = t?.start ? new Date(t.start) : new Date();
+  tePickerState.anchor = new Date(anchorDate.getFullYear(), anchorDate.getMonth(), 1).toISOString().slice(0,10);
+  renderDatePicker();
   // Löschen nur anzeigen, wenn editieren + mehr als 1 Reise existiert (letzte Reise nicht löschbar)
   const canDelete = !!tripId && Object.keys(state.trips).length > 1;
   document.getElementById('trip-edit-delete-wrap').style.display = canDelete ? 'flex' : 'none';
   document.getElementById('trip-edit-modal').classList.add('open');
   setTimeout(() => document.getElementById('te-name').focus(), 100);
+}
+
+// Visueller Zeitraum-Picker (2 Monate nebeneinander auf Desktop, 1 auf Mobile)
+function renderDatePicker() {
+  const wrap = document.getElementById('te-date-picker');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  const anchor = new Date(tePickerState.anchor || new Date().toISOString().slice(0,10));
+  const container = document.createElement('div');
+  container.className = 'date-picker-wrap';
+  // Nav
+  const nav = document.createElement('div');
+  nav.className = 'dp-nav';
+  const prev = document.createElement('button'); prev.textContent = '‹'; prev.type = 'button';
+  const label = document.createElement('div'); label.className = 'dp-month-label';
+  label.textContent = anchor.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
+  const next = document.createElement('button'); next.textContent = '›'; next.type = 'button';
+  prev.onclick = () => {
+    const d = new Date(tePickerState.anchor);
+    d.setMonth(d.getMonth() - 1);
+    tePickerState.anchor = d.toISOString().slice(0,10);
+    renderDatePicker();
+  };
+  next.onclick = () => {
+    const d = new Date(tePickerState.anchor);
+    d.setMonth(d.getMonth() + 1);
+    tePickerState.anchor = d.toISOString().slice(0,10);
+    renderDatePicker();
+  };
+  nav.append(prev, label, next);
+  container.appendChild(nav);
+  // Grid
+  const grid = document.createElement('div'); grid.className = 'dp-grid';
+  ['Mo','Di','Mi','Do','Fr','Sa','So'].forEach(d => {
+    const el = document.createElement('div'); el.className = 'dp-dow'; el.textContent = d;
+    grid.appendChild(el);
+  });
+  const firstDay = new Date(anchor.getFullYear(), anchor.getMonth(), 1);
+  const lastDay  = new Date(anchor.getFullYear(), anchor.getMonth() + 1, 0);
+  // Wochenstart Montag = 1
+  const jsDow = firstDay.getDay();
+  const preDays = (jsDow === 0 ? 7 : jsDow) - 1;
+  // Vorheriger Monat (graue Tage)
+  for (let i = preDays; i > 0; i--) {
+    const d = new Date(firstDay); d.setDate(firstDay.getDate() - i);
+    grid.appendChild(buildDpCell(d, true));
+  }
+  for (let day = 1; day <= lastDay.getDate(); day++) {
+    const d = new Date(anchor.getFullYear(), anchor.getMonth(), day);
+    grid.appendChild(buildDpCell(d, false));
+  }
+  // Auffüllen auf 6 Wochen (42 Zellen)
+  const used = preDays + lastDay.getDate();
+  const after = (Math.ceil(used / 7) * 7) - used;
+  for (let i = 1; i <= after; i++) {
+    const d = new Date(lastDay); d.setDate(lastDay.getDate() + i);
+    grid.appendChild(buildDpCell(d, true));
+  }
+  container.appendChild(grid);
+  wrap.appendChild(container);
+}
+
+function buildDpCell(d, otherMonth) {
+  const iso = d.toISOString().slice(0,10);
+  const cell = document.createElement('div');
+  cell.className = 'dp-cell' + (otherMonth ? ' other-month' : '');
+  const today = new Date().toISOString().slice(0,10);
+  if (iso === today) cell.classList.add('today');
+  const { start, end } = tePickerState;
+  if (start && iso === start) cell.classList.add('range-start');
+  if (end && iso === end) cell.classList.add('range-end');
+  if (start && end && iso > start && iso < end) cell.classList.add('in-range');
+  cell.textContent = d.getDate();
+  cell.addEventListener('click', () => {
+    // Erste Klick: Start. Zweiter Klick: Ende (wenn >= Start), sonst Reset auf Start.
+    if (!tePickerState.start || (tePickerState.start && tePickerState.end)) {
+      tePickerState.start = iso;
+      tePickerState.end = '';
+    } else {
+      if (iso < tePickerState.start) {
+        tePickerState.end = tePickerState.start;
+        tePickerState.start = iso;
+      } else {
+        tePickerState.end = iso;
+      }
+    }
+    document.getElementById('te-start').value = tePickerState.start || '';
+    document.getElementById('te-end').value = tePickerState.end || '';
+    renderDatePicker();
+  });
+  return cell;
 }
 document.getElementById('trip-edit-cancel').addEventListener('click', () => {
   closeModal('trip-edit-modal');
@@ -1720,8 +2731,10 @@ document.getElementById('trip-edit-cancel').addEventListener('click', () => {
 document.getElementById('trip-edit-save').addEventListener('click', async () => {
   const name = document.getElementById('te-name').value.trim() || 'Meine Reise';
   const city = document.getElementById('te-city').value.trim();
+  const country = document.getElementById('te-country').value || '';
   const start = document.getElementById('te-start').value;
   const end = document.getElementById('te-end').value;
+  if (start && end && end < start) { toast('Enddatum vor Startdatum – bitte prüfen'); return; }
 
   let trip;
   if (editingTripId && state.trips[editingTripId]) {
@@ -1735,6 +2748,7 @@ document.getElementById('trip-edit-save').addEventListener('click', async () => 
   const cityChanged = city && city !== trip.city;
   trip.name = name;
   trip.city = city;
+  trip.country = country;
   trip.start = start;
   trip.end = end;
   trip._metaUpdatedAt = Date.now();
@@ -1882,29 +2896,64 @@ function renderPacklist() {
   `;
   container.appendChild(progress);
 
-  // Suggestion chips — names that are NOT already in the packlist
+  // Filter-Tabs (alle / Erwachsene / Kind)
+  const hasKidItems = list.some(p => p.forKid);
+  if (hasKidItems || packFilterKid !== 'all') {
+    const filter = document.createElement('div');
+    filter.className = 'pack-filter';
+    [['all','Alle'], ['adults','👤 Erwachsene'], ['kids','👶 Kind']].forEach(([val, lbl]) => {
+      const b = document.createElement('button');
+      b.textContent = lbl;
+      if (packFilterKid === val) b.classList.add('active');
+      b.addEventListener('click', () => { packFilterKid = val; renderPacklist(); });
+      filter.appendChild(b);
+    });
+    container.appendChild(filter);
+  }
+
+  // Smart-Suggestions: Namen, die in ≥2 anderen Reisen vorkommen
   const usedNames = new Set(list.map(p => p.name.toLowerCase()));
-  const available = PACK_SUGGESTIONS.filter(s => !usedNames.has(s.name.toLowerCase())).slice(0, 10);
-  if (available.length > 0) {
+  const smartSuggestions = suggestionsEnabled ? getSmartPackSuggestions(usedNames) : [];
+  const staticAvail = suggestionsEnabled
+    ? PACK_SUGGESTIONS.filter(s => !usedNames.has(s.name.toLowerCase())
+        && !smartSuggestions.some(x => x.name.toLowerCase() === s.name.toLowerCase())).slice(0, 10)
+    : [];
+
+  if (smartSuggestions.length > 0 || staticAvail.length > 0) {
     const sg = document.createElement('div');
     sg.className = 'pack-suggest-wrap';
     sg.innerHTML = `<strong>💡 Schnell hinzufügen</strong><div class="pack-suggest-chips"></div>`;
     const chipWrap = sg.querySelector('.pack-suggest-chips');
-    available.forEach(s => {
+    smartSuggestions.forEach(s => {
+      const chip = document.createElement('button');
+      chip.className = 'pack-chip smart';
+      chip.innerHTML = `+ ${escapeHtml(s.name)} <span class="freq">${s.freq}×</span>`;
+      chip.title = `In ${s.freq} anderen Reisen vorhanden`;
+      chip.addEventListener('click', () => quickAddPack(s.name, s.category, s.forKid));
+      chipWrap.appendChild(chip);
+    });
+    staticAvail.forEach(s => {
       const chip = document.createElement('button');
       chip.className = 'pack-chip';
       chip.textContent = `+ ${s.name}`;
-      chip.addEventListener('click', () => quickAddPack(s.name, s.category));
+      chip.addEventListener('click', () => quickAddPack(s.name, s.category, false));
       chipWrap.appendChild(chip);
     });
     container.appendChild(sg);
   }
 
+  // Filter anwenden
+  const filtered = list.filter(p => {
+    if (packFilterKid === 'kids') return !!p.forKid;
+    if (packFilterKid === 'adults') return !p.forKid;
+    return true;
+  });
+
   // Category sections
   Object.entries(PACK_CATEGORIES).forEach(([key, cat]) => {
-    const items = list.filter(p => p.category === key)
+    const items = filtered.filter(p => p.category === key)
       .sort((a, b) => (a.checked - b.checked) || (a.createdAt - b.createdAt));
-    if (items.length === 0 && total > 0) return;
+    if (items.length === 0 && filtered.length > 0) return;
     const catDone = items.filter(p => p.checked).length;
     const section = document.createElement('div');
     section.className = 'pack-cat';
@@ -1918,11 +2967,11 @@ function renderPacklist() {
     } else {
       items.forEach(it => {
         const row = document.createElement('div');
-        row.className = 'pack-item' + (it.checked ? ' checked' : '');
+        row.className = 'pack-item' + (it.checked ? ' checked' : '') + (it.forKid ? ' for-kid' : '');
         row.innerHTML = `
           <div class="pack-check">${it.checked ? '✓' : ''}</div>
           <div class="p-name">
-            ${it.qty > 1 ? `<span class="p-qty">×${it.qty}</span>` : ''}${escapeHtml(it.name)}
+            ${it.qty > 1 ? `<span class="p-qty">×${it.qty}</span>` : ''}${escapeHtml(it.name)}${it.forKid ? '<span class="kid-ico" title="Für Kind">👶</span>' : ''}
             ${it.notes ? `<div class="p-note">${escapeHtml(it.notes)}</div>` : ''}
             <div class="p-by">von ${escapeHtml(it.addedBy || 'Unbekannt')}</div>
           </div>
@@ -1938,14 +2987,46 @@ function renderPacklist() {
     container.appendChild(section);
   });
 
-  if (total === 0) {
+  if (filtered.length === 0) {
     const empty = document.createElement('div');
     empty.className = 'pack-empty';
     empty.style.textAlign = 'center';
     empty.style.padding = '40px 20px';
-    empty.innerHTML = 'Noch nichts auf der Packliste.<br/>Tipp auf <strong>+</strong> unten rechts, oder nutze die Schnell-Chips oben.';
+    if (total === 0) {
+      empty.innerHTML = 'Noch nichts auf der Packliste.<br/>Tipp auf <strong>+</strong> unten rechts, oder nutze die Schnell-Chips oben.';
+    } else {
+      empty.innerHTML = 'Keine Einträge in diesem Filter.';
+    }
     container.appendChild(empty);
   }
+}
+
+// Smart Pack-Suggestions: Items, die in mind. 2 anderen Reisen vorkommen
+function getSmartPackSuggestions(usedNames) {
+  const all = allTrips();
+  const currentId = state.currentTripId;
+  const freq = new Map(); // key=lowerName → {name, category, forKid, freq, tripIds}
+  all.forEach(t => {
+    if (!t || t.id === currentId || !Array.isArray(t.packlist)) return;
+    const seen = new Set();
+    t.packlist.forEach(p => {
+      const key = (p.name || '').toLowerCase().trim();
+      if (!key || seen.has(key)) return;
+      seen.add(key);
+      const entry = freq.get(key) || { name: p.name, category: p.category || 'other', forKid: !!p.forKid, freq: 0, votes: 0 };
+      entry.freq += 1;
+      if (p.forKid) entry.votes += 1;
+      freq.set(key, entry);
+    });
+  });
+  const result = [];
+  freq.forEach((v, k) => {
+    if (v.freq >= 2 && !usedNames.has(k)) {
+      v.forKid = v.votes >= (v.freq / 2);
+      result.push(v);
+    }
+  });
+  return result.sort((a, b) => b.freq - a.freq).slice(0, 8);
 }
 
 function togglePackCheck(id) {
@@ -1957,10 +3038,10 @@ function togglePackCheck(id) {
   renderPacklist();
 }
 
-function quickAddPack(name, category) {
+function quickAddPack(name, category, forKid = false) {
   const now = Date.now();
   T().packlist.push({
-    id: uid(), name, qty: 1, category, checked: false, notes: '',
+    id: uid(), name, qty: 1, category, checked: false, notes: '', forKid: !!forKid,
     addedBy: myName || 'Ich', createdAt: now, updatedAt: now
   });
   saveState();
@@ -1976,6 +3057,7 @@ function openPackModal(editId = null) {
   document.getElementById('pack-qty').value = item?.qty || 1;
   document.getElementById('pack-category').value = item?.category || 'clothing';
   document.getElementById('pack-notes').value = item?.notes || '';
+  document.getElementById('pack-for-kid').checked = !!item?.forKid;
   document.getElementById('pack-delete-wrap').style.display = editId ? 'flex' : 'none';
   document.getElementById('pack-modal').classList.add('open');
   setTimeout(() => document.getElementById('pack-name').focus(), 100);
@@ -1988,14 +3070,15 @@ document.getElementById('pack-save').addEventListener('click', () => {
   const qty = Math.max(1, parseInt(document.getElementById('pack-qty').value) || 1);
   const category = document.getElementById('pack-category').value;
   const notes = document.getElementById('pack-notes').value.trim();
+  const forKid = !!document.getElementById('pack-for-kid').checked;
 
   if (editingPackId) {
     const item = T().packlist.find(p => p.id === editingPackId);
-    if (item) Object.assign(item, { name, qty, category, notes, updatedAt: Date.now() });
+    if (item) Object.assign(item, { name, qty, category, notes, forKid, updatedAt: Date.now() });
   } else {
     const now = Date.now();
     T().packlist.push({
-      id: uid(), name, qty, category, checked: false, notes,
+      id: uid(), name, qty, category, checked: false, notes, forKid,
       addedBy: myName || 'Ich', createdAt: now, updatedAt: now
     });
   }
@@ -2017,6 +3100,116 @@ document.getElementById('pack-delete').addEventListener('click', () => {
     editingPackId = null;
   }
 });
+
+// ============ Unterkunft (Accommodation) Modal ============
+let editingAccomId = null;
+let accomSelectedPlace = null;
+let accomSearchTimeout = null;
+
+function openAccomModal(editId) {
+  editingAccomId = editId || null;
+  accomSelectedPlace = null;
+  const item = editId ? (T().accommodations || []).find(a => a.id === editId) : null;
+  document.getElementById('accom-modal-title').textContent = editId ? '🏨 Unterkunft bearbeiten' : '🏨 Unterkunft hinzufügen';
+  document.getElementById('accom-name').value = item?.name || '';
+  document.getElementById('accom-address').value = item?.address || '';
+  document.getElementById('accom-start').value = item?.start || '';
+  document.getElementById('accom-end').value = item?.end || '';
+  document.getElementById('accom-notes').value = item?.notes || '';
+  document.getElementById('accom-search').value = '';
+  document.getElementById('accom-search-results').innerHTML = '';
+  document.getElementById('accom-delete-wrap').style.display = editId ? 'flex' : 'none';
+  document.getElementById('accom-modal').classList.add('open');
+  setTimeout(() => document.getElementById('accom-name').focus(), 100);
+}
+
+document.getElementById('accom-cancel').addEventListener('click', () => closeModal('accom-modal'));
+
+document.getElementById('accom-search').addEventListener('input', (e) => {
+  const q = e.target.value.trim();
+  clearTimeout(accomSearchTimeout);
+  const resultsEl = document.getElementById('accom-search-results');
+  if (q.length < 3) { resultsEl.innerHTML = ''; return; }
+  resultsEl.innerHTML = '<div class="search-loading">Suche...</div>';
+  accomSearchTimeout = setTimeout(async () => {
+    try {
+      const near = T().city ? `, ${T().city}` : '';
+      const url = `https://nominatim.openstreetmap.org/search?format=json&limit=5&addressdetails=1&q=${encodeURIComponent(q + near)}`;
+      const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+      const data = await res.json();
+      if (data.length === 0) {
+        resultsEl.innerHTML = '<div class="search-loading">Nichts gefunden.</div>'; return;
+      }
+      resultsEl.innerHTML = '';
+      data.forEach(r => {
+        const div = document.createElement('div');
+        div.className = 'search-result';
+        const name = r.namedetails?.name || r.display_name.split(',')[0];
+        div.innerHTML = `<div class="r-name">${escapeHtml(name)}</div>
+                        <div class="r-addr">${escapeHtml(r.display_name)}</div>`;
+        div.addEventListener('click', () => {
+          document.getElementById('accom-name').value = document.getElementById('accom-name').value || name;
+          document.getElementById('accom-address').value = r.display_name;
+          accomSelectedPlace = { lat: parseFloat(r.lat), lng: parseFloat(r.lon) };
+          document.getElementById('accom-search-results').innerHTML = '';
+          document.getElementById('accom-search').value = '';
+          toast('Ort übernommen ✓');
+        });
+        resultsEl.appendChild(div);
+      });
+    } catch(e) {
+      resultsEl.innerHTML = '<div class="search-loading">Suche fehlgeschlagen.</div>';
+    }
+  }, 400);
+});
+
+document.getElementById('accom-save').addEventListener('click', () => {
+  const name = document.getElementById('accom-name').value.trim();
+  if (!name) { toast('Bitte Namen eingeben'); return; }
+  const address = document.getElementById('accom-address').value.trim();
+  const start = document.getElementById('accom-start').value;
+  const end = document.getElementById('accom-end').value;
+  const notes = document.getElementById('accom-notes').value.trim();
+
+  if (!Array.isArray(T().accommodations)) T().accommodations = [];
+  if (editingAccomId) {
+    const a = T().accommodations.find(x => x.id === editingAccomId);
+    if (a) {
+      Object.assign(a, { name, address, start, end, notes, updatedAt: Date.now() });
+      if (accomSelectedPlace) { a.lat = accomSelectedPlace.lat; a.lng = accomSelectedPlace.lng; }
+    }
+  } else {
+    const now = Date.now();
+    T().accommodations.push({
+      id: uid(), name, address, start, end, notes,
+      lat: accomSelectedPlace?.lat || null, lng: accomSelectedPlace?.lng || null,
+      addedBy: myName || 'Ich', createdAt: now, updatedAt: now
+    });
+  }
+  saveState();
+  closeModal('accom-modal');
+  renderList();
+  if (currentView === 'map') renderMap();
+  toast(editingAccomId ? 'Gespeichert ✓' : 'Hinzugefügt ✓');
+  editingAccomId = null;
+});
+
+document.getElementById('accom-delete').addEventListener('click', () => {
+  if (!editingAccomId) return;
+  if (confirm('Unterkunft wirklich löschen?')) {
+    tombstoneAccommodation(editingAccomId);
+    T().accommodations = (T().accommodations || []).filter(a => a.id !== editingAccomId);
+    saveState();
+    closeModal('accom-modal');
+    renderList();
+    if (currentView === 'map') renderMap();
+    toast('Gelöscht');
+    editingAccomId = null;
+  }
+});
+
+// Standort-Button auf der Karte
+document.getElementById('my-location-btn').addEventListener('click', toggleMyLocation);
 
 function importFromHash() {
   if (!location.hash.startsWith('#data=')) return;
