@@ -90,9 +90,9 @@
   header .title-caret { font-size: 12px; color: var(--text-muted); flex-shrink: 0; }
   header .actions { display: flex; gap: 6px; }
   header .icon-btn {
-    width: 38px; height: 38px; border-radius: 50%; background: var(--bg-soft);
-    display: flex; align-items: center; justify-content: center; font-size: 17px;
-    color: var(--text); transition: transform 0.15s, background 0.15s;
+    width: 42px; height: 42px; border-radius: 50%; background: var(--bg-soft);
+    display: flex; align-items: center; justify-content: center; font-size: 18px;
+    color: var(--text); transition: transform 0.15s, background 0.15s; flex-shrink: 0;
   }
   header .icon-btn:active { background: var(--border); transform: scale(0.92); }
   header .icon-btn.avatar { background: var(--primary); color: white; font-weight: 700; font-size: 14px; box-shadow: var(--shadow-pink); }
@@ -194,9 +194,10 @@
   @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
   .modal h3 { margin: 0 0 16px; font-size: 20px; font-weight: 700; letter-spacing: -0.02em; }
   .modal label { font-size: 12px; color: var(--text-muted); display: block; margin: 12px 0 6px; font-weight: 600; letter-spacing: 0.01em; }
+  /* font-size: 16px verhindert Auto-Zoom auf iOS Safari beim Fokussieren */
   .modal input, .modal select, .modal textarea {
     width: 100%; padding: 14px 14px; border: 1.5px solid var(--border);
-    border-radius: var(--radius-sm); font-size: 15px; background: var(--surface);
+    border-radius: var(--radius-sm); font-size: 16px; background: var(--surface);
     transition: border-color 0.15s, box-shadow 0.15s;
   }
   .modal input:focus, .modal select:focus, .modal textarea:focus {
@@ -275,22 +276,44 @@
 
   /* Map view */
   #map { position: absolute; inset: 0; }
+  /* Legende oben rechts — Zoom-Buttons sind oben links (Leaflet-Default) */
   .map-legend {
-    position: absolute; top: 12px; left: 12px; z-index: 500; background: white;
-    padding: 10px 12px; border-radius: var(--radius-md); font-size: 11px;
-    box-shadow: var(--shadow-md); display: flex; flex-direction: column; gap: 5px;
+    position: absolute; top: 12px; right: 12px; z-index: 500; background: white;
+    padding: 9px 11px; border-radius: var(--radius-md); font-size: 11px;
+    box-shadow: var(--shadow-md); display: flex; flex-direction: column; gap: 4px;
+    max-width: 160px;
   }
   .map-legend .lg-row { display: flex; align-items: center; gap: 8px; font-weight: 500; }
   .map-legend .lg-dot { width: 12px; height: 12px; border-radius: 50%; border: 2px solid white;
     box-shadow: 0 0 0 1px rgba(0,0,0,0.1); }
+  /* Leaflet Zoom-Buttons: größer für Mobile */
+  .leaflet-touch .leaflet-bar a,
+  .leaflet-control-zoom a {
+    width: 40px !important; height: 40px !important; line-height: 40px !important;
+    font-size: 22px !important; font-weight: 500;
+    color: var(--text) !important;
+  }
+  .leaflet-bar {
+    border-radius: 12px !important; overflow: hidden;
+    box-shadow: var(--shadow-md) !important; border: none !important;
+  }
+  .leaflet-control-attribution {
+    font-size: 10px !important; padding: 2px 6px !important; border-radius: 8px 0 0 0 !important;
+  }
+
+  /* MyLocation-Button: über dem FAB platziert, damit beide nebeneinander sichtbar sind.
+     FAB sitzt bei bottom: 80px (+safe); dieser Button sitzt bei bottom: 150px (+safe), gleiche rechte Kante. */
   .map-loc-btn {
-    position: absolute; bottom: 24px; right: 16px; z-index: 500;
-    width: 48px; height: 48px; border-radius: 50%; background: white;
+    position: fixed; right: 18px; bottom: calc(150px + var(--safe-bottom)); z-index: 500;
+    width: 48px; height: 48px; border-radius: 50%; background: white; border: none;
     box-shadow: var(--shadow-md); font-size: 22px;
     display: flex; align-items: center; justify-content: center;
     transition: transform 0.15s;
   }
   .map-loc-btn:active { background: var(--bg-soft); transform: scale(0.92); }
+  .map-loc-btn.active { background: #3b82f6; color: white; }
+  /* Nur in der Kartenansicht sichtbar */
+  body:not([data-view="map"]) .map-loc-btn { display: none; }
 
   /* Packliste view */
   .packlist-wrap { padding: 14px 14px 100px; animation: fadeIn 0.2s ease; }
@@ -348,9 +371,9 @@
   .p-name .p-note { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
   .p-name .p-by { font-size: 10.5px; color: var(--text-soft); margin-top: 3px; font-weight: 500; }
   .p-edit {
-    width: 32px; height: 32px; border-radius: 50%; color: var(--text-muted);
-    display: flex; align-items: center; justify-content: center; font-size: 14px;
-    transition: background 0.15s;
+    width: 40px; height: 40px; border-radius: 50%; color: var(--text-muted);
+    display: flex; align-items: center; justify-content: center; font-size: 16px;
+    transition: background 0.15s; flex-shrink: 0;
   }
   .p-edit:active { background: var(--bg-soft); }
   .pack-suggest-wrap {
@@ -361,7 +384,7 @@
   .pack-suggest-chips { display: flex; flex-wrap: wrap; gap: 6px; }
   .pack-chip {
     background: white; border: 1px solid #fde68a; border-radius: 999px;
-    padding: 6px 12px; font-size: 12.5px; cursor: pointer; font-weight: 500;
+    padding: 9px 14px; font-size: 13px; cursor: pointer; font-weight: 500; min-height: 36px;
     transition: transform 0.1s, background 0.15s;
   }
   .pack-chip:active { background: #fde68a; transform: scale(0.96); }
@@ -937,7 +960,7 @@ create policy "u" on trips for update using (true);</pre>
     <p style="color:var(--text-muted); font-size:13px; margin:0 0 10px;">
       Teile diesen Link mit deiner Frau. Sobald sie ihn öffnet, sieht sie deine Liste und kann ihre eigenen Punkte hinzufügen.
     </p>
-    <textarea id="share-url" readonly style="width:100%; min-height:100px; font-size:12px;"></textarea>
+    <textarea id="share-url" readonly style="width:100%; min-height:100px; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:13px; word-break:break-all;"></textarea>
     <div class="modal-actions">
       <button class="btn secondary" id="close-share">Schließen</button>
       <button class="btn primary" id="copy-share">Link kopieren</button>
@@ -1098,7 +1121,7 @@ create policy "u" on trips for update using (true);</pre>
 // ============ App-Version ============
 // Bei Schema-Änderungen SCHEMA_VERSION hochzählen + Migration ergänzen.
 // APP_VERSION ist die User-sichtbare Version.
-const APP_VERSION = '0.5.0';
+const APP_VERSION = '0.5.1';
 const SCHEMA_VERSION = 3;
 
 // ============ Constants & Demo Data ============
@@ -1759,6 +1782,8 @@ function switchView(name) {
   document.getElementById('view-' + name).classList.add('active');
   document.querySelectorAll('nav.tabs .tab').forEach(b => b.classList.toggle('active', b.dataset.view === name));
   currentView = name;
+  // Setze data-view am body, damit CSS view-spezifisch steuern kann (z.B. MyLocation-Button nur auf Karte)
+  document.body.setAttribute('data-view', name);
   if (name === 'list') renderList();
   if (name === 'calendar') renderCalendar();
   if (name === 'map') { setTimeout(() => { initMap(); renderMap(); }, 60); }
@@ -3676,6 +3701,7 @@ function showWelcomeIfNeeded() {
 }
 
 // ============ Init ============
+document.body.setAttribute('data-view', 'list');
 importFromHash();
 checkInviteInURL();
 renderHeader();

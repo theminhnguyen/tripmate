@@ -1,5 +1,5 @@
 // TripMate Service Worker — einfaches Offline-Caching
-const CACHE = 'tripmate-v0.5.0';
+const CACHE = 'tripmate-v0.5.1';
 const ASSETS = [
   './',
   './index.html',
