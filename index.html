@@ -109,6 +109,15 @@
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
   header .title-caret { font-size: 12px; color: var(--text-muted); flex-shrink: 0; }
+  /* Brand (Logo) im Header */
+  header .brand {
+    display: flex; align-items: center; gap: 8px; flex: 1;
+    font-weight: 800; font-size: 17px; letter-spacing: -0.02em; color: var(--text);
+  }
+  header .brand .brand-mark {
+    color: var(--accent); font-size: 18px; line-height: 1;
+  }
+  header .brand .brand-name { letter-spacing: -0.01em; }
   header .actions { display: flex; gap: 6px; }
   header .icon-btn {
     width: 42px; height: 42px; border-radius: 50%; background: var(--bg-soft);
@@ -1311,12 +1320,16 @@
 <body>
 <div id="app">
   <header>
-    <button class="title title-btn" id="trip-title-btn" title="Reise wechseln">
+    <div class="brand" aria-label="TripMate">
+      <span class="brand-mark">✦</span>
+      <span class="brand-name">TripMate</span>
+    </div>
+    <!-- versteckt aber für Code-Kompatibilität (saveState/openTripManager Click-Pfad) -->
+    <button class="title title-btn" id="trip-title-btn" title="Reise wechseln" style="display:none;" aria-hidden="true">
       <span class="title-texts">
         <span id="trip-name">London Trip</span>
         <small id="trip-city">London, UK</small>
       </span>
-      <span class="title-caret" aria-hidden="true">▾</span>
     </button>
     <div class="actions">
       <button class="icon-btn" id="sync-status" title="Cloud-Sync" style="display:none;">☁️</button>
@@ -2914,7 +2927,7 @@ function renderHeute() {
     btn.addEventListener('click', () => {
       const qa = btn.dataset.qa;
       if (qa === 'expense') openExpenseModal(null);
-      else if (qa === 'fx') switchView('geld');
+      else if (qa === 'fx') { geldSubTab = 'fx'; switchView('geld'); }
       else if (qa === 'safe') { switchView('mehr'); setTimeout(() => { const el = document.querySelector('[data-mehr-row="docs"]'); if (el) el.click(); }, 80); }
       else if (qa === 'email') openEmailImportModal();
     });
@@ -2982,12 +2995,13 @@ function renderGeldSub() {
   const sub = document.getElementById('geld-sub-container');
   if (!sub) return;
   sub.innerHTML = '';
+  // Im Geld-Tab sind die Panels die Hauptinhalte → IMMER expanded (skipCollapse).
   if (geldSubTab === 'expenses') {
-    renderExpensePanel(sub);
+    renderExpensePanel(sub, { skipCollapse: true });
   } else if (geldSubTab === 'fx') {
-    renderFxPanel(sub);
+    renderFxPanel(sub, { skipCollapse: true });
   } else if (geldSubTab === 'visa') {
-    renderVisaPanel(sub);
+    renderVisaPanel(sub, { skipCollapse: true });
   }
 }
 
@@ -3076,9 +3090,22 @@ function handleMehrRow(action) {
 function scrollToPanel(panelClass, fallbackView) {
   if (fallbackView) switchView(fallbackView);
   setTimeout(() => {
-    const el = document.querySelector('.' + panelClass);
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }, 120);
+    // Erst aktive View durchsuchen — sonst greift querySelector evtl. die hidden Plan-Variante
+    const activeView = document.querySelector('.view.active');
+    const el = (activeView && activeView.querySelector('.' + panelClass)) || document.querySelector('.' + panelClass);
+    if (!el) return;
+    // Falls Panel collapsed → automatisch expandieren, sonst sind die Buttons unklickbar
+    if (el.classList.contains('collapsed')) {
+      el.classList.remove('collapsed');
+      // Map section-name from panel class for localStorage cleanup
+      const sectionMap = { 'country-panel':'country', 'sos-panel':'sos', 'docs-panel':'documents', 'visa-panel':'visa', 'fx-panel':'fx', 'exp-panel':'expenses', 'itin-panel':'itinerary' };
+      const section = sectionMap[panelClass];
+      if (section) setSectionCollapsed(section, false);
+      const head = el.querySelector('.collapsible-head');
+      if (head) head.setAttribute('aria-expanded', 'true');
+    }
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 160);
 }
 function openHelp() {
   toast('Hilfe-Seite kommt in v1.1');
@@ -3185,26 +3212,20 @@ function renderList() {
     <div class="page-sub">${evCount} Termine · ${itCount} Orte · ${acCount} Hotels</div>`;
   container.appendChild(header);
 
-  // Länder-Tipps-Panel wenn Land gesetzt
+  // Länder-Tipps-Panel wenn Land gesetzt (Mehr → Reiseinfos scrollt hier hin)
   renderCountryPanel(container);
 
-  // Visa & Einreise
-  renderVisaPanel(container);
-
-  // Zentraler Reiseplan / Itinerary (chrono Aggregation)
+  // Zentraler Reiseplan / Itinerary (chrono Aggregation) — incl. Email-Import-Button
   renderItineraryPanel(container);
 
-  // Notfall-Assistent
+  // Notfall-Assistent (Mehr → SOS-Details scrollt hier hin)
   renderSosPanel(container);
 
-  // Währungsrechner (wenn Trip-Land != EUR)
-  renderFxPanel(container);
-
-  // Ausgabe-Tracker
-  renderExpensePanel(container);
-
-  // Dokumenten-Safe (AES-GCM)
+  // Dokumenten-Safe (Mehr → Safe scrollt hier hin)
   renderDocsPanel(container);
+
+  // Hinweis: FX/Expense/Visum sind jetzt EXKLUSIV im Geld-Tab,
+  // damit IDs nicht kollidieren und Buttons garantiert klickbar sind.
 
   // Unterkunfts-Kurzansicht (falls vorhanden)
   renderAccommodationsShort(container);
@@ -3542,11 +3563,31 @@ function visaStatusMeta(v) {
   }
 }
 
-function renderVisaPanel(container) {
+function renderVisaPanel(container, opts) {
+  opts = opts || {};
   const trip = T();
-  if (!trip.country) return;
+  if (!trip.country) {
+    if (opts.skipCollapse) {
+      const note = document.createElement('div');
+      note.className = 'empty-card';
+      note.style.boxShadow = 'var(--shadow-xs)';
+      note.innerHTML = `<div class="ec-icon">🌍</div><div class="ec-title">Kein Reiseland gesetzt</div><div class="ec-text">Setze ein Reiseland in den Trip-Einstellungen, um Visum-Infos anzuzeigen.</div>`;
+      container.appendChild(note);
+    }
+    return;
+  }
   const visa = findVisa(trip.country);
-  if (!visa) return;
+  if (!visa) {
+    if (opts.skipCollapse) {
+      const country = findCountry(trip.country);
+      const note = document.createElement('div');
+      note.className = 'empty-card';
+      note.style.boxShadow = 'var(--shadow-xs)';
+      note.innerHTML = `<div class="ec-icon">🛂</div><div class="ec-title">Keine Visa-Daten</div><div class="ec-text">Für ${escapeHtml(country?.name || trip.country)} liegen aktuell keine Visa-Infos in der TripMate-DB vor. Bitte direkt bei der Botschaft oder dem Auswärtigen Amt prüfen.</div>`;
+      container.appendChild(note);
+    }
+    return;
+  }
   const country = findCountry(trip.country);
   const meta = visaStatusMeta(visa);
 
@@ -3571,7 +3612,9 @@ function renderVisaPanel(container) {
     </div>
   `;
   container.appendChild(panel);
-  makeCollapsible(panel, 'visa', panel.querySelector('.v-head'), panel.querySelector('.v-body'));
+  if (!opts.skipCollapse) {
+    makeCollapsible(panel, 'visa', panel.querySelector('.v-head'), panel.querySelector('.v-body'));
+  }
 }
 
 // ============ Währungsrechner (FX) ============
@@ -3642,7 +3685,8 @@ function formatFx(n) {
   return n.toLocaleString('de-DE', { maximumFractionDigits: 3 });
 }
 
-function renderFxPanel(container) {
+function renderFxPanel(container, opts) {
+  opts = opts || {};
   const trip = T();
   // Zielwährung vom Land, sonst USD
   let tripCurr = 'USD';
@@ -3681,7 +3725,9 @@ function renderFxPanel(container) {
     </div>
   `;
   container.appendChild(panel);
-  makeCollapsible(panel, 'fx', panel.querySelector('.fx-head'), panel.querySelector('.fx-body'));
+  if (!opts.skipCollapse) {
+    makeCollapsible(panel, 'fx', panel.querySelector('.fx-head'), panel.querySelector('.fx-body'));
+  }
 
   const fromSel = panel.querySelector('#fx-from-cur');
   const toSel = panel.querySelector('#fx-to-cur');
@@ -3778,7 +3824,8 @@ function tripBaseCurrency() {
   return 'EUR';
 }
 
-function renderExpensePanel(container) {
+function renderExpensePanel(container, opts) {
+  opts = opts || {};
   const trip = T();
   const expenses = trip.expenses || [];
   const panel = document.createElement('div');
@@ -3848,7 +3895,9 @@ function renderExpensePanel(container) {
     </div>
   `;
   container.appendChild(panel);
-  makeCollapsible(panel, 'expenses', panel.querySelector('.exp-head'), panel.querySelector('.exp-body'));
+  if (!opts.skipCollapse) {
+    makeCollapsible(panel, 'expenses', panel.querySelector('.exp-head'), panel.querySelector('.exp-body'));
+  }
 
   panel.querySelector('#exp-add-btn').addEventListener('click', (e) => {
     e.stopPropagation();
@@ -6456,6 +6505,20 @@ function showWelcomeIfNeeded() {
 }
 
 // ============ Init ============
+// One-shot Migration v0.5.4: alte collapsed-Keys löschen, damit Panels nach
+// Redesign nicht versehentlich eingeklappt sind (Buttons wären unklickbar)
+try {
+  if (localStorage.getItem('tm.uiMigration') !== 'v0.5.4') {
+    const remove = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && k.startsWith('collapsed.')) remove.push(k);
+    }
+    remove.forEach(k => localStorage.removeItem(k));
+    localStorage.setItem('tm.uiMigration', 'v0.5.4');
+  }
+} catch (e) { /* private mode / quota */ }
+
 document.body.setAttribute('data-view', 'heute');
 importFromHash();
 checkInviteInURL();
