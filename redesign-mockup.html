@@ -1,0 +1,1584 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TripMate v1.0 — Redesign-Mockup</title>
+<style>
+  /* =====================================================
+     TripMate v1.0 — Design Tokens (siehe REDESIGN.md §4)
+     ===================================================== */
+  :root {
+    /* Farben */
+    --bg: #FAFAF7;
+    --surface: #FFFFFF;
+    --surface-soft: #F5F4EE;
+    --text: #1A1A1A;
+    --text-muted: #6B6B6B;
+    --text-soft: #A0A0A0;
+    --border: #ECECEC;
+    --accent: #FF385C;
+    --accent-soft: #FFF0F4;
+    --success: #16A34A;
+    --warning: #F59E0B;
+    --danger: #DC2626;
+
+    /* Spacing */
+    --s-1: 4px;
+    --s-2: 8px;
+    --s-3: 12px;
+    --s-4: 16px;
+    --s-5: 20px;
+    --s-6: 24px;
+    --s-8: 32px;
+    --s-12: 48px;
+
+    /* Radien */
+    --r-sm: 8px;
+    --r-md: 12px;
+    --r-card: 20px;
+    --r-sheet: 28px;
+
+    /* Schatten */
+    --sh-xs: 0 1px 2px rgba(0,0,0,0.04);
+    --sh-sm: 0 2px 8px rgba(0,0,0,0.06);
+    --sh-md: 0 4px 16px rgba(0,0,0,0.08);
+    --sh-lg: 0 12px 32px rgba(0,0,0,0.12);
+
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: var(--font);
+    background: linear-gradient(180deg, #1f1f23 0%, #2a2a30 100%);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 48px 24px 96px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Briefing-Kopf */
+  .briefing {
+    max-width: 1280px;
+    margin: 0 auto 56px;
+    color: #fff;
+    text-align: center;
+  }
+  .briefing .eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.55);
+    margin-bottom: 12px;
+  }
+  .briefing h1 {
+    font-size: 36px;
+    line-height: 1.15;
+    margin: 0 0 16px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  .briefing p {
+    max-width: 640px;
+    margin: 0 auto;
+    font-size: 16px;
+    line-height: 1.55;
+    color: rgba(255,255,255,0.7);
+  }
+  .briefing .meta {
+    margin-top: 24px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.4);
+    letter-spacing: 0.05em;
+  }
+
+  /* Frame-Galerie */
+  .gallery {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 56px 40px;
+    justify-content: center;
+    align-items: flex-start;
+  }
+  .frame-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+  .frame-label {
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+  .frame-label .small {
+    display: block;
+    font-weight: 400;
+    color: rgba(255,255,255,0.55);
+    font-size: 11px;
+    margin-top: 2px;
+  }
+
+  /* iPhone-Frame */
+  .frame {
+    width: 390px;
+    height: 844px;
+    background: #000;
+    border-radius: 52px;
+    padding: 14px;
+    box-shadow:
+      0 0 0 2px #2a2a30,
+      0 30px 60px rgba(0,0,0,0.5),
+      inset 0 0 0 2px rgba(255,255,255,0.04);
+    position: relative;
+  }
+  .screen {
+    width: 100%;
+    height: 100%;
+    background: var(--bg);
+    border-radius: 40px;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+  /* Dynamic Island */
+  .dynamic-island {
+    position: absolute;
+    top: 11px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 122px;
+    height: 36px;
+    background: #000;
+    border-radius: 20px;
+    z-index: 100;
+  }
+  /* Status-Bar */
+  .status-bar {
+    height: 54px;
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: var(--text);
+    font-size: 15px;
+    font-weight: 600;
+    flex-shrink: 0;
+    z-index: 10;
+    position: relative;
+  }
+  .status-bar .right {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    font-size: 14px;
+  }
+  /* Home-Indicator */
+  .home-indicator {
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 134px;
+    height: 5px;
+    background: rgba(0,0,0,0.85);
+    border-radius: 3px;
+    z-index: 100;
+  }
+
+  /* Inhalts-Container */
+  .content {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+    padding-bottom: 96px;
+  }
+  .content-scroll {
+    height: 100%;
+    overflow-y: auto;
+    padding: 0 20px;
+  }
+  /* Hide scrollbar for clean mockup look */
+  .content-scroll::-webkit-scrollbar { display: none; }
+
+  /* Trip-Strip */
+  .trip-strip {
+    background: var(--surface);
+    border-radius: var(--r-md);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: var(--sh-xs);
+    margin: 4px 0 24px;
+    border: 1px solid var(--border);
+  }
+  .trip-strip .flag {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #FF385C, #FF8E53);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .trip-strip .info { flex: 1; min-width: 0; }
+  .trip-strip .info .name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .trip-strip .info .dates {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 1px;
+  }
+  .trip-strip .chevron {
+    color: var(--text-soft);
+    font-size: 14px;
+  }
+
+  /* Page-Header */
+  .page-header {
+    margin-bottom: 8px;
+  }
+  .page-header .h-display {
+    font-size: 32px;
+    line-height: 38px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin: 0;
+  }
+  .page-header .sub {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+  .page-header .sub .weather {
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  /* Caption-Label */
+  .caption {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-soft);
+    margin: 28px 0 12px;
+  }
+  .caption:first-of-type { margin-top: 24px; }
+
+  /* Today-Card */
+  .today-card {
+    background: var(--surface);
+    border-radius: var(--r-card);
+    padding: 4px 0;
+    box-shadow: var(--sh-sm);
+    overflow: hidden;
+  }
+  .agenda-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+  }
+  .agenda-item:last-child { border-bottom: none; }
+  .agenda-item .time {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    min-width: 42px;
+  }
+  .agenda-item .icon {
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .agenda-item .body { flex: 1; min-width: 0; }
+  .agenda-item .title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .agenda-item .meta {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .agenda-item.now {
+    background: var(--accent-soft);
+  }
+  .agenda-item.now .time { color: var(--accent); }
+
+  /* Quick-Actions */
+  .quick-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .qa-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    padding: 14px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: var(--sh-xs);
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.1s;
+  }
+  .qa-btn .qa-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: var(--surface-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .qa-btn .qa-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .qa-btn.danger .qa-icon {
+    background: #FEE2E2;
+  }
+  .qa-btn.danger .qa-label { color: var(--danger); }
+
+  /* Day-Row (Nächste Tage) */
+  .day-row {
+    display: flex;
+    align-items: center;
+    background: var(--surface);
+    padding: 14px 18px;
+    border-radius: var(--r-md);
+    box-shadow: var(--sh-xs);
+    margin-bottom: 8px;
+  }
+  .day-row .day-date {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    width: 90px;
+  }
+  .day-row .day-summary {
+    flex: 1;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+  .day-row .chevron { color: var(--text-soft); font-size: 14px; }
+
+  /* Trip-Overview */
+  .trip-overview {
+    background: var(--surface-soft);
+    border-radius: var(--r-card);
+    padding: 18px;
+    display: flex;
+    justify-content: space-around;
+    text-align: center;
+  }
+  .trip-overview .stat .num {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.1;
+  }
+  .trip-overview .stat .lbl {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 4px;
+    letter-spacing: 0.04em;
+  }
+
+  /* Filter-Chips */
+  .chips-row {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    margin: 4px 0 20px;
+    padding-bottom: 4px;
+  }
+  .chips-row::-webkit-scrollbar { display: none; }
+  .chip {
+    padding: 8px 16px;
+    border-radius: 999px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .chip.active {
+    background: var(--text);
+    color: var(--surface);
+    border-color: var(--text);
+  }
+
+  /* Day-Section (Plan) */
+  .day-section { margin-bottom: 24px; }
+  .day-section .day-head {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 10px;
+    padding: 0 4px;
+  }
+  .day-section .day-head .num {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .day-section .day-head .name {
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+  .day-section .day-head .badge {
+    margin-left: auto;
+    background: var(--accent-soft);
+    color: var(--accent);
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .plan-card {
+    background: var(--surface);
+    border-radius: var(--r-md);
+    padding: 14px 16px;
+    box-shadow: var(--sh-xs);
+    margin-bottom: 6px;
+    display: flex;
+    gap: 12px;
+  }
+  .plan-card .pc-time {
+    font-size: 12px;
+    color: var(--text-muted);
+    width: 44px;
+    flex-shrink: 0;
+    padding-top: 1px;
+  }
+  .plan-card .pc-body { flex: 1; min-width: 0; }
+  .plan-card .pc-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .plan-card .pc-meta {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+  .plan-card .pc-icon {
+    font-size: 16px;
+    flex-shrink: 0;
+    padding-top: 1px;
+  }
+
+  /* FAB */
+  .fab {
+    position: absolute;
+    right: 20px;
+    bottom: 100px;
+    width: 56px;
+    height: 56px;
+    border-radius: 28px;
+    background: var(--accent);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    font-weight: 300;
+    box-shadow: 0 6px 20px rgba(255,56,92,0.4);
+    z-index: 50;
+  }
+  .fab.sos {
+    bottom: 168px;
+    background: rgba(220,38,38,0.95);
+    box-shadow: 0 6px 20px rgba(220,38,38,0.45);
+  }
+  .fab.sos .label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+  }
+
+  /* Geld-Hero */
+  .geld-tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--surface-soft);
+    padding: 4px;
+    border-radius: 12px;
+    margin: 4px 0 20px;
+  }
+  .geld-tabs .gt {
+    flex: 1;
+    text-align: center;
+    padding: 10px 0;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+  }
+  .geld-tabs .gt.active {
+    background: var(--surface);
+    color: var(--text);
+    font-weight: 600;
+    box-shadow: var(--sh-xs);
+  }
+  .budget-hero {
+    background: var(--surface);
+    border-radius: var(--r-card);
+    padding: 24px;
+    box-shadow: var(--sh-sm);
+    margin-bottom: 16px;
+  }
+  .budget-hero .lbl {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-soft);
+  }
+  .budget-hero .amount {
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--text);
+    margin-top: 6px;
+    letter-spacing: -0.02em;
+  }
+  .budget-hero .of {
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+  .budget-hero .progress {
+    height: 8px;
+    background: var(--surface-soft);
+    border-radius: 4px;
+    margin-top: 18px;
+    overflow: hidden;
+  }
+  .budget-hero .progress .fill {
+    height: 100%;
+    width: 31%;
+    background: linear-gradient(90deg, var(--accent), #FF8E53);
+    border-radius: 4px;
+  }
+  .budget-hero .row {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  /* Kategorien */
+  .cat-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--surface);
+    border-radius: var(--r-md);
+    padding: 12px 16px;
+    box-shadow: var(--sh-xs);
+    margin-bottom: 6px;
+  }
+  .cat-row .cat-ic {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface-soft);
+    font-size: 16px;
+  }
+  .cat-row .cat-name {
+    flex: 1;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+  }
+  .cat-row .cat-amt {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .cat-row .cat-pct {
+    font-size: 11px;
+    color: var(--text-muted);
+    width: 38px;
+    text-align: right;
+  }
+
+  /* Mehr-Liste */
+  .more-section {
+    background: var(--surface);
+    border-radius: var(--r-card);
+    box-shadow: var(--sh-sm);
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+  .more-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+  }
+  .more-row:last-child { border-bottom: none; }
+  .more-row .ic {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: var(--surface-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+  .more-row .lbl {
+    flex: 1;
+    font-size: 14px;
+    color: var(--text);
+    font-weight: 500;
+  }
+  .more-row .badge {
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 999px;
+    margin-right: 8px;
+  }
+  .more-row .badge.success {
+    background: #DCFCE7;
+    color: var(--success);
+  }
+  .more-row .badge.muted {
+    background: var(--surface-soft);
+    color: var(--text-muted);
+  }
+  .more-row .ch { color: var(--text-soft); font-size: 14px; }
+
+  /* Bottom-Tab-Nav */
+  .tabbar {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 86px;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border);
+    display: flex;
+    padding: 8px 0 24px;
+    z-index: 60;
+  }
+  .tab {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 4px;
+    color: var(--text-soft);
+    font-size: 11px;
+    font-weight: 500;
+    padding-top: 6px;
+  }
+  .tab .ic {
+    font-size: 22px;
+    line-height: 1;
+    filter: grayscale(100%) opacity(0.5);
+  }
+  .tab.active {
+    color: var(--accent);
+  }
+  .tab.active .ic {
+    filter: none;
+  }
+
+  /* Bottom-Sheet (Trip-Switcher) */
+  .sheet-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 70;
+    display: flex;
+    align-items: flex-end;
+  }
+  .sheet {
+    background: var(--surface);
+    width: 100%;
+    border-radius: var(--r-sheet) var(--r-sheet) 0 0;
+    padding: 12px 20px 32px;
+    box-shadow: var(--sh-lg);
+    max-height: 80%;
+    overflow: hidden;
+  }
+  .sheet .grabber {
+    width: 36px;
+    height: 5px;
+    background: #DDD;
+    border-radius: 3px;
+    margin: 0 auto 16px;
+  }
+  .sheet h3 {
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0 0 16px;
+  }
+  .trip-card {
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .trip-card.active {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+  }
+  .trip-card .tcf {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #FF385C, #FF8E53);
+    font-size: 18px;
+  }
+  .trip-card.b .tcf { background: linear-gradient(135deg, #4F46E5, #06B6D4); }
+  .trip-card.c .tcf { background: linear-gradient(135deg, #16A34A, #84CC16); }
+  .trip-card .tcb { flex: 1; }
+  .trip-card .tcb .nm {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .trip-card .tcb .dt {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+  .trip-card .tcc {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .new-trip-btn {
+    margin-top: 8px;
+    padding: 14px;
+    border: 1px dashed var(--border);
+    border-radius: var(--r-md);
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  /* Karte-Mockup */
+  .map-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at 30% 35%, #DDE5DA 0%, transparent 60%),
+      radial-gradient(circle at 70% 60%, #C9D6E5 0%, transparent 55%),
+      linear-gradient(135deg, #E8E3D5 0%, #D4D9CC 100%);
+  }
+  .map-bg::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(90deg, transparent 49.5%, rgba(255,255,255,0.4) 49.5%, rgba(255,255,255,0.4) 50.5%, transparent 50.5%) 0 0 / 60px 100%,
+      linear-gradient(0deg, transparent 49.5%, rgba(255,255,255,0.4) 49.5%, rgba(255,255,255,0.4) 50.5%, transparent 50.5%) 0 0 / 100% 60px;
+    opacity: 0.3;
+  }
+  .map-pin {
+    position: absolute;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    border: 2px solid #fff;
+    transform: translate(-50%, -50%);
+  }
+  .map-pin.b { background: #4F46E5; }
+  .map-pin.c { background: #16A34A; }
+  .map-pin.d { background: var(--warning); }
+
+  /* Annotations (designer notes) */
+  .annot {
+    position: absolute;
+    color: rgba(255,255,255,0.65);
+    font-size: 11px;
+    line-height: 1.4;
+    max-width: 180px;
+  }
+  .annot::before {
+    content: '';
+    display: block;
+    width: 1px;
+    height: 24px;
+    background: rgba(255,255,255,0.3);
+    margin-bottom: 6px;
+  }
+
+  /* Foot-Note */
+  .footer-note {
+    max-width: 720px;
+    margin: 80px auto 0;
+    text-align: center;
+    color: rgba(255,255,255,0.45);
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  .footer-note a {
+    color: rgba(255,255,255,0.75);
+    text-decoration: underline;
+  }
+
+  /* Section dividers */
+  .section-title {
+    color: rgba(255,255,255,0.85);
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-align: center;
+    margin: 80px 0 32px;
+    position: relative;
+  }
+  .section-title::before, .section-title::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 80px;
+    height: 1px;
+    background: rgba(255,255,255,0.15);
+  }
+  .section-title::before { right: calc(50% + 140px); }
+  .section-title::after { left: calc(50% + 140px); }
+
+  @media (max-width: 880px) {
+    .frame { transform: scale(0.85); transform-origin: top center; margin-bottom: -120px; }
+    .briefing h1 { font-size: 26px; }
+    body { padding: 32px 16px 64px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="briefing">
+  <div class="eyebrow">TripMate · v1.0 Redesign</div>
+  <h1>Vom Feature-Stapel zur kontextbasierten Reise-App</h1>
+  <p>Ein neues Informations-Architektur-Konzept mit fünf Tabs, einem ruhigen visuellen System und einem Heute-Screen, der weiß, wo du gerade bist.</p>
+  <div class="meta">Mockup zum Strategie-Dokument · siehe REDESIGN.md</div>
+</div>
+
+<div class="section-title">Hauptansichten</div>
+
+<div class="gallery">
+
+  <!-- =========================================== -->
+  <!-- FRAME 1 — HEUTE (Home, kontextbasiert)       -->
+  <!-- =========================================== -->
+  <div class="frame-wrap">
+    <div class="frame">
+      <div class="screen">
+        <div class="dynamic-island"></div>
+        <div class="status-bar">
+          <span>9:41</span>
+          <span class="right">●●●● 5G ▮</span>
+        </div>
+        <div class="content">
+          <div class="content-scroll">
+
+            <div class="trip-strip">
+              <div class="flag">🇵🇹</div>
+              <div class="info">
+                <div class="name">Lisbon Trip</div>
+                <div class="dates">23. – 27. April · Tag 2 von 5</div>
+              </div>
+              <div class="chevron">⌄</div>
+            </div>
+
+            <div class="page-header">
+              <h1 class="h-display">Donnerstag</h1>
+              <div class="sub">24. April · <span class="weather">Lissabon · 19° ☀</span></div>
+            </div>
+
+            <div class="caption">Heute auf dem Plan</div>
+            <div class="today-card">
+              <div class="agenda-item now">
+                <div class="time">09:30</div>
+                <div class="icon">✈️</div>
+                <div class="body">
+                  <div class="title">LH456 · FRA → LIS</div>
+                  <div class="meta">Terminal 1 · Gate B14</div>
+                </div>
+              </div>
+              <div class="agenda-item">
+                <div class="time">15:00</div>
+                <div class="icon">🏨</div>
+                <div class="body">
+                  <div class="title">Pestana Pousada</div>
+                  <div class="meta">Check-in · R. das Janelas Verdes</div>
+                </div>
+              </div>
+              <div class="agenda-item">
+                <div class="time">19:30</div>
+                <div class="icon">🍽</div>
+                <div class="body">
+                  <div class="title">Time Out Market</div>
+                  <div class="meta">Reservierung für 2 Personen</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="caption">Schnellaktionen</div>
+            <div class="quick-actions">
+              <div class="qa-btn">
+                <div class="qa-icon">＋</div>
+                <div class="qa-label">Ausgabe</div>
+              </div>
+              <div class="qa-btn">
+                <div class="qa-icon">€€</div>
+                <div class="qa-label">Wechseln</div>
+              </div>
+              <div class="qa-btn">
+                <div class="qa-icon">🔒</div>
+                <div class="qa-label">Safe</div>
+              </div>
+              <div class="qa-btn">
+                <div class="qa-icon">📧</div>
+                <div class="qa-label">Email-Import</div>
+              </div>
+            </div>
+
+            <div class="caption">Nächste Tage</div>
+            <div class="day-row">
+              <div class="day-date">Fr · 25.04</div>
+              <div class="day-summary">2 Termine · Belém</div>
+              <div class="chevron">›</div>
+            </div>
+            <div class="day-row">
+              <div class="day-date">Sa · 26.04</div>
+              <div class="day-summary">Sintra-Ausflug</div>
+              <div class="chevron">›</div>
+            </div>
+            <div class="day-row">
+              <div class="day-date">So · 27.04</div>
+              <div class="day-summary">Heimreise · LH457</div>
+              <div class="chevron">›</div>
+            </div>
+
+            <div class="caption">Deine Reise</div>
+            <div class="trip-overview">
+              <div class="stat"><div class="num">3</div><div class="lbl">Hotels</div></div>
+              <div class="stat"><div class="num">12</div><div class="lbl">Orte</div></div>
+              <div class="stat"><div class="num">8</div><div class="lbl">Termine</div></div>
+              <div class="stat"><div class="num">€247</div><div class="lbl">Ausgaben</div></div>
+            </div>
+            <div style="height: 32px;"></div>
+          </div>
+          <div class="fab sos">
+            <span class="label">SOS</span>
+          </div>
+        </div>
+        <div class="tabbar">
+          <div class="tab active"><div class="ic">🏠</div>Heute</div>
+          <div class="tab"><div class="ic">📅</div>Plan</div>
+          <div class="tab"><div class="ic">🗺</div>Karte</div>
+          <div class="tab"><div class="ic">💶</div>Geld</div>
+          <div class="tab"><div class="ic">⋯</div>Mehr</div>
+        </div>
+        <div class="home-indicator"></div>
+      </div>
+    </div>
+    <div class="frame-label">Tab 1 · Heute<span class="small">Kontextbasierter Home-Screen</span></div>
+  </div>
+
+  <!-- =========================================== -->
+  <!-- FRAME 2 — PLAN (Itinerary mit Filter)         -->
+  <!-- =========================================== -->
+  <div class="frame-wrap">
+    <div class="frame">
+      <div class="screen">
+        <div class="dynamic-island"></div>
+        <div class="status-bar">
+          <span>9:41</span>
+          <span class="right">●●●● 5G ▮</span>
+        </div>
+        <div class="content">
+          <div class="content-scroll">
+            <div class="trip-strip">
+              <div class="flag">🇵🇹</div>
+              <div class="info">
+                <div class="name">Lisbon Trip</div>
+                <div class="dates">23. – 27. April · Tag 2 von 5</div>
+              </div>
+              <div class="chevron">⌄</div>
+            </div>
+
+            <div class="page-header">
+              <h1 class="h-display">Reiseplan</h1>
+              <div class="sub">5 Tage · 8 Termine</div>
+            </div>
+
+            <div class="chips-row">
+              <div class="chip active">Alle</div>
+              <div class="chip">Termine</div>
+              <div class="chip">Hotels</div>
+              <div class="chip">Aktivitäten</div>
+              <div class="chip">Reservierungen</div>
+            </div>
+
+            <div class="day-section">
+              <div class="day-head">
+                <div class="num">23</div>
+                <div class="name">Mittwoch · Anreise</div>
+                <div class="badge">Vergangen</div>
+              </div>
+              <div class="plan-card">
+                <div class="pc-time">14:00</div>
+                <div class="pc-icon">🏨</div>
+                <div class="pc-body">
+                  <div class="pc-title">Pestana Pousada · Check-in</div>
+                  <div class="pc-meta">3 Nächte · Bestätigung #PT-2026</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="day-section">
+              <div class="day-head">
+                <div class="num">24</div>
+                <div class="name">Donnerstag · Heute</div>
+                <div class="badge">Heute</div>
+              </div>
+              <div class="plan-card">
+                <div class="pc-time">09:30</div>
+                <div class="pc-icon">✈️</div>
+                <div class="pc-body">
+                  <div class="pc-title">Flug nach Lissabon</div>
+                  <div class="pc-meta">LH456 · FRA T1 → LIS</div>
+                </div>
+              </div>
+              <div class="plan-card">
+                <div class="pc-time">15:00</div>
+                <div class="pc-icon">🏨</div>
+                <div class="pc-body">
+                  <div class="pc-title">Hotel Check-in</div>
+                  <div class="pc-meta">Pestana Pousada de Lisboa</div>
+                </div>
+              </div>
+              <div class="plan-card">
+                <div class="pc-time">19:30</div>
+                <div class="pc-icon">🍽</div>
+                <div class="pc-body">
+                  <div class="pc-title">Time Out Market</div>
+                  <div class="pc-meta">Abendessen · 2 Personen</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="day-section">
+              <div class="day-head">
+                <div class="num">25</div>
+                <div class="name">Freitag</div>
+              </div>
+              <div class="plan-card">
+                <div class="pc-time">10:30</div>
+                <div class="pc-icon">🏛</div>
+                <div class="pc-body">
+                  <div class="pc-title">Mosteiro dos Jerónimos</div>
+                  <div class="pc-meta">Belém · Eintritt €10</div>
+                </div>
+              </div>
+            </div>
+            <div style="height: 32px;"></div>
+          </div>
+          <div class="fab sos"><span class="label">SOS</span></div>
+          <div class="fab">＋</div>
+        </div>
+        <div class="tabbar">
+          <div class="tab"><div class="ic">🏠</div>Heute</div>
+          <div class="tab active"><div class="ic">📅</div>Plan</div>
+          <div class="tab"><div class="ic">🗺</div>Karte</div>
+          <div class="tab"><div class="ic">💶</div>Geld</div>
+          <div class="tab"><div class="ic">⋯</div>Mehr</div>
+        </div>
+        <div class="home-indicator"></div>
+      </div>
+    </div>
+    <div class="frame-label">Tab 2 · Plan<span class="small">Itinerary mit Filter-Chips & FAB</span></div>
+  </div>
+
+  <!-- =========================================== -->
+  <!-- FRAME 3 — KARTE (Vollbild + Sheet)            -->
+  <!-- =========================================== -->
+  <div class="frame-wrap">
+    <div class="frame">
+      <div class="screen">
+        <div class="dynamic-island"></div>
+        <div class="status-bar" style="background: rgba(255,255,255,0.85); backdrop-filter: blur(12px); position: absolute; left: 0; right: 0; top: 0;">
+          <span>9:41</span>
+          <span class="right">●●●● 5G ▮</span>
+        </div>
+        <div class="content" style="padding: 0;">
+          <div class="map-bg"></div>
+          <!-- Pin-Mockup -->
+          <div class="map-pin" style="left: 35%; top: 28%;">🏨</div>
+          <div class="map-pin b" style="left: 58%; top: 35%;">🍽</div>
+          <div class="map-pin c" style="left: 42%; top: 48%;">🏛</div>
+          <div class="map-pin d" style="left: 65%; top: 52%;">☕</div>
+          <div class="map-pin" style="left: 28%; top: 58%;">🛍</div>
+          <div class="map-pin b" style="left: 72%; top: 30%;">🍽</div>
+
+          <!-- Filter-Chips schwebend -->
+          <div style="position: absolute; top: 64px; left: 0; right: 0; padding: 0 20px;">
+            <div class="chips-row" style="margin: 0;">
+              <div class="chip active">Alle</div>
+              <div class="chip">🏨 Hotels</div>
+              <div class="chip">🍽 Essen</div>
+              <div class="chip">🏛 Kultur</div>
+              <div class="chip">☕ Cafés</div>
+            </div>
+          </div>
+
+          <!-- Bottom-Sheet -->
+          <div style="position: absolute; left: 0; right: 0; bottom: 86px; background: var(--surface); border-radius: var(--r-sheet) var(--r-sheet) 0 0; padding: 12px 20px 20px; box-shadow: var(--sh-lg); max-height: 50%;">
+            <div style="width: 36px; height: 5px; background: #DDD; border-radius: 3px; margin: 0 auto 14px;"></div>
+            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 14px;">
+              <h3 style="font-size: 17px; font-weight: 700; margin: 0;">12 Orte</h3>
+              <span style="font-size: 12px; color: var(--text-muted);">Sortieren ⌄</span>
+            </div>
+            <div class="more-row" style="border: none; padding: 10px 0;">
+              <div class="ic">🏨</div>
+              <div class="lbl" style="font-size: 13px;">Pestana Pousada<br><span style="font-size: 11px; color: var(--text-muted); font-weight: 400;">450 m · Hotel</span></div>
+              <div class="ch">›</div>
+            </div>
+            <div class="more-row" style="border: none; padding: 10px 0;">
+              <div class="ic">🍽</div>
+              <div class="lbl" style="font-size: 13px;">Time Out Market<br><span style="font-size: 11px; color: var(--text-muted); font-weight: 400;">890 m · Restaurant</span></div>
+              <div class="ch">›</div>
+            </div>
+            <div class="more-row" style="border: none; padding: 10px 0;">
+              <div class="ic">🏛</div>
+              <div class="lbl" style="font-size: 13px;">Mosteiro dos Jerónimos<br><span style="font-size: 11px; color: var(--text-muted); font-weight: 400;">5,2 km · Sehenswürdigkeit</span></div>
+              <div class="ch">›</div>
+            </div>
+          </div>
+        </div>
+        <div class="tabbar">
+          <div class="tab"><div class="ic">🏠</div>Heute</div>
+          <div class="tab"><div class="ic">📅</div>Plan</div>
+          <div class="tab active"><div class="ic">🗺</div>Karte</div>
+          <div class="tab"><div class="ic">💶</div>Geld</div>
+          <div class="tab"><div class="ic">⋯</div>Mehr</div>
+        </div>
+        <div class="home-indicator"></div>
+      </div>
+    </div>
+    <div class="frame-label">Tab 3 · Karte<span class="small">Vollbild · Bottom-Sheet snap-Liste</span></div>
+  </div>
+
+  <!-- =========================================== -->
+  <!-- FRAME 4 — GELD (Budget-Hero)                  -->
+  <!-- =========================================== -->
+  <div class="frame-wrap">
+    <div class="frame">
+      <div class="screen">
+        <div class="dynamic-island"></div>
+        <div class="status-bar">
+          <span>9:41</span>
+          <span class="right">●●●● 5G ▮</span>
+        </div>
+        <div class="content">
+          <div class="content-scroll">
+            <div class="trip-strip">
+              <div class="flag">🇵🇹</div>
+              <div class="info">
+                <div class="name">Lisbon Trip</div>
+                <div class="dates">23. – 27. April · Tag 2 von 5</div>
+              </div>
+              <div class="chevron">⌄</div>
+            </div>
+
+            <div class="page-header">
+              <h1 class="h-display">Geld</h1>
+              <div class="sub">€800 Budget · 5 Tage</div>
+            </div>
+
+            <div class="geld-tabs">
+              <div class="gt active">Ausgaben</div>
+              <div class="gt">Wechseln</div>
+              <div class="gt">Visum</div>
+            </div>
+
+            <div class="budget-hero">
+              <div class="lbl">Ausgegeben</div>
+              <div class="amount">€247<span class="of"> / 800</span></div>
+              <div class="progress"><div class="fill"></div></div>
+              <div class="row">
+                <span>31 % verbraucht</span>
+                <span>€553 übrig</span>
+              </div>
+            </div>
+
+            <div class="caption">Kategorien</div>
+            <div class="cat-row">
+              <div class="cat-ic">🍽</div>
+              <div class="cat-name">Essen & Trinken</div>
+              <div class="cat-amt">€124</div>
+              <div class="cat-pct">50%</div>
+            </div>
+            <div class="cat-row">
+              <div class="cat-ic">🚖</div>
+              <div class="cat-name">Transport</div>
+              <div class="cat-amt">€58</div>
+              <div class="cat-pct">23%</div>
+            </div>
+            <div class="cat-row">
+              <div class="cat-ic">🎟</div>
+              <div class="cat-name">Aktivitäten</div>
+              <div class="cat-amt">€42</div>
+              <div class="cat-pct">17%</div>
+            </div>
+            <div class="cat-row">
+              <div class="cat-ic">🛍</div>
+              <div class="cat-name">Shopping</div>
+              <div class="cat-amt">€23</div>
+              <div class="cat-pct">10%</div>
+            </div>
+
+            <div class="caption">Letzte Ausgaben</div>
+            <div class="more-section">
+              <div class="more-row">
+                <div class="ic">🍽</div>
+                <div class="lbl">A Cevicheria<br><span style="font-size: 11px; color: var(--text-muted); font-weight: 400;">Heute · Abendessen</span></div>
+                <div style="font-size: 14px; font-weight: 600;">€48</div>
+              </div>
+              <div class="more-row">
+                <div class="ic">🚖</div>
+                <div class="lbl">Bolt Lissabon<br><span style="font-size: 11px; color: var(--text-muted); font-weight: 400;">Heute · Flughafen</span></div>
+                <div style="font-size: 14px; font-weight: 600;">€18</div>
+              </div>
+              <div class="more-row">
+                <div class="ic">☕</div>
+                <div class="lbl">Café A Brasileira<br><span style="font-size: 11px; color: var(--text-muted); font-weight: 400;">Gestern</span></div>
+                <div style="font-size: 14px; font-weight: 600;">€7</div>
+              </div>
+            </div>
+            <div style="height: 32px;"></div>
+          </div>
+          <div class="fab">＋</div>
+        </div>
+        <div class="tabbar">
+          <div class="tab"><div class="ic">🏠</div>Heute</div>
+          <div class="tab"><div class="ic">📅</div>Plan</div>
+          <div class="tab"><div class="ic">🗺</div>Karte</div>
+          <div class="tab active"><div class="ic">💶</div>Geld</div>
+          <div class="tab"><div class="ic">⋯</div>Mehr</div>
+        </div>
+        <div class="home-indicator"></div>
+      </div>
+    </div>
+    <div class="frame-label">Tab 4 · Geld<span class="small">Budget-Hero · Sub-Tabs · Liste</span></div>
+  </div>
+
+  <!-- =========================================== -->
+  <!-- FRAME 5 — MEHR (Settings & Tools)             -->
+  <!-- =========================================== -->
+  <div class="frame-wrap">
+    <div class="frame">
+      <div class="screen">
+        <div class="dynamic-island"></div>
+        <div class="status-bar">
+          <span>9:41</span>
+          <span class="right">●●●● 5G ▮</span>
+        </div>
+        <div class="content">
+          <div class="content-scroll">
+            <div class="trip-strip">
+              <div class="flag">🇵🇹</div>
+              <div class="info">
+                <div class="name">Lisbon Trip</div>
+                <div class="dates">23. – 27. April · Tag 2 von 5</div>
+              </div>
+              <div class="chevron">⌄</div>
+            </div>
+
+            <div class="page-header">
+              <h1 class="h-display">Mehr</h1>
+              <div class="sub">Werkzeuge, Trip-Settings & Profil</div>
+            </div>
+
+            <div class="caption">Reise</div>
+            <div class="more-section">
+              <div class="more-row">
+                <div class="ic">📋</div>
+                <div class="lbl">Packliste</div>
+                <div class="badge muted">4 / 12</div>
+                <div class="ch">›</div>
+              </div>
+              <div class="more-row">
+                <div class="ic">🌍</div>
+                <div class="lbl">Reiseinfos Portugal</div>
+                <div class="ch">›</div>
+              </div>
+              <div class="more-row">
+                <div class="ic">🛂</div>
+                <div class="lbl">Visum</div>
+                <div class="badge success">✓ frei</div>
+                <div class="ch">›</div>
+              </div>
+              <div class="more-row">
+                <div class="ic">🔒</div>
+                <div class="lbl">Dokumenten-Safe</div>
+                <div class="badge">3</div>
+                <div class="ch">›</div>
+              </div>
+              <div class="more-row">
+                <div class="ic">🚨</div>
+                <div class="lbl">Notfall-Details</div>
+                <div class="ch">›</div>
+              </div>
+            </div>
+
+            <div class="caption">Trip</div>
+            <div class="more-section">
+              <div class="more-row">
+                <div class="ic">⚙️</div>
+                <div class="lbl">Trip bearbeiten</div>
+                <div class="ch">›</div>
+              </div>
+              <div class="more-row">
+                <div class="ic">📤</div>
+                <div class="lbl">Trip teilen</div>
+                <div class="ch">›</div>
+              </div>
+              <div class="more-row">
+                <div class="ic">🔄</div>
+                <div class="lbl">Sync</div>
+                <div class="badge success">Synced</div>
+                <div class="ch">›</div>
+              </div>
+            </div>
+
+            <div class="caption">App</div>
+            <div class="more-section">
+              <div class="more-row">
+                <div class="ic">👤</div>
+                <div class="lbl">Profil</div>
+                <div class="ch">›</div>
+              </div>
+              <div class="more-row">
+                <div class="ic">❓</div>
+                <div class="lbl">Hilfe & Anleitung</div>
+                <div class="ch">›</div>
+              </div>
+              <div class="more-row">
+                <div class="ic">🐞</div>
+                <div class="lbl">Feedback geben</div>
+                <div class="ch">›</div>
+              </div>
+              <div class="more-row">
+                <div class="ic">ℹ️</div>
+                <div class="lbl">Über</div>
+                <div class="badge muted">v1.0</div>
+              </div>
+            </div>
+            <div style="height: 32px;"></div>
+          </div>
+        </div>
+        <div class="tabbar">
+          <div class="tab"><div class="ic">🏠</div>Heute</div>
+          <div class="tab"><div class="ic">📅</div>Plan</div>
+          <div class="tab"><div class="ic">🗺</div>Karte</div>
+          <div class="tab"><div class="ic">💶</div>Geld</div>
+          <div class="tab active"><div class="ic">⋯</div>Mehr</div>
+        </div>
+        <div class="home-indicator"></div>
+      </div>
+    </div>
+    <div class="frame-label">Tab 5 · Mehr<span class="small">Gruppierte Liste · Settings & Tools</span></div>
+  </div>
+
+</div>
+
+<div class="section-title">Pattern: Trip-Switcher Bottom-Sheet</div>
+
+<div class="gallery">
+  <div class="frame-wrap">
+    <div class="frame">
+      <div class="screen">
+        <div class="dynamic-island"></div>
+        <div class="status-bar">
+          <span>9:41</span>
+          <span class="right">●●●● 5G ▮</span>
+        </div>
+        <div class="content">
+          <div class="content-scroll" style="filter: blur(2px); opacity: 0.6;">
+            <div class="trip-strip">
+              <div class="flag">🇵🇹</div>
+              <div class="info">
+                <div class="name">Lisbon Trip</div>
+                <div class="dates">23. – 27. April</div>
+              </div>
+              <div class="chevron">⌄</div>
+            </div>
+            <div class="page-header">
+              <h1 class="h-display">Donnerstag</h1>
+            </div>
+          </div>
+          <!-- Sheet -->
+          <div class="sheet-overlay">
+            <div class="sheet">
+              <div class="grabber"></div>
+              <h3>Reise wechseln</h3>
+              <div class="trip-card active">
+                <div class="tcf">🇵🇹</div>
+                <div class="tcb">
+                  <div class="nm">Lisbon Trip</div>
+                  <div class="dt">23. – 27. April · 5 Tage</div>
+                </div>
+                <div class="tcc">Aktiv</div>
+              </div>
+              <div class="trip-card b">
+                <div class="tcf">🇯🇵</div>
+                <div class="tcb">
+                  <div class="nm">Japan Sakura 2026</div>
+                  <div class="dt">12. – 26. Mai · 14 Tage</div>
+                </div>
+              </div>
+              <div class="trip-card c">
+                <div class="tcf">🇮🇹</div>
+                <div class="tcb">
+                  <div class="nm">Sizilien Sommer</div>
+                  <div class="dt">3. – 17. Aug · 14 Tage</div>
+                </div>
+              </div>
+              <div class="new-trip-btn">＋ Neue Reise</div>
+            </div>
+          </div>
+        </div>
+        <div class="tabbar" style="opacity: 0.4;">
+          <div class="tab active"><div class="ic">🏠</div>Heute</div>
+          <div class="tab"><div class="ic">📅</div>Plan</div>
+          <div class="tab"><div class="ic">🗺</div>Karte</div>
+          <div class="tab"><div class="ic">💶</div>Geld</div>
+          <div class="tab"><div class="ic">⋯</div>Mehr</div>
+        </div>
+        <div class="home-indicator"></div>
+      </div>
+    </div>
+    <div class="frame-label">Pattern · Trip-Switcher<span class="small">Bottom-Sheet, ersetzt Header-Dropdown</span></div>
+  </div>
+
+  <!-- Side panel: design tokens -->
+  <div class="frame-wrap" style="width: 390px;">
+    <div style="background: var(--surface); border-radius: 32px; padding: 32px 28px; color: var(--text); width: 100%; box-shadow: var(--sh-lg);">
+      <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-soft); margin-bottom: 8px;">Design-System</div>
+      <h2 style="font-size: 22px; font-weight: 700; margin: 0 0 24px; letter-spacing: -0.01em;">Tokens auf einen Blick</h2>
+
+      <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-soft); margin-bottom: 10px;">Farben</div>
+      <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-bottom: 22px;">
+        <div style="aspect-ratio: 1; background: #FAFAF7; border-radius: 8px; border: 1px solid var(--border);"></div>
+        <div style="aspect-ratio: 1; background: #FFFFFF; border-radius: 8px; border: 1px solid var(--border);"></div>
+        <div style="aspect-ratio: 1; background: #F5F4EE; border-radius: 8px; border: 1px solid var(--border);"></div>
+        <div style="aspect-ratio: 1; background: #1A1A1A; border-radius: 8px;"></div>
+        <div style="aspect-ratio: 1; background: #FF385C; border-radius: 8px;"></div>
+        <div style="aspect-ratio: 1; background: #FFF0F4; border-radius: 8px;"></div>
+        <div style="aspect-ratio: 1; background: #16A34A; border-radius: 8px;"></div>
+        <div style="aspect-ratio: 1; background: #F59E0B; border-radius: 8px;"></div>
+        <div style="aspect-ratio: 1; background: #DC2626; border-radius: 8px;"></div>
+        <div style="aspect-ratio: 1; background: #6B6B6B; border-radius: 8px;"></div>
+        <div style="aspect-ratio: 1; background: #A0A0A0; border-radius: 8px;"></div>
+        <div style="aspect-ratio: 1; background: #ECECEC; border-radius: 8px;"></div>
+      </div>
+
+      <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-soft); margin-bottom: 10px;">Typografie</div>
+      <div style="font-size: 32px; line-height: 38px; font-weight: 700; letter-spacing: -0.02em;">Display 32</div>
+      <div style="font-size: 24px; line-height: 32px; font-weight: 700; margin-top: 6px;">H1 · 24</div>
+      <div style="font-size: 18px; line-height: 26px; font-weight: 600; margin-top: 6px;">H2 · 18</div>
+      <div style="font-size: 15px; line-height: 22px; margin-top: 6px;">Body · 15 Regular</div>
+      <div style="font-size: 13px; line-height: 18px; color: var(--text-muted); margin-top: 6px;">Small · 13 Regular</div>
+      <div style="font-size: 11px; line-height: 16px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-soft); margin-top: 10px;">Caption · 11 Bold</div>
+
+      <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-soft); margin: 24px 0 10px;">Spacing</div>
+      <div style="display: flex; gap: 6px; align-items: flex-end;">
+        <div style="width: 4px; height: 12px; background: var(--accent); border-radius: 2px;"></div>
+        <div style="width: 8px; height: 16px; background: var(--accent); border-radius: 2px;"></div>
+        <div style="width: 12px; height: 20px; background: var(--accent); border-radius: 2px;"></div>
+        <div style="width: 16px; height: 24px; background: var(--accent); border-radius: 2px;"></div>
+        <div style="width: 20px; height: 28px; background: var(--accent); border-radius: 2px;"></div>
+        <div style="width: 24px; height: 32px; background: var(--accent); border-radius: 2px;"></div>
+        <div style="width: 32px; height: 36px; background: var(--accent); border-radius: 2px;"></div>
+        <div style="width: 48px; height: 40px; background: var(--accent); border-radius: 2px;"></div>
+      </div>
+      <div style="font-size: 11px; color: var(--text-soft); margin-top: 6px;">4 · 8 · 12 · 16 · 20 · 24 · 32 · 48</div>
+
+      <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-soft); margin: 24px 0 10px;">Radien & Schatten</div>
+      <div style="display: flex; gap: 12px;">
+        <div style="flex: 1; aspect-ratio: 1; background: var(--surface); border-radius: 8px; box-shadow: var(--sh-xs); display: flex; align-items: center; justify-content: center; font-size: 11px; color: var(--text-muted);">8 · xs</div>
+        <div style="flex: 1; aspect-ratio: 1; background: var(--surface); border-radius: 12px; box-shadow: var(--sh-sm); display: flex; align-items: center; justify-content: center; font-size: 11px; color: var(--text-muted);">12 · sm</div>
+        <div style="flex: 1; aspect-ratio: 1; background: var(--surface); border-radius: 20px; box-shadow: var(--sh-md); display: flex; align-items: center; justify-content: center; font-size: 11px; color: var(--text-muted);">20 · md</div>
+        <div style="flex: 1; aspect-ratio: 1; background: var(--surface); border-radius: 28px; box-shadow: var(--sh-lg); display: flex; align-items: center; justify-content: center; font-size: 11px; color: var(--text-muted);">28 · lg</div>
+      </div>
+
+      <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-soft); margin: 24px 0 10px;">Akzent-Regel</div>
+      <div style="font-size: 13px; line-height: 1.55; color: var(--text-muted);">Maximal <strong style="color: var(--text);">eine</strong> gefärbte Fläche pro Bildschirm. Coral nur für Marken-Akzent, Status oder primäre Aktion. Alles andere bleibt ruhig.</div>
+    </div>
+    <div class="frame-label">Design-Tokens<span class="small">Visualisierung des Stilguides</span></div>
+  </div>
+</div>
+
+<div class="footer-note">
+  Dieser Mockup ist ein klickbarer Komparator zum Strategie-Dokument.<br>
+  Die Frames sind statische HTML-Renders mit den finalen Design-Tokens — keine Implementierung.<br>
+  Implementierung erfolgt in Phasen direkt in <code style="font-size: 12px; padding: 1px 6px; background: rgba(255,255,255,0.1); border-radius: 4px;">index.html</code>.
+</div>
+
+</body>
+</html>

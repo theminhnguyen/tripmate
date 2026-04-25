@@ -14,37 +14,58 @@
   integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 <style>
   :root {
-    --bg: #FAFAFA;
-    --bg-soft: #F3F2F0;
-    --surface: #FFFFFF;
-    --border: #EBEBEB;
-    --border-soft: #F0F0F0;
-    --text: #222222;
-    --text-muted: #717171;
-    --text-soft: #9CA3AF;
-    --primary: #FF385C;
-    --primary-dark: #E00B41;
-    --primary-soft: #FFF1F3;
-    --primary-gradient: linear-gradient(135deg, #FF385C 0%, #E61E4D 50%, #D70466 100%);
-    --accent: #0EA5E9;
-    --accent-soft: #E0F2FE;
-    --danger: #ef4444;
-    --success: #00A699;
-    --warning: #FFB400;
+    /* === v1.0 Design Tokens (REDESIGN.md §4) === */
+    --bg: #FAFAF7;             /* warmes Off-White, ruhiger Hintergrund */
+    --bg-soft: #F5F4EE;        /* sekundäre Flächen */
+    --surface: #FFFFFF;        /* Karten, Sheets */
+    --surface-soft: #F5F4EE;   /* Alias für ruhige Flächen */
+    --border: #ECECEC;
+    --border-soft: #F2F2F2;
+    --text: #1A1A1A;
+    --text-muted: #6B6B6B;
+    --text-soft: #A0A0A0;
+
+    /* Akzent (Coral) — sparsam einsetzen */
+    --accent: #FF385C;
+    --accent-soft: #FFF0F4;
+    --accent-dark: #E00B41;
+    --accent-gradient: linear-gradient(135deg, #FF385C 0%, #E61E4D 50%, #D70466 100%);
+
+    /* Backwards-Compat-Aliase (alter Code referenziert --primary*) */
+    --primary: var(--accent);
+    --primary-dark: var(--accent-dark);
+    --primary-soft: var(--accent-soft);
+    --primary-gradient: var(--accent-gradient);
+
+    /* Status */
+    --success: #16A34A;
+    --warning: #F59E0B;
+    --danger: #DC2626;
+
+    /* Kategoriefarben (semantische Datentypen) */
     --sight: #8b5cf6;
     --food: #f97316;
     --shop: #ec4899;
     --buy: #00A699;
     --other: #6b7280;
-    --shadow-xs: 0 1px 2px rgba(0,0,0,0.05);
-    --shadow-sm: 0 2px 6px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03);
-    --shadow-md: 0 4px 14px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
-    --shadow-lg: 0 12px 28px rgba(0,0,0,0.12), 0 4px 8px rgba(0,0,0,0.06);
-    --shadow-pink: 0 4px 14px rgba(255,56,92,0.28), 0 2px 4px rgba(255,56,92,0.15);
-    --radius-sm: 10px;
-    --radius-md: 14px;
-    --radius-lg: 18px;
-    --radius-xl: 22px;
+
+    /* Schatten */
+    --shadow-xs: 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+    --shadow-lg: 0 12px 32px rgba(0,0,0,0.12);
+    --shadow-pink: 0 6px 20px rgba(255,56,92,0.4);
+
+    /* Radien */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 20px;
+    --radius-xl: 28px;
+
+    /* Spacing-Skala (8-Punkt-Raster) */
+    --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px;
+    --s-5: 20px; --s-6: 24px; --s-8: 32px; --s-12: 48px;
+
     --safe-top: env(safe-area-inset-top);
     --safe-bottom: env(safe-area-inset-bottom);
   }
@@ -925,6 +946,366 @@
     transition: background 0.15s, color 0.15s;
   }
   .segmented button.active { background: var(--surface); color: var(--text); box-shadow: var(--shadow-xs); }
+
+  /* ====================================================
+     v1.0 REDESIGN — Heute / Plan / Geld / Mehr Tab Styles
+     ==================================================== */
+
+  /* View-Wraps: konsistente Innenabstände */
+  .heute-wrap, .geld-wrap, .mehr-wrap {
+    padding: 12px 16px 110px;
+    animation: fadeIn 0.2s ease;
+    max-width: 100%;
+  }
+
+  /* Trip-Strip oben in jeder View */
+  .trip-strip {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: var(--shadow-xs);
+    margin-bottom: 18px;
+    text-align: left;
+    transition: transform 0.1s, box-shadow 0.15s;
+    cursor: pointer;
+  }
+  .trip-strip:active { transform: scale(0.99); box-shadow: var(--shadow-sm); }
+  .trip-strip .ts-flag {
+    width: 36px; height: 36px; border-radius: 8px;
+    background: var(--bg-soft);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; flex-shrink: 0;
+  }
+  .trip-strip .ts-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  .trip-strip .ts-name {
+    font-size: 14px; font-weight: 600; color: var(--text);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .trip-strip .ts-meta {
+    font-size: 12px; color: var(--text-muted);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .trip-strip .ts-caret {
+    color: var(--text-soft); font-size: 13px; flex-shrink: 0;
+  }
+
+  /* Page Header (Display-Datum) */
+  .page-header { margin-bottom: 6px; }
+  .page-header .h-display {
+    font-size: 30px; line-height: 36px; font-weight: 700;
+    margin: 4px 0 4px; letter-spacing: -0.02em; color: var(--text);
+  }
+  .page-header .page-sub {
+    font-size: 14px; color: var(--text-muted); line-height: 1.4;
+  }
+  .page-header .weather { color: var(--text); font-weight: 500; }
+
+  /* Caption-Label (uppercase Sektionsüberschrift) */
+  .caption {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.06em;
+    text-transform: uppercase; color: var(--text-soft);
+    margin: 24px 0 10px; padding-left: 4px;
+  }
+
+  /* Heute: Today-Card (Agenda) */
+  .today-card {
+    background: var(--surface); border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm); overflow: hidden;
+  }
+  .today-card .agenda-item {
+    width: 100%;
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+    transition: background 0.1s;
+  }
+  .today-card .agenda-item:last-child { border-bottom: none; }
+  .today-card .agenda-item:active { background: var(--bg-soft); }
+  .today-card .ag-time {
+    font-size: 13px; font-weight: 600; color: var(--text);
+    min-width: 44px; flex-shrink: 0;
+  }
+  .today-card .ag-icon { font-size: 18px; flex-shrink: 0; }
+  .today-card .ag-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  .today-card .ag-title {
+    font-size: 14px; font-weight: 500; color: var(--text);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .today-card .ag-meta {
+    font-size: 12px; color: var(--text-muted);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+
+  /* Empty-Card (für leere Heute-Agenda) */
+  .empty-card {
+    background: var(--surface); border-radius: var(--radius-lg);
+    padding: 28px 20px; text-align: center; box-shadow: var(--shadow-sm);
+  }
+  .empty-card .ec-icon { font-size: 36px; margin-bottom: 8px; }
+  .empty-card .ec-title { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .empty-card .ec-text { font-size: 13px; color: var(--text-muted); margin-bottom: 16px; line-height: 1.4; }
+  .empty-card .btn-primary {
+    background: var(--accent); color: #fff; padding: 10px 18px;
+    border-radius: 999px; font-size: 13px; font-weight: 600;
+    box-shadow: var(--shadow-pink);
+  }
+  .empty-card .btn-primary:active { transform: scale(0.97); }
+
+  /* Quick-Actions Grid */
+  .quick-actions {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+  }
+  .qa-btn {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-md); padding: 12px 14px;
+    display: flex; align-items: center; gap: 10px;
+    box-shadow: var(--shadow-xs); text-align: left;
+    transition: transform 0.1s, box-shadow 0.15s;
+  }
+  .qa-btn:active { transform: scale(0.97); box-shadow: var(--shadow-sm); }
+  .qa-btn .qa-icon {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: var(--bg-soft); display: flex; align-items: center;
+    justify-content: center; font-size: 16px; flex-shrink: 0;
+    color: var(--text);
+  }
+  .qa-btn .qa-label { font-size: 13px; font-weight: 600; color: var(--text); }
+
+  /* Day-Row (Nächste Tage) */
+  .day-row {
+    width: 100%;
+    display: flex; align-items: center; gap: 10px;
+    background: var(--surface); padding: 12px 16px;
+    border-radius: var(--radius-md); box-shadow: var(--shadow-xs);
+    margin-bottom: 6px; text-align: left;
+    transition: transform 0.1s;
+  }
+  .day-row:active { transform: scale(0.99); }
+  .day-row .dr-date {
+    font-size: 13px; font-weight: 600; color: var(--text); min-width: 90px;
+  }
+  .day-row .dr-summary { flex: 1; font-size: 13px; color: var(--text-muted); }
+  .day-row .dr-chev { color: var(--text-soft); font-size: 14px; flex-shrink: 0; }
+
+  /* Trip-Overview Stats */
+  .trip-overview {
+    background: var(--bg-soft); border-radius: var(--radius-lg);
+    padding: 16px 12px;
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+    text-align: center;
+  }
+  .trip-overview .to-stat .to-num {
+    font-size: 20px; font-weight: 700; color: var(--text); line-height: 1.1;
+  }
+  .trip-overview .to-stat .to-lbl {
+    font-size: 11px; color: var(--text-muted);
+    margin-top: 4px; letter-spacing: 0.03em;
+  }
+
+  /* Geld-Sub-Tabs */
+  .geld-tabs {
+    display: flex; gap: 4px; background: var(--bg-soft);
+    padding: 4px; border-radius: 12px; margin: 6px 0 16px;
+  }
+  .geld-tabs .gt {
+    flex: 1; text-align: center; padding: 9px 0;
+    border-radius: 8px; font-size: 13px; font-weight: 500;
+    color: var(--text-muted); transition: all 0.15s;
+  }
+  .geld-tabs .gt.active {
+    background: var(--surface); color: var(--text);
+    font-weight: 600; box-shadow: var(--shadow-xs);
+  }
+
+  /* Mehr-Tab: Sektions-Liste */
+  .more-section {
+    background: var(--surface); border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm); overflow: hidden; margin-bottom: 14px;
+  }
+  .more-row {
+    width: 100%;
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 16px; border-bottom: 1px solid var(--border);
+    text-align: left; transition: background 0.1s;
+  }
+  .more-row:last-child { border-bottom: none; }
+  .more-row:active { background: var(--bg-soft); }
+  .more-row .mr-ic {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: var(--bg-soft); display: flex; align-items: center;
+    justify-content: center; font-size: 16px; flex-shrink: 0;
+  }
+  .more-row .mr-lbl { flex: 1; font-size: 14px; color: var(--text); font-weight: 500; }
+  .more-row .mr-badge {
+    background: var(--accent-soft); color: var(--accent);
+    font-size: 11px; font-weight: 600; padding: 2px 8px;
+    border-radius: 999px; margin-right: 6px;
+  }
+  .more-row .mr-badge.success { background: #DCFCE7; color: var(--success); }
+  .more-row .mr-badge.muted { background: var(--bg-soft); color: var(--text-muted); }
+  .more-row .mr-ch { color: var(--text-soft); font-size: 14px; flex-shrink: 0; }
+
+  /* Toggle-Switch (Mehr-Tab Pref-Row) */
+  .more-row.toggle-row { cursor: default; }
+  .more-row.toggle-row:active { background: transparent; }
+  .toggle {
+    position: relative; display: inline-block;
+    width: 44px; height: 26px; flex-shrink: 0;
+  }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider {
+    position: absolute; cursor: pointer; inset: 0;
+    background: var(--bg-soft); border-radius: 999px;
+    transition: background 0.2s;
+  }
+  .toggle-slider::before {
+    content: ''; position: absolute; left: 3px; top: 3px;
+    width: 20px; height: 20px; background: #fff;
+    border-radius: 50%; box-shadow: var(--shadow-xs);
+    transition: transform 0.2s;
+  }
+  .toggle input:checked + .toggle-slider { background: var(--accent); }
+  .toggle input:checked + .toggle-slider::before { transform: translateX(18px); }
+  .more-row.about-row { color: var(--text-muted); }
+
+  /* SOS-FAB (floating) */
+  .sos-fab {
+    position: fixed; right: 16px;
+    bottom: calc(86px + var(--safe-bottom) + 80px);
+    width: 54px; height: 54px;
+    border-radius: 50%;
+    background: var(--danger);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 6px 20px rgba(220,38,38,0.45);
+    z-index: 50;
+    transition: transform 0.15s, box-shadow 0.2s;
+    animation: pop 0.25s ease;
+  }
+  .sos-fab:active { transform: scale(0.93); }
+  .sos-fab-label {
+    font-size: 12px; font-weight: 700; letter-spacing: 0.06em;
+  }
+
+  /* Bottom-Sheet (Trip-Switcher, SOS-Sheet) */
+  .bottom-sheet {
+    position: fixed; inset: 0;
+    z-index: 100;
+    display: none;
+    align-items: flex-end; justify-content: center;
+  }
+  .bottom-sheet.show { display: flex; animation: fadeIn 0.18s ease; }
+  .bottom-sheet .sheet-overlay {
+    position: absolute; inset: 0;
+    background: rgba(0,0,0,0.45);
+  }
+  .bottom-sheet .sheet-body {
+    position: relative;
+    width: 100%; max-width: 600px;
+    background: var(--surface);
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    padding: 12px 20px calc(28px + var(--safe-bottom));
+    max-height: 88vh; overflow-y: auto;
+    box-shadow: var(--shadow-lg);
+    animation: sheetSlideUp 0.22s ease;
+  }
+  @keyframes sheetSlideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  .bottom-sheet .sheet-grabber {
+    display: block; width: 36px; height: 5px; background: #DDD;
+    border-radius: 3px; margin: 0 auto 14px;
+  }
+  .bottom-sheet .sheet-title {
+    font-size: 18px; font-weight: 700; margin: 0 0 4px;
+    color: var(--text);
+  }
+  .bottom-sheet .sheet-sub {
+    font-size: 13px; color: var(--text-muted); margin: 0 0 16px;
+  }
+  .bottom-sheet .btn-cancel {
+    width: 100%; margin-top: 14px;
+    background: var(--bg-soft); color: var(--text);
+    border-radius: var(--radius-md); padding: 12px;
+    font-size: 14px; font-weight: 500;
+  }
+
+  /* SOS-Sheet spezifisch */
+  .sos-call-big {
+    display: flex; align-items: center; justify-content: center;
+    background: var(--danger); color: #fff;
+    padding: 18px; border-radius: var(--radius-md);
+    font-size: 17px; font-weight: 700;
+    margin-bottom: 14px; text-decoration: none;
+    box-shadow: 0 4px 16px rgba(220,38,38,0.3);
+  }
+  .sos-call-big:active { transform: scale(0.98); }
+  .sos-grid-sheet {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+  }
+  .sos-grid-sheet .sos-item {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--bg-soft); padding: 14px 12px;
+    border-radius: var(--radius-md); font-size: 13px; font-weight: 500;
+    color: var(--text); text-decoration: none; min-height: 50px;
+  }
+  .sos-grid-sheet .sos-item:active { transform: scale(0.97); }
+
+  /* Trip-Switcher-Sheet spezifisch */
+  .trip-card-row {
+    width: 100%;
+    display: flex; align-items: center; gap: 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 14px 14px; margin-bottom: 8px;
+    text-align: left; background: var(--surface);
+    transition: transform 0.1s;
+  }
+  .trip-card-row:active { transform: scale(0.99); }
+  .trip-card-row.active {
+    border-color: var(--accent); background: var(--accent-soft);
+  }
+  .trip-card-row .tcr-flag {
+    width: 36px; height: 36px; border-radius: 8px;
+    background: var(--bg-soft); display: flex; align-items: center;
+    justify-content: center; font-size: 18px; flex-shrink: 0;
+  }
+  .trip-card-row .tcr-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  .trip-card-row .tcr-name {
+    font-size: 14px; font-weight: 600; color: var(--text);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .trip-card-row .tcr-meta {
+    font-size: 12px; color: var(--text-muted);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .trip-card-row .tcr-active {
+    font-size: 11px; font-weight: 600; color: var(--accent);
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .trip-new-btn {
+    width: 100%; margin-top: 4px;
+    background: var(--surface);
+    border: 1px dashed var(--border);
+    border-radius: var(--radius-md);
+    padding: 14px; text-align: center;
+    color: var(--text-muted); font-size: 14px; font-weight: 500;
+  }
+  .trip-new-btn:active { background: var(--bg-soft); }
+
+  /* SOS-FAB nur wenn data-view es zulässt — refreshSosFab() steuert via display */
+  body[data-view="map"] .sos-fab,
+  body[data-view="geld"] .sos-fab,
+  body[data-view="mehr"] .sos-fab,
+  body[data-view="packlist"] .sos-fab,
+  body[data-view="calendar"] .sos-fab { display: none !important; }
 </style>
 </head>
 <body>
@@ -945,7 +1326,11 @@
   </header>
 
   <main>
-    <section class="view active" id="view-list">
+    <section class="view active" id="view-heute">
+      <div class="heute-wrap" id="heute-container"></div>
+    </section>
+
+    <section class="view" id="view-list">
       <div class="list-wrap" id="list-container"></div>
     </section>
 
@@ -965,19 +1350,45 @@
       </div>
     </section>
 
+    <section class="view" id="view-geld">
+      <div class="geld-wrap" id="geld-container"></div>
+    </section>
+
+    <section class="view" id="view-mehr">
+      <div class="mehr-wrap" id="mehr-container"></div>
+    </section>
+
     <section class="view" id="view-packlist">
       <div class="packlist-wrap" id="packlist-container"></div>
     </section>
   </main>
 
   <button class="fab" id="fab" title="Hinzufügen">+</button>
+  <button class="sos-fab" id="sos-fab" title="Notruf-Optionen" aria-label="Notruf öffnen">
+    <span class="sos-fab-label">SOS</span>
+  </button>
 
   <nav class="tabs">
-    <button class="tab active" data-view="list"><span class="ico">📋</span>Liste</button>
-    <button class="tab" data-view="calendar"><span class="ico">📅</span>Kalender</button>
+    <button class="tab active" data-view="heute"><span class="ico">🏠</span>Heute</button>
+    <button class="tab" data-view="plan"><span class="ico">📅</span>Plan</button>
     <button class="tab" data-view="map"><span class="ico">🗺️</span>Karte</button>
-    <button class="tab" data-view="packlist"><span class="ico">🎒</span>Packliste</button>
+    <button class="tab" data-view="geld"><span class="ico">💶</span>Geld</button>
+    <button class="tab" data-view="mehr"><span class="ico">⋯</span>Mehr</button>
   </nav>
+</div>
+
+<!-- Bottom-Sheets (außerhalb #app, fixed-positioned) -->
+<div class="bottom-sheet" id="sos-sheet" aria-hidden="true">
+  <div class="sheet-overlay" data-sheet-close="sos-sheet"></div>
+  <div class="sheet-body" role="dialog" aria-modal="true">
+    <span class="sheet-grabber"></span>
+  </div>
+</div>
+<div class="bottom-sheet" id="trip-switcher-sheet" aria-hidden="true">
+  <div class="sheet-overlay" data-sheet-close="trip-switcher-sheet"></div>
+  <div class="sheet-body" role="dialog" aria-modal="true">
+    <span class="sheet-grabber"></span>
+  </div>
 </div>
 
 <!-- Add item modal -->
@@ -1530,7 +1941,7 @@ create policy "u" on trips for update using (true);</pre>
 // ============ App-Version ============
 // Bei Schema-Änderungen SCHEMA_VERSION hochzählen + Migration ergänzen.
 // APP_VERSION ist die User-sichtbare Version.
-const APP_VERSION = '0.5.3';
+const APP_VERSION = '0.5.4';
 const SCHEMA_VERSION = 3;
 
 // ============ Constants & Demo Data ============
@@ -1745,7 +2156,8 @@ const DEFAULT_STATE = {
   schemaVersion: SCHEMA_VERSION,
   currentTripId: 't1',
   trips: { t1: DEFAULT_TRIP },
-  _tripTombs: [] // Gelöschte Trip-IDs, damit die Löschung auch zur Partnerin wandert
+  _tripTombs: [], // Gelöschte Trip-IDs, damit die Löschung auch zur Partnerin wandert
+  prefs: { sosFabEnabled: true }
 };
 function freshTrip(overrides) {
   const t = {
@@ -1847,7 +2259,7 @@ function deleteTrip(id) {
 // ============ State ============
 let state = loadState();
 let myName = localStorage.getItem('tm_my_name') || '';
-let currentView = 'list';
+let currentView = 'heute';
 let selectedPlace = null;
 let editingItemId = null;
 let map = null, markers = [], accomMarkers = [], myLocationMarker = null;
@@ -1884,6 +2296,9 @@ function loadState() {
       if (!parsed.trips || typeof parsed.trips !== 'object') parsed.trips = {};
       if (!Array.isArray(parsed._tripTombs)) parsed._tripTombs = [];
       if (typeof parsed.schemaVersion !== 'number') parsed.schemaVersion = 2;
+      // Globale Prefs (v0.5.4) — UI-Präferenzen, persistent über alle Trips
+      if (!parsed.prefs || typeof parsed.prefs !== 'object') parsed.prefs = {};
+      if (typeof parsed.prefs.sosFabEnabled !== 'boolean') parsed.prefs.sosFabEnabled = true;
       // Falls currentTripId nicht existiert, auf die erste Trip setzen
       if (!parsed.trips[parsed.currentTripId]) {
         const first = Object.keys(parsed.trips)[0];
@@ -2164,10 +2579,15 @@ function mergeRemoteState(remote) {
 }
 function refreshCurrentView() {
   renderHeader();
-  if (currentView === 'list') renderList();
+  renderTripStrip();
+  if (currentView === 'heute') renderHeute();
+  else if (currentView === 'plan' || currentView === 'list') renderList();
   else if (currentView === 'calendar') renderCalendar();
   else if (currentView === 'map') renderMap();
   else if (currentView === 'packlist') renderPacklist();
+  else if (currentView === 'geld') renderGeld();
+  else if (currentView === 'mehr') renderMehr();
+  refreshSosFab();
 }
 function startCloudPolling() {
   clearInterval(CLOUD.pollTimer);
@@ -2252,19 +2672,47 @@ async function copyToClipboard(text) {
 }
 
 // ============ View switching ============
+// View-Aliase: nav-tabs benutzen 'heute|plan|map|geld|mehr' — ältere Aufrufe wie
+// switchView('list')/switchView('calendar')/switchView('packlist') werden weiter
+// unterstützt (z.B. aus Mehr → "Kalender öffnen").
 function switchView(name) {
+  // Alias plan → list (interner View-Container)
+  const viewId = (name === 'plan') ? 'list' : name;
+  const viewEl = document.getElementById('view-' + viewId);
+  if (!viewEl) { console.warn('Unknown view:', name); return; }
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  document.getElementById('view-' + name).classList.add('active');
-  document.querySelectorAll('nav.tabs .tab').forEach(b => b.classList.toggle('active', b.dataset.view === name));
+  viewEl.classList.add('active');
+  // Bottom-Nav-Highlight: 'list' und 'calendar' und 'packlist' fallen alle auf "plan" zurück
+  let navName = name;
+  if (['list','calendar','packlist'].includes(name)) navName = 'plan';
+  document.querySelectorAll('nav.tabs .tab').forEach(b => b.classList.toggle('active', b.dataset.view === navName));
   currentView = name;
-  // Setze data-view am body, damit CSS view-spezifisch steuern kann (z.B. MyLocation-Button nur auf Karte)
   document.body.setAttribute('data-view', name);
-  if (name === 'list') renderList();
-  if (name === 'calendar') renderCalendar();
-  if (name === 'map') { setTimeout(() => { initMap(); renderMap(); }, 60); }
-  if (name === 'packlist') renderPacklist();
+  // Render der jeweiligen View
+  if (name === 'heute') renderHeute();
+  else if (name === 'plan' || name === 'list') renderList();
+  else if (name === 'calendar') renderCalendar();
+  else if (name === 'map') { setTimeout(() => { initMap(); renderMap(); }, 60); }
+  else if (name === 'packlist') renderPacklist();
+  else if (name === 'geld') renderGeld();
+  else if (name === 'mehr') renderMehr();
+  // FAB sichtbar machen außer auf Heute, Mehr, Geld
+  refreshFabVisibility();
+  refreshSosFab();
+  // Trip-Strip oben aktualisieren
+  renderTripStrip();
+  // Bei Tab-Wechsel zur Karte oder Plan: Map nur dort sichtbar
+  if (name === 'map' && map) { map.invalidateSize(); }
 }
 document.querySelectorAll('nav.tabs .tab').forEach(b => b.addEventListener('click', () => switchView(b.dataset.view)));
+
+// FAB-Sichtbarkeit: nur auf Plan + Packliste sinnvoll
+function refreshFabVisibility() {
+  const fab = document.getElementById('fab');
+  if (!fab) return;
+  const showFab = (currentView === 'plan' || currentView === 'list' || currentView === 'packlist' || currentView === 'calendar');
+  fab.style.display = showFab ? '' : 'none';
+}
 
 // ============ Header ============
 function renderHeader() {
@@ -2272,10 +2720,470 @@ function renderHeader() {
   document.getElementById('trip-city').textContent = T().city;
 }
 
+// ============ Trip-Strip (oben in jeder View) ============
+function buildTripStripHTML() {
+  const t = T();
+  const flag = countryFlag(t.country) || '✈️';
+  const dateLabel = tripDateRangeLabel(t);
+  const dayLabel = tripDayProgressLabel(t);
+  return `<button class="trip-strip" id="trip-strip-btn" type="button" aria-label="Reise wechseln">
+    <span class="ts-flag">${flag}</span>
+    <span class="ts-info">
+      <span class="ts-name">${escapeHtml(t.name || 'Reise')}</span>
+      <span class="ts-meta">${escapeHtml(dateLabel + (dayLabel ? ' · ' + dayLabel : ''))}</span>
+    </span>
+    <span class="ts-caret">⌄</span>
+  </button>`;
+}
+function renderTripStrip() {
+  // (Aktuell nicht global im DOM — wird pro View eingefügt. Funktion vorhanden für künftige Header-Integration.)
+  // Hook re-bind nach Re-Render der Views (handled in jeder render-Funktion).
+}
+function bindTripStrip(rootEl) {
+  if (!rootEl) return;
+  const btn = rootEl.querySelector('#trip-strip-btn');
+  if (btn) btn.addEventListener('click', openTripSwitcher);
+}
+function countryFlag(code) {
+  if (!code) return '';
+  const cc = code.toUpperCase();
+  if (!/^[A-Z]{2}$/.test(cc)) return '';
+  return String.fromCodePoint(...[...cc].map(c => 0x1F1E6 + c.charCodeAt(0) - 65));
+}
+function tripDateRangeLabel(t) {
+  if (!t.start && !t.end) return t.city || 'Noch ohne Datum';
+  if (t.start && t.end) {
+    const a = new Date(t.start), b = new Date(t.end);
+    const sameMonth = a.getMonth() === b.getMonth() && a.getFullYear() === b.getFullYear();
+    const monthA = a.toLocaleDateString('de-DE', { month: 'short' });
+    const monthB = b.toLocaleDateString('de-DE', { month: 'short' });
+    if (sameMonth) return `${a.getDate()}. – ${b.getDate()}. ${monthB}`;
+    return `${a.getDate()}. ${monthA} – ${b.getDate()}. ${monthB}`;
+  }
+  if (t.start) return `ab ${fmtDate(t.start)}`;
+  return `bis ${fmtDate(t.end)}`;
+}
+function tripDayProgressLabel(t) {
+  if (!t.start || !t.end) return '';
+  const a = new Date(t.start), b = new Date(t.end), now = new Date();
+  // Truncate to day boundaries
+  a.setHours(0,0,0,0); b.setHours(0,0,0,0); now.setHours(0,0,0,0);
+  const totalDays = Math.round((b - a) / 86400000) + 1;
+  if (now < a) return `noch ${Math.round((a - now) / 86400000)} Tage`;
+  if (now > b) return `vor ${Math.round((now - b) / 86400000)} Tagen`;
+  const dayN = Math.round((now - a) / 86400000) + 1;
+  return `Tag ${dayN}/${totalDays}`;
+}
+
+// ============ Heute-Tab (kontextbasierter Home-Screen) ============
+function renderHeute() {
+  const container = document.getElementById('heute-container');
+  if (!container) return;
+  const t = T();
+  const today = new Date(); today.setHours(0,0,0,0);
+  const todayISO = isoFromDate(today);
+
+  // Heute-Items sammeln
+  const todayEvents = (t.events || []).filter(e => e.date === todayISO);
+  const todayItems = (t.items || []).filter(i => i.scheduledDate === todayISO);
+  const todayAccoms = (t.accommodations || []).filter(a => a.start === todayISO || a.end === todayISO);
+  // Aggregat sortieren nach Zeit
+  const todayAgenda = [];
+  todayEvents.forEach(e => todayAgenda.push({
+    type: 'event', time: e.time || '', title: e.title || eventTypeLabel(e.type),
+    icon: eventIcon(e.type), meta: e.notes || '', _ref: { kind: 'event', id: e.id }
+  }));
+  todayItems.forEach(i => todayAgenda.push({
+    type: 'item', time: i.scheduledTime || '', title: i.name,
+    icon: catIcon(i.category), meta: i.address || '', _ref: { kind: 'item', id: i.id }
+  }));
+  todayAccoms.forEach(a => todayAgenda.push({
+    type: 'accom', time: '', title: a.name + (a.start === todayISO ? ' · Check-in' : ' · Check-out'),
+    icon: '🏨', meta: a.address || '', _ref: { kind: 'accom', id: a.id }
+  }));
+  todayAgenda.sort((a, b) => (a.time || '99:99').localeCompare(b.time || '99:99'));
+
+  // Hero-Datum
+  const weekday = today.toLocaleDateString('de-DE', { weekday: 'long' });
+  const dateLong = today.toLocaleDateString('de-DE', { day: 'numeric', month: 'long' });
+
+  // Nächste 3 Tage zusammenfassen
+  const nextDays = [];
+  for (let d = 1; d <= 3; d++) {
+    const nx = new Date(today.getTime() + d * 86400000);
+    const iso = isoFromDate(nx);
+    const ev = (t.events || []).filter(e => e.date === iso);
+    const it = (t.items || []).filter(i => i.scheduledDate === iso);
+    const ac = (t.accommodations || []).filter(a => a.start === iso || a.end === iso);
+    const total = ev.length + it.length + ac.length;
+    if (total === 0 && (!t.end || iso > t.end)) continue;
+    nextDays.push({
+      iso,
+      dayShort: nx.toLocaleDateString('de-DE', { weekday: 'short' }),
+      dateShort: nx.getDate() + '.' + String(nx.getMonth() + 1).padStart(2, '0'),
+      summary: buildDaySummary(ev, it, ac)
+    });
+  }
+
+  // Trip-Stats
+  const stats = {
+    accoms: (t.accommodations || []).length,
+    items: (t.items || []).length,
+    events: (t.events || []).length,
+    expensesEur: Math.round((t.expenses || []).reduce((s, e) => s + (convertFx(e.amount, e.currency, 'EUR') || 0), 0))
+  };
+
+  // ----- HTML aufbauen -----
+  let html = buildTripStripHTML();
+  html += `<header class="page-header">
+    <h1 class="h-display">${escapeHtml(weekday)}</h1>
+    <div class="page-sub">${escapeHtml(dateLong)} · <span class="weather">${escapeHtml(t.city || 'Ohne Ort')}</span></div>
+  </header>`;
+
+  // Heute-Agenda
+  if (todayAgenda.length > 0) {
+    html += `<div class="caption">Heute auf dem Plan</div>`;
+    html += `<div class="today-card">`;
+    todayAgenda.forEach((a, idx) => {
+      html += `<button class="agenda-item" data-kind="${a._ref.kind}" data-id="${a._ref.id}" type="button">
+        <span class="ag-time">${escapeHtml(a.time || '—')}</span>
+        <span class="ag-icon">${a.icon}</span>
+        <span class="ag-body">
+          <span class="ag-title">${escapeHtml(a.title)}</span>
+          ${a.meta ? `<span class="ag-meta">${escapeHtml(a.meta)}</span>` : ''}
+        </span>
+      </button>`;
+    });
+    html += `</div>`;
+  } else {
+    html += `<div class="empty-card">
+      <div class="ec-icon">🌤</div>
+      <div class="ec-title">Heute ist ungeplant</div>
+      <div class="ec-text">Keine Termine, keine Items für ${dateLong}.</div>
+      <button class="btn-primary" id="empty-add-plan-btn" type="button">+ Termin hinzufügen</button>
+    </div>`;
+  }
+
+  // Schnellaktionen
+  html += `<div class="caption">Schnellaktionen</div>`;
+  html += `<div class="quick-actions">
+    <button class="qa-btn" data-qa="expense" type="button"><span class="qa-icon">＋</span><span class="qa-label">Ausgabe</span></button>
+    <button class="qa-btn" data-qa="fx" type="button"><span class="qa-icon">€€</span><span class="qa-label">Wechseln</span></button>
+    <button class="qa-btn" data-qa="safe" type="button"><span class="qa-icon">🔒</span><span class="qa-label">Safe</span></button>
+    <button class="qa-btn" data-qa="email" type="button"><span class="qa-icon">📧</span><span class="qa-label">Email-Import</span></button>
+  </div>`;
+
+  // Nächste Tage
+  if (nextDays.length > 0) {
+    html += `<div class="caption">Nächste Tage</div>`;
+    nextDays.forEach(d => {
+      html += `<button class="day-row" data-day="${d.iso}" type="button">
+        <span class="dr-date">${escapeHtml(d.dayShort)} · ${escapeHtml(d.dateShort)}</span>
+        <span class="dr-summary">${escapeHtml(d.summary)}</span>
+        <span class="dr-chev">›</span>
+      </button>`;
+    });
+  }
+
+  // Trip-Übersicht
+  html += `<div class="caption">Deine Reise</div>
+    <div class="trip-overview">
+      <div class="to-stat"><div class="to-num">${stats.accoms}</div><div class="to-lbl">Hotels</div></div>
+      <div class="to-stat"><div class="to-num">${stats.items}</div><div class="to-lbl">Orte</div></div>
+      <div class="to-stat"><div class="to-num">${stats.events}</div><div class="to-lbl">Termine</div></div>
+      <div class="to-stat"><div class="to-num">€${stats.expensesEur}</div><div class="to-lbl">Ausgaben</div></div>
+    </div>`;
+
+  html += `<div style="height:32px;"></div>`;
+
+  container.innerHTML = html;
+  bindTripStrip(container);
+
+  // Bindings
+  container.querySelectorAll('.agenda-item').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const kind = btn.dataset.kind, id = btn.dataset.id;
+      if (kind === 'event') openEventModal(id);
+      else if (kind === 'item') showDetail(id);
+      else if (kind === 'accom') openAccomModal(id);
+    });
+  });
+  const emptyBtn = container.querySelector('#empty-add-plan-btn');
+  if (emptyBtn) emptyBtn.addEventListener('click', () => openEventModal(null));
+  container.querySelectorAll('.qa-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const qa = btn.dataset.qa;
+      if (qa === 'expense') openExpenseModal(null);
+      else if (qa === 'fx') switchView('geld');
+      else if (qa === 'safe') { switchView('mehr'); setTimeout(() => { const el = document.querySelector('[data-mehr-row="docs"]'); if (el) el.click(); }, 80); }
+      else if (qa === 'email') openEmailImportModal();
+    });
+  });
+  container.querySelectorAll('.day-row').forEach(btn => {
+    btn.addEventListener('click', () => switchView('plan'));
+  });
+}
+
+function buildDaySummary(ev, it, ac) {
+  const parts = [];
+  if (ev.length) parts.push(ev.length === 1 ? '1 Termin' : ev.length + ' Termine');
+  if (it.length) parts.push(it.length === 1 ? '1 Ort' : it.length + ' Orte');
+  if (ac.length) parts.push(ac.length === 1 ? '1 Hotel' : ac.length + ' Hotels');
+  if (parts.length === 0) return 'Noch nichts geplant';
+  return parts.join(' · ');
+}
+function isoFromDate(d) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+function eventTypeLabel(type) {
+  return type === 'flight' ? 'Flug' : type === 'train' ? 'Zug' : type === 'transfer' ? 'Transfer' : 'Termin';
+}
+function eventIcon(type) {
+  return type === 'flight' ? '✈️' : type === 'train' ? '🚆' : type === 'transfer' ? '🚌' : '📅';
+}
+function catIcon(cat) {
+  return cat === 'sight' ? '🏛' : cat === 'food' ? '🍽' : cat === 'shop' ? '🛍' : cat === 'buy' ? '🛒' : '📍';
+}
+// (escapeHtml ist global definiert; siehe weiter unten)
+
+// ============ Geld-Tab ============
+let geldSubTab = 'expenses'; // 'expenses' | 'fx' | 'visa'
+function renderGeld() {
+  const container = document.getElementById('geld-container');
+  if (!container) return;
+  const t = T();
+  let html = buildTripStripHTML();
+  html += `<header class="page-header">
+    <h1 class="h-display">Geld</h1>
+    <div class="page-sub">${escapeHtml(t.country ? findCountry(t.country)?.name || '' : 'Budget & Wechsel')}</div>
+  </header>`;
+  // Sub-Tabs
+  html += `<div class="geld-tabs">
+    <button class="gt ${geldSubTab==='expenses'?'active':''}" data-gt="expenses" type="button">Ausgaben</button>
+    <button class="gt ${geldSubTab==='fx'?'active':''}" data-gt="fx" type="button">Wechseln</button>
+    <button class="gt ${geldSubTab==='visa'?'active':''}" data-gt="visa" type="button">Visum</button>
+  </div>`;
+  html += `<div id="geld-sub-container"></div>`;
+  html += `<div style="height:32px;"></div>`;
+  container.innerHTML = html;
+  bindTripStrip(container);
+  container.querySelectorAll('.gt').forEach(btn => {
+    btn.addEventListener('click', () => {
+      geldSubTab = btn.dataset.gt;
+      renderGeldSub();
+    });
+  });
+  renderGeldSub();
+}
+function renderGeldSub() {
+  const sub = document.getElementById('geld-sub-container');
+  if (!sub) return;
+  sub.innerHTML = '';
+  if (geldSubTab === 'expenses') {
+    renderExpensePanel(sub);
+  } else if (geldSubTab === 'fx') {
+    renderFxPanel(sub);
+  } else if (geldSubTab === 'visa') {
+    renderVisaPanel(sub);
+  }
+}
+
+// ============ Mehr-Tab ============
+function renderMehr() {
+  const container = document.getElementById('mehr-container');
+  if (!container) return;
+  const t = T();
+  let html = buildTripStripHTML();
+  html += `<header class="page-header">
+    <h1 class="h-display">Mehr</h1>
+    <div class="page-sub">Werkzeuge, Trip-Settings &amp; Profil</div>
+  </header>`;
+
+  // REISE
+  const packCount = (t.packlist || []).length;
+  const packDone = (t.packlist || []).filter(p => p.checked).length;
+  const docsCount = (t.documents || []).length;
+  html += `<div class="caption">Reise</div>`;
+  html += `<div class="more-section">
+    <button class="more-row" data-mehr-row="packlist" type="button"><span class="mr-ic">📋</span><span class="mr-lbl">Packliste</span><span class="mr-badge muted">${packDone}/${packCount}</span><span class="mr-ch">›</span></button>
+    <button class="more-row" data-mehr-row="info" type="button"><span class="mr-ic">🌍</span><span class="mr-lbl">Reiseinfos${t.country ? ' · ' + (findCountry(t.country)?.name || '') : ''}</span><span class="mr-ch">›</span></button>
+    <button class="more-row" data-mehr-row="visa" type="button"><span class="mr-ic">🛂</span><span class="mr-lbl">Visum</span><span class="mr-ch">›</span></button>
+    <button class="more-row" data-mehr-row="docs" type="button"><span class="mr-ic">🔒</span><span class="mr-lbl">Dokumenten-Safe</span>${docsCount > 0 ? `<span class="mr-badge">${docsCount}</span>` : ''}<span class="mr-ch">›</span></button>
+    <button class="more-row" data-mehr-row="sos" type="button"><span class="mr-ic">🚨</span><span class="mr-lbl">Notfall-Details</span><span class="mr-ch">›</span></button>
+    <button class="more-row" data-mehr-row="calendar" type="button"><span class="mr-ic">📅</span><span class="mr-lbl">Kalender-Ansicht</span><span class="mr-ch">›</span></button>
+  </div>`;
+
+  // TRIP
+  html += `<div class="caption">Trip</div>`;
+  html += `<div class="more-section">
+    <button class="more-row" data-mehr-row="trip-edit" type="button"><span class="mr-ic">⚙️</span><span class="mr-lbl">Trip bearbeiten</span><span class="mr-ch">›</span></button>
+    <button class="more-row" data-mehr-row="trip-share" type="button"><span class="mr-ic">📤</span><span class="mr-lbl">Trip teilen</span><span class="mr-ch">›</span></button>
+    <button class="more-row" data-mehr-row="sync" type="button"><span class="mr-ic">🔄</span><span class="mr-lbl">Sync</span><span class="mr-badge ${cloudEnabled() ? 'success' : 'muted'}">${cloudEnabled() ? 'aktiv' : 'aus'}</span><span class="mr-ch">›</span></button>
+    <button class="more-row" data-mehr-row="trip-list" type="button"><span class="mr-ic">🧳</span><span class="mr-lbl">Reisen verwalten</span><span class="mr-ch">›</span></button>
+  </div>`;
+
+  // APP
+  const sosOn = state.prefs && state.prefs.sosFabEnabled !== false;
+  html += `<div class="caption">App</div>`;
+  html += `<div class="more-section">
+    <button class="more-row" data-mehr-row="settings" type="button"><span class="mr-ic">👤</span><span class="mr-lbl">Profil &amp; Einstellungen</span><span class="mr-ch">›</span></button>
+    <div class="more-row toggle-row">
+      <span class="mr-ic">🚨</span><span class="mr-lbl">SOS-Knopf permanent zeigen</span>
+      <label class="toggle"><input type="checkbox" id="pref-sos-fab" ${sosOn ? 'checked' : ''}><span class="toggle-slider"></span></label>
+    </div>
+    <button class="more-row" data-mehr-row="help" type="button"><span class="mr-ic">❓</span><span class="mr-lbl">Hilfe &amp; Anleitung</span><span class="mr-ch">›</span></button>
+    <div class="more-row about-row">
+      <span class="mr-ic">ℹ️</span><span class="mr-lbl">TripMate</span><span class="mr-badge muted">v${APP_VERSION || '0.5.4'}</span>
+    </div>
+  </div>`;
+
+  html += `<div style="height:48px;"></div>`;
+  container.innerHTML = html;
+  bindTripStrip(container);
+
+  // Bindings für Mehr-Rows
+  container.querySelectorAll('[data-mehr-row]').forEach(btn => {
+    btn.addEventListener('click', () => handleMehrRow(btn.dataset.mehrRow));
+  });
+  const sosToggle = container.querySelector('#pref-sos-fab');
+  if (sosToggle) sosToggle.addEventListener('change', () => {
+    if (!state.prefs) state.prefs = {};
+    state.prefs.sosFabEnabled = sosToggle.checked;
+    saveState();
+    refreshSosFab();
+    toast(sosToggle.checked ? 'SOS-Knopf wieder sichtbar' : 'SOS-Knopf ausgeblendet — erreichbar via Mehr');
+  });
+}
+function handleMehrRow(action) {
+  switch (action) {
+    case 'packlist': switchView('packlist'); break;
+    case 'calendar': switchView('calendar'); break;
+    case 'info': scrollToPanel('country-panel', 'plan'); break;
+    case 'visa': geldSubTab = 'visa'; switchView('geld'); break;
+    case 'docs': scrollToPanel('docs-panel', 'plan'); break;
+    case 'sos': scrollToPanel('sos-panel', 'plan'); break;
+    case 'trip-edit': openTripEdit(state.currentTripId); break;
+    case 'trip-share': document.getElementById('share-btn')?.click(); break;
+    case 'sync': document.getElementById('open-sync-setup')?.click(); break;
+    case 'trip-list': openTripManager(); break;
+    case 'settings': openSettings(); break;
+    case 'help': openHelp(); break;
+  }
+}
+function scrollToPanel(panelClass, fallbackView) {
+  if (fallbackView) switchView(fallbackView);
+  setTimeout(() => {
+    const el = document.querySelector('.' + panelClass);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 120);
+}
+function openHelp() {
+  toast('Hilfe-Seite kommt in v1.1');
+}
+
+// ============ SOS-FAB (globaler Notruf-Button) ============
+function refreshSosFab() {
+  const fab = document.getElementById('sos-fab');
+  if (!fab) return;
+  const enabled = state.prefs && state.prefs.sosFabEnabled !== false;
+  const showOn = ['heute', 'plan', 'list'];
+  const visible = enabled && showOn.includes(currentView) && !!T().country;
+  fab.style.display = visible ? '' : 'none';
+}
+function openSosSheet() {
+  const t = T();
+  const info = t.country ? findCountry(t.country) : null;
+  const emergency = (info && info.emergency) || '112';
+  const city = (t.city || '').split(',')[0].trim();
+  const sheet = document.getElementById('sos-sheet');
+  if (!sheet) return;
+  const body = sheet.querySelector('.sheet-body');
+  body.innerHTML = `
+    <h3 class="sheet-title">Notfall</h3>
+    <p class="sheet-sub">${info ? escapeHtml(info.name) : 'Notrufnummern unbekannt — Standard 112'}</p>
+    <a class="sos-call-big" href="tel:${escapeHtml(emergency)}">📞 Notruf ${escapeHtml(emergency)}</a>
+    <div class="sos-grid-sheet">
+      <a class="sos-item" href="https://www.google.com/maps/search/${encodeURIComponent('Krankenhaus ' + city)}" target="_blank" rel="noopener">🏥 Krankenhaus</a>
+      <a class="sos-item" href="https://www.google.com/maps/search/${encodeURIComponent('Apotheke ' + city)}" target="_blank" rel="noopener">💊 Apotheke</a>
+      <a class="sos-item" href="https://www.google.com/search?q=${encodeURIComponent('Deutsch sprachiger Arzt ' + city)}" target="_blank" rel="noopener">👨‍⚕️ Arzt (DE)</a>
+      <a class="sos-item" href="https://www.auswaertiges-amt.de/de/ReiseUndSicherheit/vertretungen/${encodeURIComponent((t.country || '').toLowerCase())}" target="_blank" rel="noopener">🇩🇪 Botschaft</a>
+    </div>
+    <button class="btn-cancel" id="sos-sheet-close" type="button">Schließen</button>
+  `;
+  sheet.classList.add('show');
+  body.querySelector('#sos-sheet-close').addEventListener('click', () => sheet.classList.remove('show'));
+}
+
+// ============ Trip-Switcher Bottom-Sheet ============
+function openTripSwitcher() {
+  const sheet = document.getElementById('trip-switcher-sheet');
+  if (!sheet) return;
+  const body = sheet.querySelector('.sheet-body');
+  const trips = Object.values(state.trips);
+  let html = `<h3 class="sheet-title">Reise wechseln</h3>`;
+  trips.forEach(tr => {
+    const flag = countryFlag(tr.country) || '✈️';
+    const dateLbl = tripDateRangeLabel(tr);
+    const isActive = tr.id === state.currentTripId;
+    html += `<button class="trip-card-row ${isActive ? 'active' : ''}" data-trip-id="${tr.id}" type="button">
+      <span class="tcr-flag">${flag}</span>
+      <span class="tcr-info">
+        <span class="tcr-name">${escapeHtml(tr.name || 'Reise')}</span>
+        <span class="tcr-meta">${escapeHtml(dateLbl)}</span>
+      </span>
+      ${isActive ? '<span class="tcr-active">Aktiv</span>' : ''}
+    </button>`;
+  });
+  html += `<button class="trip-new-btn" id="ts-new-trip" type="button">＋ Neue Reise</button>`;
+  html += `<button class="btn-cancel" id="ts-close" type="button">Schließen</button>`;
+  body.innerHTML = html;
+  sheet.classList.add('show');
+  body.querySelectorAll('[data-trip-id]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.tripId;
+      if (id !== state.currentTripId && switchTrip(id)) {
+        sheet.classList.remove('show');
+        // Komplettes Re-Render
+        renderHeader();
+        refreshCurrentView();
+        if (currentView === 'map' && map) { map.setView(T().center, 13); renderMap(); }
+        toast('🧳 ' + (T().name || 'Reise') + ' aktiv');
+      }
+    });
+  });
+  body.querySelector('#ts-new-trip').addEventListener('click', () => {
+    sheet.classList.remove('show');
+    openTripManager(); // bestehender Trip-Manager kümmert sich um "Neu"
+  });
+  body.querySelector('#ts-close').addEventListener('click', () => sheet.classList.remove('show'));
+}
+
 // ============ List view ============
 function renderList() {
   const container = document.getElementById('list-container');
   container.innerHTML = '';
+
+  // Trip-Strip oben (klickbar → Trip-Switcher Bottom-Sheet)
+  const stripWrap = document.createElement('div');
+  stripWrap.innerHTML = buildTripStripHTML();
+  const stripEl = stripWrap.firstElementChild;
+  if (stripEl) {
+    container.appendChild(stripEl);
+    stripEl.addEventListener('click', openTripSwitcher);
+  }
+  // Page-Header
+  const header = document.createElement('header');
+  header.className = 'page-header';
+  const t0 = T();
+  const evCount = (t0.events || []).length;
+  const itCount = (t0.items || []).length;
+  const acCount = (t0.accommodations || []).length;
+  header.innerHTML = `<h1 class="h-display">Reiseplan</h1>
+    <div class="page-sub">${evCount} Termine · ${itCount} Orte · ${acCount} Hotels</div>`;
+  container.appendChild(header);
 
   // Länder-Tipps-Panel wenn Land gesetzt
   renderCountryPanel(container);
@@ -2745,7 +3653,17 @@ function renderFxPanel(container) {
       tripCurr = info.curr.split(/[\s\/,]+/)[0].toUpperCase();
     }
   }
-  if (tripCurr === 'EUR') return; // kein Umrechner nötig
+  if (tripCurr === 'EUR') {
+    // Im Geld-Tab Hinweis statt einfach leere Fläche
+    if (container && container.id === 'geld-sub-container') {
+      const note = document.createElement('div');
+      note.className = 'empty-card';
+      note.style.boxShadow = 'var(--shadow-xs)';
+      note.innerHTML = `<div class="ec-icon">💶</div><div class="ec-title">EUR-Land</div><div class="ec-text">Hier brauchst du keinen Umrechner — die Trip-Währung ist Euro.</div>`;
+      container.appendChild(note);
+    }
+    return; // kein Umrechner nötig
+  }
 
   const panel = document.createElement('div');
   panel.className = 'fx-panel';
@@ -2786,8 +3704,10 @@ function renderFxPanel(container) {
       sel.appendChild(opt);
     });
   };
-  fill(fromSel, 'EUR');
-  fill(toSel, tripCurr);
+  // Auto-Currency: Trip-Land-Währung links (von), Heimat (EUR) rechts (nach).
+  // → User sieht direkt "100 THB = X EUR" beim Öffnen — typisches Reise-Szenario.
+  fill(fromSel, tripCurr);
+  fill(toSel, 'EUR');
 
   const recompute = () => {
     const amt = parseFloat(fromVal.value);
@@ -5536,15 +6456,27 @@ function showWelcomeIfNeeded() {
 }
 
 // ============ Init ============
-document.body.setAttribute('data-view', 'list');
+document.body.setAttribute('data-view', 'heute');
 importFromHash();
 checkInviteInURL();
 preloadFx();
 renderHeader();
-renderList();
+renderHeute();
 showWelcomeIfNeeded();
 updateSyncIndicator();
 startCloudPolling();
+refreshFabVisibility();
+refreshSosFab();
+
+// SOS-FAB Click → Notruf-Sheet
+document.getElementById('sos-fab')?.addEventListener('click', openSosSheet);
+// Bottom-Sheet Overlays close on tap
+document.querySelectorAll('.bottom-sheet .sheet-overlay').forEach(o => {
+  o.addEventListener('click', () => {
+    const id = o.getAttribute('data-sheet-close');
+    if (id) document.getElementById(id)?.classList.remove('show');
+  });
+});
 
 // Register service worker
 if ('serviceWorker' in navigator) {
