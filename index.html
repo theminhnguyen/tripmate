@@ -469,6 +469,274 @@
   .country-panel .cp-drive-left { color: #b91c1c; font-weight: 700; }
   .country-panel .cp-extra { margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(120, 53, 15, 0.16); font-style: italic; color: #78350f; }
 
+  /* Itinerary (zentraler Reiseplan) */
+  .itin-panel {
+    background: linear-gradient(135deg, #F5F3FF 0%, #EDE9FE 100%);
+    border-radius: var(--radius-lg); padding: 16px; margin-bottom: 14px;
+    font-size: 13.5px;
+  }
+  .itin-panel h3 { margin: 0; font-size: 15px; font-weight: 700; color: #4C1D95; display: flex; align-items: center; gap: 8px; letter-spacing: -0.01em; }
+  .itin-day {
+    background: white; border-radius: var(--radius-md); padding: 10px 12px;
+    margin-top: 8px; box-shadow: var(--shadow-xs);
+  }
+  .itin-day-head {
+    font-size: 12px; font-weight: 700; color: #5B21B6; text-transform: uppercase;
+    letter-spacing: 0.06em; margin-bottom: 6px;
+    display: flex; justify-content: space-between;
+  }
+  .itin-day-head .count { font-weight: 500; color: #7E22CE; opacity: 0.75; font-size: 11px; letter-spacing: 0; text-transform: none; }
+  .itin-entry {
+    display: flex; gap: 10px; padding: 6px 0; align-items: flex-start;
+    border-top: 1px solid #F5F3FF;
+  }
+  .itin-entry:first-child { border-top: none; }
+  .itin-entry .ico { font-size: 16px; flex-shrink: 0; padding-top: 1px; }
+  .itin-entry .time { font-size: 11.5px; color: var(--text-muted); font-variant-numeric: tabular-nums; min-width: 46px; flex-shrink: 0; padding-top: 2px; font-weight: 600; }
+  .itin-entry .title { font-weight: 600; font-size: 13.5px; color: var(--text); line-height: 1.3; }
+  .itin-entry .meta { font-size: 11.5px; color: var(--text-muted); margin-top: 2px; }
+  .itin-empty { color: #7E22CE; font-style: italic; font-size: 12.5px; padding: 10px 0; text-align: center; }
+  .itin-source { font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: #8B5CF6; font-weight: 700; padding: 2px 6px; background: #F5F3FF; border-radius: 4px; margin-left: 6px; }
+
+  /* Notfall-Assistent */
+  .sos-panel {
+    background: linear-gradient(135deg, #FEF2F2 0%, #FEE2E2 100%);
+    border: 1.5px solid #FECACA; border-radius: var(--radius-lg);
+    padding: 16px; margin-bottom: 14px; font-size: 13.5px;
+  }
+  .sos-panel h3 { margin: 0; font-size: 15px; font-weight: 700; color: #991B1B; display: flex; align-items: center; gap: 8px; letter-spacing: -0.01em; }
+  .sos-call-btn {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    width: 100%; background: white; border: 1.5px solid #FCA5A5;
+    padding: 14px 16px; border-radius: var(--radius-md); margin: 12px 0 8px;
+    cursor: pointer; text-decoration: none; color: #991B1B;
+    transition: background 0.15s, transform 0.1s;
+  }
+  .sos-call-btn:active { background: #FEE2E2; transform: scale(0.99); }
+  .sos-call-btn .lbl { font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; opacity: 0.8; }
+  .sos-call-btn .num { font-size: 26px; font-weight: 800; letter-spacing: -0.02em; color: #DC2626; }
+  .sos-call-btn .ico { font-size: 26px; }
+  .sos-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px; }
+  .sos-btn {
+    background: white; border: 1.5px solid #FCA5A5; border-radius: var(--radius-md);
+    padding: 12px 10px; font-size: 12.5px; font-weight: 600; color: #991B1B;
+    text-align: left; cursor: pointer; text-decoration: none;
+    display: flex; flex-direction: column; gap: 3px;
+    transition: background 0.15s;
+  }
+  .sos-btn:active { background: #FEE2E2; }
+  .sos-btn .ico { font-size: 18px; }
+  .sos-btn .sub { font-size: 11px; color: #B91C1C; font-weight: 500; opacity: 0.85; }
+
+  /* Visa & Einreise Panel */
+  .visa-panel {
+    background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+    border-radius: var(--radius-lg); padding: 16px; margin-bottom: 14px;
+    font-size: 13.5px; line-height: 1.5;
+  }
+  .visa-panel h3 { margin: 0; font-size: 15px; font-weight: 700; color: #1E3A8A; display: flex; align-items: center; gap: 8px; letter-spacing: -0.01em; }
+  .visa-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 12px; border-radius: 999px; font-size: 13px; font-weight: 700;
+    margin: 10px 0 6px;
+  }
+  .visa-badge.green  { background: #D1FAE5; color: #065F46; }
+  .visa-badge.yellow { background: #FEF3C7; color: #78350F; }
+  .visa-badge.red    { background: #FEE2E2; color: #991B1B; }
+  .visa-panel .v-row { display: flex; gap: 10px; padding: 4px 0; font-size: 13px; color: #1E40AF; }
+  .visa-panel .v-row strong { min-width: 124px; font-weight: 600; color: #1E3A8A; }
+  .visa-panel .v-note { font-size: 12.5px; color: #1E40AF; margin-top: 8px; padding: 10px 12px; background: rgba(255,255,255,0.5); border-radius: var(--radius-sm); }
+  .visa-panel .v-link {
+    display: inline-flex; align-items: center; gap: 6px;
+    margin-top: 10px; padding: 10px 14px; background: white; color: #1E3A8A;
+    border: 1.5px solid #BFDBFE; border-radius: var(--radius-sm); font-weight: 600;
+    font-size: 13px; text-decoration: none; transition: background 0.15s;
+  }
+  .visa-panel .v-link:active { background: #DBEAFE; }
+  .visa-panel .v-warn { color: #991B1B; font-weight: 600; }
+
+  /* Ausgabe-Tracker */
+  .exp-panel {
+    background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+    border-radius: var(--radius-lg); padding: 16px; margin-bottom: 14px;
+    font-size: 13.5px;
+  }
+  .exp-panel h3 { margin: 0; font-size: 15px; font-weight: 700; color: #78350F; display: flex; align-items: center; gap: 8px; letter-spacing: -0.01em; }
+  .exp-panel .exp-total {
+    background: white; border-radius: var(--radius-md); padding: 12px 14px; margin: 10px 0;
+    display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+  }
+  .exp-panel .exp-total-amt { font-size: 22px; font-weight: 800; color: #78350F; letter-spacing: -0.02em; }
+  .exp-panel .exp-total-lbl { font-size: 11.5px; color: #92400E; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
+  .exp-panel .exp-total-sub { font-size: 12px; color: #92400E; font-weight: 500; }
+  .exp-panel .exp-by-cat { display: flex; flex-direction: column; gap: 4px; margin: 8px 0 10px; }
+  .exp-panel .exp-cat-row {
+    display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: #78350F;
+    padding: 4px 0;
+  }
+  .exp-panel .exp-cat-row .bar { flex: 1; height: 6px; background: rgba(120,53,15,0.1); border-radius: 3px; overflow: hidden; }
+  .exp-panel .exp-cat-row .bar-fill { height: 100%; background: linear-gradient(90deg, #F59E0B, #D97706); border-radius: 3px; }
+  .exp-panel .exp-list { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+  .exp-panel .exp-item {
+    background: white; border-radius: var(--radius-md); padding: 10px 12px;
+    display: flex; gap: 10px; align-items: center; box-shadow: var(--shadow-xs);
+  }
+  .exp-panel .exp-ico { font-size: 18px; flex-shrink: 0; }
+  .exp-panel .exp-item-main { flex: 1; min-width: 0; }
+  .exp-panel .exp-item-title { font-weight: 600; font-size: 13.5px; color: var(--text); }
+  .exp-panel .exp-item-meta { font-size: 11.5px; color: var(--text-muted); margin-top: 2px; }
+  .exp-panel .exp-item-amt { font-weight: 700; font-size: 13.5px; color: #78350F; white-space: nowrap; }
+  .exp-panel .exp-item-conv { font-size: 11px; color: var(--text-soft); }
+  .exp-panel .exp-empty { text-align: center; color: #92400E; font-style: italic; padding: 10px 0; font-size: 12.5px; }
+  .exp-panel .btn-exp-add {
+    width: 100%; margin-top: 8px; background: white; border: 1.5px solid #F59E0B;
+    color: #78350F; font-weight: 600; padding: 10px; border-radius: var(--radius-sm);
+    font-size: 14px; cursor: pointer; transition: background 0.15s;
+  }
+  .exp-panel .btn-exp-add:active { background: #FEF3C7; }
+
+  /* Dokumenten-Safe (AES-GCM) */
+  .docs-panel {
+    background: linear-gradient(135deg, #1F2937 0%, #374151 100%);
+    color: #F9FAFB;
+    border-radius: var(--radius-lg); padding: 16px; margin-bottom: 14px;
+    font-size: 13.5px;
+  }
+  .docs-panel h3 { margin: 0; font-size: 15px; font-weight: 700; color: #F9FAFB; letter-spacing: -0.01em; display: flex; align-items: center; gap: 8px; }
+  .docs-panel .collapsible-chev { background: rgba(255,255,255,0.12); color: #F9FAFB; }
+  .docs-panel .docs-locked { text-align: center; padding: 8px 4px; }
+  .docs-panel .docs-sub { color: #D1D5DB; font-size: 12.5px; margin-bottom: 12px; }
+  .docs-panel .docs-hint { color: #9CA3AF; font-size: 11.5px; margin-top: 10px; line-height: 1.4; }
+  .docs-panel .btn-doc-unlock {
+    background: #F9FAFB; color: #1F2937; border: none;
+    padding: 12px 22px; border-radius: var(--radius-sm); font-weight: 700;
+    font-size: 14px; cursor: pointer; min-width: 200px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  }
+  .docs-panel .btn-doc-unlock:active { transform: scale(0.97); }
+  .docs-panel .docs-empty { color: #D1D5DB; font-style: italic; text-align: center; padding: 14px 0; font-size: 12.5px; }
+  .docs-panel .doc-item {
+    background: rgba(255,255,255,0.08); border-radius: var(--radius-md);
+    padding: 10px 12px; display: flex; gap: 10px; align-items: center; margin-bottom: 6px;
+  }
+  .docs-panel .doc-ico { font-size: 22px; flex-shrink: 0; }
+  .docs-panel .doc-main { flex: 1; min-width: 0; }
+  .docs-panel .doc-name { font-weight: 600; color: #F9FAFB; font-size: 13.5px; word-break: break-word; }
+  .docs-panel .doc-meta { font-size: 11.5px; color: #9CA3AF; margin-top: 2px; }
+  .docs-panel .doc-actions { display: flex; gap: 4px; flex-shrink: 0; }
+  .docs-panel .btn-doc-act {
+    background: rgba(255,255,255,0.12); border: none; color: #F9FAFB;
+    width: 32px; height: 32px; border-radius: 50%; font-size: 14px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .docs-panel .btn-doc-act:active { background: rgba(255,255,255,0.22); }
+  .docs-panel .doc-del:active { background: rgba(239,68,68,0.6); }
+  .docs-panel .btn-doc-add {
+    width: 100%; margin-top: 8px; background: #F9FAFB; color: #1F2937; border: none;
+    padding: 10px; border-radius: var(--radius-sm); font-weight: 700; font-size: 14px;
+    cursor: pointer;
+  }
+  .docs-panel .btn-doc-lock {
+    width: 100%; margin-top: 6px; background: transparent; color: #D1D5DB;
+    border: 1px solid rgba(255,255,255,0.2); padding: 8px; border-radius: var(--radius-sm);
+    font-weight: 600; font-size: 13px; cursor: pointer;
+  }
+  .docs-panel .btn-doc-lock:active { background: rgba(255,255,255,0.08); }
+  .modal .modal-sub { font-size: 12.5px; color: var(--text-muted); margin: 4px 0 12px; line-height: 1.4; }
+  .modal .modal-err { color: #DC2626; font-size: 12.5px; margin-top: 8px; min-height: 16px; }
+
+  /* Itinerary Email-Import Button */
+  .btn-itin-import {
+    width: 100%; margin-top: 10px; background: white;
+    border: 1.5px dashed #C4B5FD; color: #6D28D9;
+    padding: 10px; border-radius: var(--radius-sm); font-weight: 600; font-size: 13.5px;
+    cursor: pointer;
+  }
+  .btn-itin-import:active { background: #F5F3FF; }
+
+  /* Email-Import Preview */
+  .email-pv-kind { font-size: 12px; color: var(--text-muted); margin: 6px 0 8px; }
+  .email-pv-row { display: flex; justify-content: space-between; gap: 10px;
+    padding: 6px 8px; background: var(--surface-soft, #F8FAFC); border-radius: 6px; margin-bottom: 4px;
+    font-size: 13px;
+  }
+  .email-pv-row span { color: var(--text-muted); }
+  .email-pv-row strong { color: var(--text); text-align: right; word-break: break-word; }
+
+  /* Währungsrechner */
+  .fx-panel {
+    background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%);
+    border-radius: var(--radius-lg); padding: 16px; margin-bottom: 14px;
+    font-size: 13.5px;
+  }
+  .fx-panel h3 { margin: 0; font-size: 15px; font-weight: 700; color: #065F46; letter-spacing: -0.01em; display: flex; align-items: center; gap: 8px; }
+  .fx-panel .fx-row { display: flex; gap: 8px; align-items: center; margin-top: 10px; }
+  .fx-panel .fx-input {
+    flex: 1 1 60px; min-width: 0; padding: 10px 12px; font-size: 16px;
+    border: 1.5px solid #A7F3D0; border-radius: var(--radius-sm); background: white;
+    color: #065F46; font-weight: 600;
+  }
+  .fx-panel .fx-input:focus { outline: none; border-color: #10B981; box-shadow: 0 0 0 3px rgba(16,185,129,0.2); }
+  .fx-panel .fx-select {
+    padding: 10px 8px; font-size: 14px; font-weight: 600; color: #065F46;
+    border: 1.5px solid #A7F3D0; border-radius: var(--radius-sm); background: white;
+    min-width: 78px;
+  }
+  .fx-panel .fx-arrow { font-size: 18px; color: #10B981; flex-shrink: 0; }
+  .fx-panel .fx-swap {
+    width: 36px; height: 36px; border-radius: 50%; background: white;
+    border: 1.5px solid #A7F3D0; color: #065F46; font-size: 14px;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    cursor: pointer; transition: transform 0.15s;
+  }
+  .fx-panel .fx-swap:active { transform: rotate(180deg) scale(0.92); }
+  .fx-panel .fx-info {
+    font-size: 11.5px; color: #047857; margin-top: 8px; text-align: right;
+    opacity: 0.85;
+  }
+  .fx-panel .fx-info.offline { color: #9A3412; }
+
+  /* Collapsible Sections — generisch für Reise-Infos, Vorschläge, Unterkunft */
+  .collapsible { position: relative; }
+  .collapsible-head {
+    cursor: pointer; user-select: none; -webkit-user-select: none;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 8px; padding: 2px 0;
+    transition: opacity 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .collapsible-head:active { opacity: 0.7; }
+  .collapsible-chev {
+    width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; color: var(--text-muted);
+    background: rgba(255,255,255,0.5);
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
+  }
+  .collapsible.collapsed .collapsible-chev { transform: rotate(-90deg); }
+  .collapsible-body {
+    overflow: hidden;
+    max-height: 3000px;
+    transition: max-height 0.25s ease, opacity 0.2s ease, margin 0.25s ease, padding 0.25s ease;
+  }
+  .collapsible.collapsed .collapsible-body {
+    max-height: 0 !important;
+    opacity: 0;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+  }
+  /* Kompaktere Panel-Margins wenn collapsed */
+  .country-panel.collapsed,
+  .smart-suggestions.collapsed,
+  .category.collapsible.collapsed {
+    padding-bottom: 14px;
+  }
+  .country-panel.collapsible .collapsible-head h3 { margin: 0; }
+  .smart-suggestions.collapsible .collapsible-head .ss-head { margin-bottom: 0; }
+  .category.collapsible > h2 { margin-bottom: 0; }
+  .category.collapsible .collapsible-head { padding: 0; }
+
   /* Unterkunft */
   .accom-list { margin: 8px 0; display: flex; flex-direction: column; gap: 10px; }
   .accom-row {
@@ -1096,6 +1364,147 @@ create policy "u" on trips for update using (true);</pre>
   </div>
 </div>
 
+<!-- Ausgabe (Expense) Modal -->
+<div class="modal-backdrop" id="expense-modal">
+  <div class="modal">
+    <h3>💶 Ausgabe</h3>
+
+    <label>Bezeichnung</label>
+    <input type="text" id="exp-title" placeholder="z.B. Abendessen Trattoria" autocomplete="off" />
+
+    <div class="row">
+      <div>
+        <label>Betrag</label>
+        <input type="number" id="exp-amount" inputmode="decimal" step="0.01" placeholder="0,00" />
+      </div>
+      <div>
+        <label>Währung</label>
+        <select id="exp-currency">
+          <option value="EUR">EUR</option>
+          <option value="USD">USD</option>
+          <option value="GBP">GBP</option>
+          <option value="CHF">CHF</option>
+          <option value="JPY">JPY</option>
+          <option value="THB">THB</option>
+          <option value="TRY">TRY</option>
+          <option value="SEK">SEK</option>
+          <option value="NOK">NOK</option>
+          <option value="DKK">DKK</option>
+          <option value="PLN">PLN</option>
+          <option value="CZK">CZK</option>
+          <option value="HUF">HUF</option>
+          <option value="AUD">AUD</option>
+          <option value="CAD">CAD</option>
+          <option value="AED">AED</option>
+          <option value="SGD">SGD</option>
+          <option value="MXN">MXN</option>
+          <option value="BRL">BRL</option>
+          <option value="INR">INR</option>
+          <option value="VND">VND</option>
+          <option value="IDR">IDR</option>
+          <option value="KRW">KRW</option>
+          <option value="CNY">CNY</option>
+        </select>
+      </div>
+    </div>
+
+    <label>Kategorie</label>
+    <select id="exp-category">
+      <option value="food">🍽️ Essen</option>
+      <option value="stay">🏨 Unterkunft</option>
+      <option value="transport">🚇 Transport</option>
+      <option value="sight">🎫 Attraktion</option>
+      <option value="shop">🛍️ Shopping</option>
+      <option value="other">💶 Sonstiges</option>
+    </select>
+
+    <div class="row">
+      <div>
+        <label>Datum</label>
+        <input type="date" id="exp-date" />
+      </div>
+      <div>
+        <label>Bezahlt von</label>
+        <input type="text" id="exp-paidby" placeholder="Name" />
+      </div>
+    </div>
+
+    <label>Notiz (optional)</label>
+    <textarea id="exp-notes" placeholder="z.B. Beleg-Nr., Aufteilung"></textarea>
+
+    <div class="modal-actions">
+      <button class="btn secondary" id="exp-cancel">Abbrechen</button>
+      <button class="btn primary" id="exp-save">Speichern</button>
+    </div>
+    <div class="modal-actions" id="exp-delete-wrap">
+      <button class="btn danger" id="exp-delete-btn" style="width:100%;">Löschen</button>
+    </div>
+  </div>
+</div>
+
+<!-- Ausgabenliste (alle) Modal -->
+<div class="modal-backdrop" id="expense-list-modal">
+  <div class="modal">
+    <h3>💶 Alle Ausgaben</h3>
+    <div id="exp-list-body" style="max-height:60vh; overflow:auto; margin:10px 0;"></div>
+    <div class="modal-actions">
+      <button class="btn secondary" id="exp-list-close">Schließen</button>
+    </div>
+  </div>
+</div>
+
+<!-- Doc Safe: Passphrase modal -->
+<div class="modal-backdrop" id="doc-pp-modal">
+  <div class="modal">
+    <h3 id="doc-pp-title">Safe entsperren</h3>
+    <p id="doc-pp-sub" class="modal-sub"></p>
+    <label>Passwort</label>
+    <input type="password" id="doc-pp-1" placeholder="Mindestens 6 Zeichen" autocomplete="new-password" />
+    <div id="doc-pp-2-wrap" style="display:none;">
+      <label>Passwort wiederholen</label>
+      <input type="password" id="doc-pp-2" placeholder="Nochmal eingeben" autocomplete="new-password" />
+    </div>
+    <div id="doc-pp-err" class="modal-err"></div>
+    <div class="modal-actions">
+      <button class="btn secondary" id="doc-pp-cancel">Abbrechen</button>
+      <button class="btn primary" id="doc-pp-submit">Entsperren</button>
+    </div>
+  </div>
+</div>
+
+<!-- Email-Import modal -->
+<div class="modal-backdrop" id="email-import-modal">
+  <div class="modal" style="max-width: 560px;">
+    <h3>📧 Bestätigungs-Email importieren</h3>
+    <p class="modal-sub">Kopiere den kompletten Email-Text rein. TripMate erkennt automatisch Hotels, Flüge, Züge, Airbnb und Veranstaltungen.</p>
+    <textarea id="email-import-ta" rows="10" placeholder="Email-Text hier einfügen..." style="width:100%; font-family:ui-monospace,monospace; font-size:12px; padding:10px; border:1.5px solid #e5e7eb; border-radius:8px; resize:vertical;"></textarea>
+    <button class="btn secondary" id="email-import-preview-btn" style="width:100%; margin-top:8px;">🔍 Vorschau prüfen</button>
+    <div id="email-import-preview" style="margin-top:10px;"></div>
+    <div id="email-import-err" class="modal-err"></div>
+    <div class="modal-actions">
+      <button class="btn secondary" id="email-import-cancel">Abbrechen</button>
+      <button class="btn primary" id="email-import-add-btn" disabled>Hinzufügen</button>
+    </div>
+  </div>
+</div>
+
+<!-- Doc Safe: Add file modal -->
+<div class="modal-backdrop" id="doc-add-modal">
+  <div class="modal">
+    <h3>📄 Dokument hinzufügen</h3>
+    <p class="modal-sub">Wird auf deinem Gerät verschlüsselt. Max. 4 MB pro Datei.</p>
+    <label>Datei wählen</label>
+    <input type="file" id="doc-add-file" accept="image/*,application/pdf,.pdf,.png,.jpg,.jpeg,.heic" />
+    <label style="margin-top:10px;">Notiz (optional)</label>
+    <input type="text" id="doc-add-notes" placeholder="z.B. „Reisepass" oder „Auslandskrankenversicherung"" />
+    <div id="doc-add-err" class="modal-err"></div>
+    <div class="modal-actions">
+      <button class="btn secondary" id="doc-add-cancel">Abbrechen</button>
+      <button class="btn primary" id="doc-add-submit">Hinzufügen</button>
+    </div>
+  </div>
+</div>
+
 <!-- Welcome modal -->
 <div class="modal-backdrop" id="welcome-modal">
   <div class="modal">
@@ -1121,7 +1530,7 @@ create policy "u" on trips for update using (true);</pre>
 // ============ App-Version ============
 // Bei Schema-Änderungen SCHEMA_VERSION hochzählen + Migration ergänzen.
 // APP_VERSION ist die User-sichtbare Version.
-const APP_VERSION = '0.5.1';
+const APP_VERSION = '0.5.3';
 const SCHEMA_VERSION = 3;
 
 // ============ Constants & Demo Data ============
@@ -1206,6 +1615,60 @@ const COUNTRIES = {
   'BR': { name:'Brasilien',    plug:'Typ N',    volt:'127V/220V/60Hz', drive:'rechts', tip:'10% oft im Preis', reserv:'São Paulo/Rio: reservieren', lang:'Portugiesisch', emergency:'190/192', curr:'BRL' },
   'AR': { name:'Argentinien',  plug:'Typ C/I',  volt:'220V/50Hz', drive:'rechts', tip:'10%', reserv:'Beliebte Steakhouses reservieren', lang:'Spanisch', emergency:'911', curr:'ARS' }
 };
+
+// ============ Visa & Einreise (für dt. Staatsbürger) ============
+// visa: 'none' = kein Visum, 'evisa' = e-Visa online, 'voa' = Visa on Arrival, 'required' = voraus beantragen
+// passportMonths: Mindestgültigkeit des Passes nach Rückreise (Monate)
+// Quelle: Auswärtiges Amt — stets selbst gegenchecken. Links führen zur Länder-Seite des AA.
+const VISA_INFO = {
+  'DE': { visa:'none',    passportMonths:0,  stay:'unbegrenzt (Heimatland)', note:'Personalausweis reicht in EU.', url:'https://www.auswaertiges-amt.de/de/service/laender' },
+  'AT': { visa:'none',    passportMonths:0,  stay:'90 Tage (Schengen)',      note:'Personalausweis oder Reisepass.', url:'https://www.auswaertiges-amt.de/de/service/laender/oesterreich-node' },
+  'CH': { visa:'none',    passportMonths:0,  stay:'90 Tage',                  note:'Personalausweis ausreichend.',      url:'https://www.auswaertiges-amt.de/de/service/laender/schweiz-node' },
+  'FR': { visa:'none',    passportMonths:0,  stay:'90 Tage (Schengen)',      note:'Personalausweis ausreichend.',      url:'https://www.auswaertiges-amt.de/de/service/laender/frankreich-node' },
+  'IT': { visa:'none',    passportMonths:0,  stay:'90 Tage (Schengen)',      note:'Personalausweis ausreichend.',      url:'https://www.auswaertiges-amt.de/de/service/laender/italien-node' },
+  'ES': { visa:'none',    passportMonths:0,  stay:'90 Tage (Schengen)',      note:'Personalausweis ausreichend.',      url:'https://www.auswaertiges-amt.de/de/service/laender/spanien-node' },
+  'PT': { visa:'none',    passportMonths:0,  stay:'90 Tage (Schengen)',      note:'Personalausweis ausreichend.',      url:'https://www.auswaertiges-amt.de/de/service/laender/portugal-node' },
+  'NL': { visa:'none',    passportMonths:0,  stay:'90 Tage (Schengen)',      note:'Personalausweis ausreichend.',      url:'https://www.auswaertiges-amt.de/de/service/laender/niederlande-node' },
+  'BE': { visa:'none',    passportMonths:0,  stay:'90 Tage (Schengen)',      note:'Personalausweis ausreichend.',      url:'https://www.auswaertiges-amt.de/de/service/laender/belgien-node' },
+  'LU': { visa:'none',    passportMonths:0,  stay:'90 Tage (Schengen)',      note:'Personalausweis ausreichend.',      url:'https://www.auswaertiges-amt.de/de/service/laender/luxemburg-node' },
+  'DK': { visa:'none',    passportMonths:0,  stay:'90 Tage (Schengen)',      note:'Personalausweis ausreichend.',      url:'https://www.auswaertiges-amt.de/de/service/laender/daenemark-node' },
+  'SE': { visa:'none',    passportMonths:0,  stay:'90 Tage (Schengen)',      note:'Personalausweis ausreichend.',      url:'https://www.auswaertiges-amt.de/de/service/laender/schweden-node' },
+  'NO': { visa:'none',    passportMonths:0,  stay:'90 Tage (Schengen)',      note:'Personalausweis ausreichend.',      url:'https://www.auswaertiges-amt.de/de/service/laender/norwegen-node' },
+  'FI': { visa:'none',    passportMonths:0,  stay:'90 Tage (Schengen)',      note:'Personalausweis ausreichend.',      url:'https://www.auswaertiges-amt.de/de/service/laender/finnland-node' },
+  'IS': { visa:'none',    passportMonths:0,  stay:'90 Tage (Schengen)',      note:'Personalausweis ausreichend.',      url:'https://www.auswaertiges-amt.de/de/service/laender/island-node' },
+  'PL': { visa:'none',    passportMonths:0,  stay:'90 Tage (Schengen)',      note:'Personalausweis ausreichend.',      url:'https://www.auswaertiges-amt.de/de/service/laender/polen-node' },
+  'CZ': { visa:'none',    passportMonths:0,  stay:'90 Tage (Schengen)',      note:'Personalausweis ausreichend.',      url:'https://www.auswaertiges-amt.de/de/service/laender/tschechischerepublik-node' },
+  'HU': { visa:'none',    passportMonths:0,  stay:'90 Tage (Schengen)',      note:'Personalausweis ausreichend.',      url:'https://www.auswaertiges-amt.de/de/service/laender/ungarn-node' },
+  'GR': { visa:'none',    passportMonths:0,  stay:'90 Tage (Schengen)',      note:'Personalausweis ausreichend.',      url:'https://www.auswaertiges-amt.de/de/service/laender/griechenland-node' },
+  'HR': { visa:'none',    passportMonths:0,  stay:'90 Tage (Schengen)',      note:'Personalausweis ausreichend.',      url:'https://www.auswaertiges-amt.de/de/service/laender/kroatien-node' },
+  'IE': { visa:'none',    passportMonths:0,  stay:'90 Tage',                  note:'Personalausweis/Reisepass.',        url:'https://www.auswaertiges-amt.de/de/service/laender/irland-node' },
+  'GB': { visa:'none',    passportMonths:0,  stay:'6 Monate',                 note:'⚠️ Seit Brexit: Reisepass PFLICHT (kein PersAusweis mehr). ETA geplant.', url:'https://www.auswaertiges-amt.de/de/service/laender/grossbritannien-node' },
+  'TR': { visa:'none',    passportMonths:6,  stay:'90 Tage',                  note:'Reisepass ≥6 Monate gültig. Personalausweis-Einreise nur Reisegruppen.', url:'https://www.auswaertiges-amt.de/de/service/laender/tuerkei-node' },
+  'US': { visa:'esta',    passportMonths:0,  stay:'90 Tage (VWP)',            note:'ESTA nötig (~$21) — unter esta.cbp.dhs.gov beantragen, vor Abflug.', url:'https://esta.cbp.dhs.gov/' },
+  'CA': { visa:'eta',     passportMonths:0,  stay:'6 Monate',                 note:'eTA nötig (~7 CAD) für Flüge — 24h+ vorher.', url:'https://www.canada.ca/de/einwanderung-fluechtlinge-buergerschaft/dienstleistungen/elektronische-reisegenehmigung.html' },
+  'MX': { visa:'none',    passportMonths:6,  stay:'180 Tage',                 note:'FMM-Einreiseformular online oder bei Ankunft.', url:'https://www.auswaertiges-amt.de/de/service/laender/mexiko-node' },
+  'JP': { visa:'none',    passportMonths:0,  stay:'90 Tage',                  note:'Visum Waiver – Pass bei Einreise ausreichend.', url:'https://www.auswaertiges-amt.de/de/service/laender/japan-node' },
+  'KR': { visa:'keta',    passportMonths:6,  stay:'90 Tage',                  note:'K-ETA nötig (~10.000 KRW) — unter k-eta.go.kr.', url:'https://www.k-eta.go.kr/' },
+  'CN': { visa:'required',passportMonths:6,  stay:'je nach Visum',           note:'Visum muss vor Abreise beim Konsulat beantragt werden. Transit visafrei möglich.', url:'https://www.auswaertiges-amt.de/de/service/laender/china-node' },
+  'TH': { visa:'none',    passportMonths:6,  stay:'60 Tage',                  note:'Visa-Exempt – seit Juli 2024: 60 Tage visafrei.', url:'https://www.auswaertiges-amt.de/de/service/laender/thailand-node' },
+  'VN': { visa:'none',    passportMonths:6,  stay:'45 Tage',                  note:'Visafrei für 45 Tage. Längerer Aufenthalt: e-Visa unter evisa.gov.vn.', url:'https://evisa.xuatnhapcanh.gov.vn/' },
+  'ID': { visa:'voa',     passportMonths:6,  stay:'30 Tage',                  note:'Visa on Arrival (~500.000 IDR) oder e-Visa online.', url:'https://molina.imigrasi.go.id/' },
+  'SG': { visa:'none',    passportMonths:6,  stay:'90 Tage',                  note:'SG Arrival Card (elektronisch, kostenlos) ≤3 Tage vor Einreise.', url:'https://eservices.ica.gov.sg/sgarrivalcard/' },
+  'IN': { visa:'evisa',   passportMonths:6,  stay:'30–90 Tage (je nach Art)', note:'e-Visa unter indianvisaonline.gov.in, ~$25–80.', url:'https://indianvisaonline.gov.in/evisa/tvoa.html' },
+  'AE': { visa:'none',    passportMonths:6,  stay:'90 Tage',                  note:'Visum bei Einreise kostenlos.', url:'https://www.auswaertiges-amt.de/de/service/laender/vereinigtearabischeemirate-node' },
+  'AU': { visa:'eta',     passportMonths:0,  stay:'3 Monate je Besuch',      note:'eVisitor (651) kostenlos online, ETAS-App.', url:'https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/evisitor-651' },
+  'NZ': { visa:'eta',     passportMonths:3,  stay:'90 Tage',                  note:'NZeTA (~$23 NZD) + IVL-Gebühr.', url:'https://www.immigration.govt.nz/new-zealand-visas/apply-for-a-visa/about-visa/nzeta' },
+  'ZA': { visa:'none',    passportMonths:1,  stay:'90 Tage',                  note:'Kein Visum. Pass mit 2 leeren Seiten, Kinder: zusätzl. Dokumente!', url:'https://www.auswaertiges-amt.de/de/service/laender/suedafrika-node' },
+  'BR': { visa:'none',    passportMonths:6,  stay:'90 Tage',                  note:'Visafrei. Pass ≥6 Monate gültig.', url:'https://www.auswaertiges-amt.de/de/service/laender/brasilien-node' },
+  'AR': { visa:'none',    passportMonths:0,  stay:'90 Tage',                  note:'Visafrei; Reciprocity-Fee abgeschafft.', url:'https://www.auswaertiges-amt.de/de/service/laender/argentinien-node' },
+  'RU': { visa:'required',passportMonths:6,  stay:'je nach Visum',           note:'Visumspflicht. Antrag vorher beim Konsulat.', url:'https://www.auswaertiges-amt.de/de/service/laender/russischefoederation-node' },
+  'EG': { visa:'voa',     passportMonths:6,  stay:'30 Tage',                  note:'Visa on Arrival ($25) oder e-Visa.', url:'https://visa2egypt.gov.eg/' }
+};
+function findVisa(code) {
+  if (!code) return null;
+  return VISA_INFO[String(code).toUpperCase()] || null;
+}
+
 function findCountry(input) {
   if (!input) return null;
   const v = String(input).trim();
@@ -1237,6 +1700,8 @@ const DEFAULT_TRIP = {
   end: '',
   accommodations: [],    // NEU v0.4: {id, name, address, lat, lng, notes, start, end, updatedAt, createdAt}
   events: [],            // NEU v0.4: {id, type:'flight'|'train'|'transfer', title, date, time, notes, updatedAt, createdAt}
+  expenses: [],          // NEU v0.5.2: {id, title, amount, currency, category, date, paidBy, notes, createdAt, updatedAt}
+  documents: [],         // NEU v0.5.3: {id, name, mime, size, salt, iv, ciphertext (base64), notes, createdAt, updatedAt} — AES-GCM verschlüsselt
   _tombs: [],
   _metaUpdatedAt: 0,
   items: [
@@ -1295,6 +1760,8 @@ function freshTrip(overrides) {
     packlist: [],
     accommodations: [],
     events: [],
+    expenses: [],
+    documents: [],
     _tombs: [],
     _metaUpdatedAt: Date.now()
   };
@@ -1309,6 +1776,8 @@ function ensureTripDefaults(t) {
   if (!Array.isArray(t.packlist)) t.packlist = [];
   if (!Array.isArray(t.accommodations)) t.accommodations = [];
   if (!Array.isArray(t.events)) t.events = [];
+  if (!Array.isArray(t.expenses)) t.expenses = [];
+  if (!Array.isArray(t.documents)) t.documents = [];
   if (!Array.isArray(t._tombs)) t._tombs = [];
   if (typeof t._metaUpdatedAt !== 'number') t._metaUpdatedAt = 0;
   if (typeof t.country !== 'string') t.country = '';
@@ -1610,6 +2079,12 @@ function mergeOneTrip(lT, rT) {
   lT.accommodations = accRes.filtered; if (accRes.changed) changed = true;
   const evRes = mergeArrayById(lT.events, rT.events || [], myTombs, 'e');
   lT.events = evRes.filtered; if (evRes.changed) changed = true;
+  if (!Array.isArray(lT.expenses)) lT.expenses = [];
+  const xpRes = mergeArrayById(lT.expenses, rT.expenses || [], myTombs, 'x');
+  lT.expenses = xpRes.filtered; if (xpRes.changed) changed = true;
+  if (!Array.isArray(lT.documents)) lT.documents = [];
+  const dRes = mergeArrayById(lT.documents, rT.documents || [], myTombs, 'd');
+  lT.documents = dRes.filtered; if (dRes.changed) changed = true;
   const rMeta = rT._metaUpdatedAt || 0;
   const lMeta = lT._metaUpdatedAt || 0;
   if (rMeta > lMeta) {
@@ -1805,6 +2280,24 @@ function renderList() {
   // Länder-Tipps-Panel wenn Land gesetzt
   renderCountryPanel(container);
 
+  // Visa & Einreise
+  renderVisaPanel(container);
+
+  // Zentraler Reiseplan / Itinerary (chrono Aggregation)
+  renderItineraryPanel(container);
+
+  // Notfall-Assistent
+  renderSosPanel(container);
+
+  // Währungsrechner (wenn Trip-Land != EUR)
+  renderFxPanel(container);
+
+  // Ausgabe-Tracker
+  renderExpensePanel(container);
+
+  // Dokumenten-Safe (AES-GCM)
+  renderDocsPanel(container);
+
   // Unterkunfts-Kurzansicht (falls vorhanden)
   renderAccommodationsShort(container);
 
@@ -1936,17 +2429,1266 @@ function renderCountryPanel(container) {
   panel.className = 'country-panel';
   const driveClass = /links/i.test(info.drive) ? 'cp-drive-left' : '';
   panel.innerHTML = `
-    <h3>🌍 Reiseinfos ${escapeHtml(info.name)}</h3>
-    <div class="cp-row"><strong>Steckdose</strong><span>${escapeHtml(info.plug)} · ${escapeHtml(info.volt)}</span></div>
-    <div class="cp-row"><strong>Verkehr</strong><span class="${driveClass}">Fährt ${escapeHtml(info.drive)}</span></div>
-    <div class="cp-row"><strong>Währung</strong><span>${escapeHtml(info.curr)}</span></div>
-    <div class="cp-row"><strong>Sprache</strong><span>${escapeHtml(info.lang)}</span></div>
-    <div class="cp-row"><strong>Trinkgeld</strong><span>${escapeHtml(info.tip)}</span></div>
-    <div class="cp-row"><strong>Reservierung</strong><span>${escapeHtml(info.reserv)}</span></div>
-    <div class="cp-row"><strong>Notruf</strong><span>${escapeHtml(info.emergency)}</span></div>
-    ${info.extra ? `<div class="cp-extra">💡 ${escapeHtml(info.extra)}</div>` : ''}
+    <div class="cp-head"><h3>🌍 Reiseinfos ${escapeHtml(info.name)}</h3></div>
+    <div class="cp-body">
+      <div class="cp-row"><strong>Steckdose</strong><span>${escapeHtml(info.plug)} · ${escapeHtml(info.volt)}</span></div>
+      <div class="cp-row"><strong>Verkehr</strong><span class="${driveClass}">Fährt ${escapeHtml(info.drive)}</span></div>
+      <div class="cp-row"><strong>Währung</strong><span>${escapeHtml(info.curr)}</span></div>
+      <div class="cp-row"><strong>Sprache</strong><span>${escapeHtml(info.lang)}</span></div>
+      <div class="cp-row"><strong>Trinkgeld</strong><span>${escapeHtml(info.tip)}</span></div>
+      <div class="cp-row"><strong>Reservierung</strong><span>${escapeHtml(info.reserv)}</span></div>
+      <div class="cp-row"><strong>Notruf</strong><span>${escapeHtml(info.emergency)}</span></div>
+      ${info.extra ? `<div class="cp-extra">💡 ${escapeHtml(info.extra)}</div>` : ''}
+    </div>
   `;
   container.appendChild(panel);
+  makeCollapsible(panel, 'country', panel.querySelector('.cp-head'), panel.querySelector('.cp-body'));
+}
+
+// ============ Zentraler Itinerary ============
+// Aggregiert alles mit Datum aus: events, accommodations, scheduled items.
+// Liefert ein Array { date, time, icon, title, meta, source } sortiert chrono.
+function buildItinerary() {
+  const trip = T();
+  const entries = [];
+  // Events (Flüge, Züge, Transfers)
+  (trip.events || []).forEach(e => {
+    if (!e.date) return;
+    const icons = { flight: '✈️', train: '🚆', bus: '🚌', transfer: '🚕', event: '🎭' };
+    entries.push({
+      date: e.date, time: e.time || '',
+      icon: icons[e.type] || '📌',
+      title: e.title || 'Termin', meta: e.notes || '',
+      source: e.type || 'event'
+    });
+  });
+  // Accommodations → je Check-in und Check-out eine Zeile
+  (trip.accommodations || []).forEach(a => {
+    if (a.start) entries.push({
+      date: a.start, time: '',
+      icon: '🏨', title: `Check-in: ${a.name || 'Unterkunft'}`,
+      meta: a.address || '', source: 'stay'
+    });
+    if (a.end) entries.push({
+      date: a.end, time: '',
+      icon: '🏨', title: `Check-out: ${a.name || 'Unterkunft'}`,
+      meta: a.address || '', source: 'stay'
+    });
+  });
+  // Geplante Items (mit scheduledDate)
+  const cats = typeof CATEGORIES !== 'undefined' ? CATEGORIES : {};
+  (trip.items || []).forEach(it => {
+    if (!it.scheduledDate) return;
+    const cat = cats[it.category] || { icon: '📌' };
+    entries.push({
+      date: it.scheduledDate, time: it.scheduledTime || '',
+      icon: cat.icon, title: it.name, meta: it.address || '',
+      source: it.category
+    });
+  });
+  // Sortieren: Datum, dann Zeit, dann title
+  entries.sort((a, b) => {
+    const d = a.date.localeCompare(b.date);
+    if (d !== 0) return d;
+    const t = (a.time || '').localeCompare(b.time || '');
+    if (t !== 0) return t;
+    return a.title.localeCompare(b.title);
+  });
+  return entries;
+}
+
+function renderItineraryPanel(container) {
+  const entries = buildItinerary();
+  const trip = T();
+  const panel = document.createElement('div');
+  panel.className = 'itin-panel';
+  if (entries.length === 0) {
+    panel.innerHTML = `
+      <div class="itin-head"><h3>🗺️ Reiseplan</h3></div>
+      <div class="itin-body">
+        <div class="itin-empty">Noch keine Termine geplant. Termine werden automatisch aus Events, Unterkünften und geplanten Orten zusammengestellt.</div>
+        <button class="btn-itin-import" id="itin-email-import-btn">📧 Bestätigungs-Email einfügen</button>
+      </div>
+    `;
+    container.appendChild(panel);
+    makeCollapsible(panel, 'itinerary', panel.querySelector('.itin-head'), panel.querySelector('.itin-body'));
+    panel.querySelector('#itin-email-import-btn').addEventListener('click', (e) => { e.stopPropagation(); openEmailImportModal(); });
+    return;
+  }
+  // Gruppieren nach Datum
+  const byDay = new Map();
+  entries.forEach(e => {
+    if (!byDay.has(e.date)) byDay.set(e.date, []);
+    byDay.get(e.date).push(e);
+  });
+
+  let bodyHtml = '';
+  for (const [date, items] of byDay) {
+    const prettyDate = fmtDate(date);
+    const weekday = new Date(date).toLocaleDateString('de-DE', { weekday: 'long' });
+    let dayHtml = `<div class="itin-day"><div class="itin-day-head"><span>${escapeHtml(weekday)} · ${escapeHtml(prettyDate)}</span><span class="count">${items.length} Termin${items.length === 1 ? '' : 'e'}</span></div>`;
+    items.forEach(e => {
+      dayHtml += `<div class="itin-entry">
+        <span class="ico">${e.icon}</span>
+        <span class="time">${e.time || '–'}</span>
+        <div style="flex:1; min-width:0;">
+          <div class="title">${escapeHtml(e.title)}</div>
+          ${e.meta ? `<div class="meta">${escapeHtml(e.meta)}</div>` : ''}
+        </div>
+      </div>`;
+    });
+    dayHtml += '</div>';
+    bodyHtml += dayHtml;
+  }
+
+  panel.innerHTML = `
+    <div class="itin-head"><h3>🗺️ Reiseplan <span class="count" style="margin-left:auto; font-size:12px; font-weight:500; color:#7E22CE;">${entries.length} Einträge</span></h3></div>
+    <div class="itin-body">${bodyHtml}<button class="btn-itin-import" id="itin-email-import-btn">📧 Bestätigungs-Email einfügen</button></div>
+  `;
+  container.appendChild(panel);
+  makeCollapsible(panel, 'itinerary', panel.querySelector('.itin-head'), panel.querySelector('.itin-body'));
+  panel.querySelector('#itin-email-import-btn').addEventListener('click', (e) => { e.stopPropagation(); openEmailImportModal(); });
+}
+
+// ============ Notfall-Assistent ============
+// Priorisierte Notrufnummer (erste aus Länder-DB) für tel:-Link
+function primaryEmergencyNumber(countryInfo) {
+  if (!countryInfo || !countryInfo.emergency) return '';
+  // z.B. "190/192" → nehme erste
+  const raw = countryInfo.emergency.split(/[\s\/,]+/)[0].trim();
+  return raw;
+}
+function renderSosPanel(container) {
+  const trip = T();
+  if (!trip.country) return;
+  const info = findCountry(trip.country);
+  if (!info) return;
+  const num = primaryEmergencyNumber(info);
+  const city = (trip.city || '').split(',')[0].trim();
+  const visa = findVisa(trip.country);
+  // Botschafts-Link: falls in VISA_INFO vorhanden nutzen wir den AA-Länder-Link,
+  // sonst generische Suche.
+  const embassyUrl = (visa && visa.url && visa.url.includes('auswaertiges-amt.de'))
+    ? visa.url
+    : `https://www.google.com/search?q=${encodeURIComponent('Deutsche Botschaft ' + info.name)}`;
+  // Krankenhaus in der Nähe (OpenStreetMap Suche)
+  const hospitalUrl = `https://www.google.com/maps/search/${encodeURIComponent('Krankenhaus hospital ' + city)}`;
+  const pharmacyUrl = `https://www.google.com/maps/search/${encodeURIComponent('Apotheke pharmacy ' + city)}`;
+  const germanDocUrl = `https://www.google.com/search?q=${encodeURIComponent('deutschsprachiger Arzt ' + (city || info.name))}`;
+
+  const panel = document.createElement('div');
+  panel.className = 'sos-panel';
+  panel.innerHTML = `
+    <div class="sos-head"><h3>🆘 Notfall-Assistent</h3></div>
+    <div class="sos-body">
+      ${num ? `
+        <a class="sos-call-btn" href="tel:${encodeURIComponent(num)}">
+          <div>
+            <div class="lbl">Allgemeiner Notruf ${escapeHtml(info.name)}</div>
+            <div class="num">${escapeHtml(info.emergency)}</div>
+          </div>
+          <span class="ico">📞</span>
+        </a>
+      ` : ''}
+      <div class="sos-grid">
+        <a class="sos-btn" href="${hospitalUrl}" target="_blank" rel="noopener noreferrer">
+          <span class="ico">🏥</span>
+          <span>Krankenhaus</span>
+          <span class="sub">in ${escapeHtml(city || info.name)} finden</span>
+        </a>
+        <a class="sos-btn" href="${pharmacyUrl}" target="_blank" rel="noopener noreferrer">
+          <span class="ico">💊</span>
+          <span>Apotheke</span>
+          <span class="sub">in der Nähe finden</span>
+        </a>
+        <a class="sos-btn" href="${germanDocUrl}" target="_blank" rel="noopener noreferrer">
+          <span class="ico">🇩🇪</span>
+          <span>Dt. Arzt</span>
+          <span class="sub">deutschsprachig</span>
+        </a>
+        <a class="sos-btn" href="${embassyUrl}" target="_blank" rel="noopener noreferrer">
+          <span class="ico">🏛️</span>
+          <span>Botschaft</span>
+          <span class="sub">Dt. Vertretung</span>
+        </a>
+      </div>
+    </div>
+  `;
+  container.appendChild(panel);
+  makeCollapsible(panel, 'sos', panel.querySelector('.sos-head'), panel.querySelector('.sos-body'));
+}
+
+// ============ Visa & Einreise ============
+function visaStatusMeta(v) {
+  // Rückgabe: { label, badge } wobei badge 'green' | 'yellow' | 'red'
+  if (!v) return { label: 'Unbekannt', badge: 'yellow' };
+  switch (v.visa) {
+    case 'none':     return { label: 'Kein Visum nötig', badge: 'green' };
+    case 'esta':     return { label: 'ESTA erforderlich', badge: 'yellow' };
+    case 'eta':      return { label: 'eTA erforderlich', badge: 'yellow' };
+    case 'keta':     return { label: 'K-ETA erforderlich', badge: 'yellow' };
+    case 'evisa':    return { label: 'e-Visa erforderlich', badge: 'yellow' };
+    case 'voa':      return { label: 'Visa on Arrival', badge: 'yellow' };
+    case 'required': return { label: 'Visum vorab nötig', badge: 'red' };
+    default:         return { label: 'Prüfen', badge: 'yellow' };
+  }
+}
+
+function renderVisaPanel(container) {
+  const trip = T();
+  if (!trip.country) return;
+  const visa = findVisa(trip.country);
+  if (!visa) return;
+  const country = findCountry(trip.country);
+  const meta = visaStatusMeta(visa);
+
+  const panel = document.createElement('div');
+  panel.className = 'visa-panel';
+  // Pass-Gültigkeit prüfen gegen Trip-Ende, falls bekannt
+  let passHint = '';
+  if (visa.passportMonths > 0) {
+    passHint = `Pass ≥ ${visa.passportMonths} Monate gültig (nach Rückreise).`;
+  } else {
+    passHint = 'Pass während der Reise gültig.';
+  }
+
+  panel.innerHTML = `
+    <div class="v-head"><h3>🛂 Einreise ${country ? escapeHtml(country.name) : ''}</h3></div>
+    <div class="v-body">
+      <span class="visa-badge ${meta.badge}">${meta.label}</span>
+      <div class="v-row"><strong>Aufenthalt</strong><span>${escapeHtml(visa.stay)}</span></div>
+      <div class="v-row"><strong>Reisedokument</strong><span>${escapeHtml(passHint)}</span></div>
+      ${visa.note ? `<div class="v-note">${escapeHtml(visa.note)}</div>` : ''}
+      <a class="v-link" href="${visa.url}" target="_blank" rel="noopener noreferrer">🔗 Details & Antrag</a>
+    </div>
+  `;
+  container.appendChild(panel);
+  makeCollapsible(panel, 'visa', panel.querySelector('.v-head'), panel.querySelector('.v-body'));
+}
+
+// ============ Währungsrechner (FX) ============
+// Base-Währung: EUR. Rates via open.er-api.com (gratis, kein Key). Offline-Fallback via localStorage.
+const FX_RATES_KEY = 'tripmate.fxRates.v1';
+const FX_TTL_MS = 6 * 60 * 60 * 1000; // 6h cache
+// Fallback-Rates falls noch nie online gewesen (ungefähre Richtwerte, Base EUR, Stand 2024)
+const FX_FALLBACK = {
+  base: 'EUR', ts: 0, rates: {
+    EUR:1, USD:1.08, GBP:0.85, CHF:0.95, JPY:164, CNY:7.8, AUD:1.65, CAD:1.48,
+    NZD:1.78, SEK:11.4, NOK:11.7, DKK:7.46, PLN:4.3, CZK:25.2, HUF:395,
+    HRK:7.53, TRY:35, RUB:100, INR:90, THB:39, VND:27000, IDR:17200,
+    SGD:1.45, KRW:1460, MXN:18.3, BRL:5.5, ARS:940, ZAR:20.1, AED:3.96,
+    ISK:150
+  }
+};
+let fxState = null; // { base, ts, rates }
+
+function loadFxState() {
+  try {
+    const raw = localStorage.getItem(FX_RATES_KEY);
+    if (!raw) return null;
+    const obj = JSON.parse(raw);
+    if (!obj || !obj.rates || !obj.base) return null;
+    return obj;
+  } catch (e) { return null; }
+}
+function saveFxState(obj) {
+  try { localStorage.setItem(FX_RATES_KEY, JSON.stringify(obj)); } catch (e) {}
+}
+
+async function fetchFxRates(force) {
+  const cached = loadFxState();
+  const now = Date.now();
+  if (!force && cached && (now - cached.ts) < FX_TTL_MS) {
+    fxState = cached; return cached;
+  }
+  try {
+    const r = await fetch('https://open.er-api.com/v6/latest/EUR', { cache: 'no-store' });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+    if (!data || !data.rates) throw new Error('no rates');
+    const obj = { base: 'EUR', ts: now, rates: data.rates };
+    saveFxState(obj);
+    fxState = obj;
+    return obj;
+  } catch (e) {
+    // offline / failed → fall back to cached or hardcoded defaults
+    fxState = cached || FX_FALLBACK;
+    return fxState;
+  }
+}
+
+function convertFx(amount, from, to) {
+  if (!fxState || !fxState.rates) return null;
+  const fromRate = from === fxState.base ? 1 : fxState.rates[from];
+  const toRate = to === fxState.base ? 1 : fxState.rates[to];
+  if (!fromRate || !toRate) return null;
+  // amount in `from` → EUR → to
+  const inBase = amount / fromRate;
+  return inBase * toRate;
+}
+
+function formatFx(n) {
+  if (n == null || isNaN(n)) return '–';
+  if (Math.abs(n) >= 1000) return n.toLocaleString('de-DE', { maximumFractionDigits: 0 });
+  if (Math.abs(n) >= 10) return n.toLocaleString('de-DE', { maximumFractionDigits: 2 });
+  return n.toLocaleString('de-DE', { maximumFractionDigits: 3 });
+}
+
+function renderFxPanel(container) {
+  const trip = T();
+  // Zielwährung vom Land, sonst USD
+  let tripCurr = 'USD';
+  if (trip.country) {
+    const info = findCountry(trip.country);
+    if (info && info.curr) {
+      // info.curr kann "EUR" oder "USD/INR" sein → nimm erste
+      tripCurr = info.curr.split(/[\s\/,]+/)[0].toUpperCase();
+    }
+  }
+  if (tripCurr === 'EUR') return; // kein Umrechner nötig
+
+  const panel = document.createElement('div');
+  panel.className = 'fx-panel';
+  panel.innerHTML = `
+    <div class="fx-head"><h3>💱 Währungsrechner</h3></div>
+    <div class="fx-body">
+      <div class="fx-row">
+        <input type="number" inputmode="decimal" class="fx-input" id="fx-from-val" value="10" min="0" step="0.01" />
+        <select class="fx-select" id="fx-from-cur"></select>
+        <button class="fx-swap" id="fx-swap" aria-label="Tauschen">⇄</button>
+        <input type="number" inputmode="decimal" class="fx-input" id="fx-to-val" />
+        <select class="fx-select" id="fx-to-cur"></select>
+      </div>
+      <div class="fx-info" id="fx-info">Lädt Kurse…</div>
+    </div>
+  `;
+  container.appendChild(panel);
+  makeCollapsible(panel, 'fx', panel.querySelector('.fx-head'), panel.querySelector('.fx-body'));
+
+  const fromSel = panel.querySelector('#fx-from-cur');
+  const toSel = panel.querySelector('#fx-to-cur');
+  const fromVal = panel.querySelector('#fx-from-val');
+  const toVal = panel.querySelector('#fx-to-val');
+  const info = panel.querySelector('#fx-info');
+
+  // Beliebte Währungen oben, dann alle anderen aus fxState (falls geladen)
+  const popular = ['EUR','USD','GBP','CHF','JPY','CNY','AUD','CAD','SEK','NOK','DKK','PLN','CZK','HUF','THB','SGD','TRY','AED','MXN','BRL','INR','VND','IDR','KRW','ZAR','ISK'];
+  const fill = (sel, selected) => {
+    sel.innerHTML = '';
+    const seen = new Set();
+    const avail = fxState ? new Set(Object.keys(fxState.rates)) : null;
+    const allCodes = avail ? [...popular.filter(c => avail.has(c)), ...Array.from(avail).filter(c => !popular.includes(c)).sort()] : popular;
+    allCodes.forEach(c => {
+      if (seen.has(c)) return; seen.add(c);
+      const opt = document.createElement('option');
+      opt.value = c; opt.textContent = c;
+      if (c === selected) opt.selected = true;
+      sel.appendChild(opt);
+    });
+  };
+  fill(fromSel, 'EUR');
+  fill(toSel, tripCurr);
+
+  const recompute = () => {
+    const amt = parseFloat(fromVal.value);
+    if (isNaN(amt)) { toVal.value = ''; return; }
+    const result = convertFx(amt, fromSel.value, toSel.value);
+    toVal.value = result != null ? formatFx(result) : '–';
+  };
+  const recomputeReverse = () => {
+    const amt = parseFloat(toVal.value);
+    if (isNaN(amt)) { fromVal.value = ''; return; }
+    const result = convertFx(amt, toSel.value, fromSel.value);
+    fromVal.value = result != null ? formatFx(result) : '–';
+  };
+  fromVal.addEventListener('input', recompute);
+  fromSel.addEventListener('change', recompute);
+  toSel.addEventListener('change', recompute);
+  toVal.addEventListener('input', recomputeReverse);
+
+  panel.querySelector('#fx-swap').addEventListener('click', (e) => {
+    e.stopPropagation();
+    const a = fromSel.value, b = toSel.value;
+    fromSel.value = b; toSel.value = a;
+    recompute();
+  });
+
+  const updateInfo = () => {
+    if (!fxState) { info.textContent = 'Keine Kurse verfügbar'; info.classList.add('offline'); return; }
+    const age = Date.now() - fxState.ts;
+    const ageH = Math.round(age / 3600000);
+    if (fxState.ts === 0) { info.textContent = '⚠️ Offline – ungefähre Kurse'; info.classList.add('offline'); }
+    else if (age > FX_TTL_MS) { info.textContent = `⚠️ Offline – Kurse ${ageH}h alt`; info.classList.add('offline'); }
+    else { info.textContent = `Kurs aktualisiert · ${ageH < 1 ? 'eben' : ageH + 'h'}`; info.classList.remove('offline'); }
+  };
+
+  // Kurse laden (async), dann Dropdowns + Umrechnung refreshen
+  fetchFxRates(false).then(() => {
+    fill(fromSel, fromSel.value || 'EUR');
+    fill(toSel, toSel.value || tripCurr);
+    recompute();
+    updateInfo();
+  });
+  // Falls schon cached, direkt rechnen
+  if (fxState) { recompute(); updateInfo(); }
+}
+
+// Preload FX state beim App-Start (async, non-blocking)
+function preloadFx() {
+  fxState = loadFxState() || FX_FALLBACK;
+  fetchFxRates(false); // refresh im Hintergrund
+}
+
+// ============ Ausgabe-Tracker (Expenses) ============
+const EXPENSE_CATEGORIES = {
+  food:   { icon: '🍽️', label: 'Essen' },
+  stay:   { icon: '🏨', label: 'Unterkunft' },
+  transport: { icon: '🚇', label: 'Transport' },
+  sight:  { icon: '🎫', label: 'Attraktion' },
+  shop:   { icon: '🛍️', label: 'Shopping' },
+  other:  { icon: '💶', label: 'Sonstiges' }
+};
+
+function tripBaseCurrency() {
+  const trip = T();
+  if (trip.country) {
+    const info = findCountry(trip.country);
+    if (info && info.curr) return info.curr.split(/[\s\/,]+/)[0].toUpperCase();
+  }
+  return 'EUR';
+}
+
+function renderExpensePanel(container) {
+  const trip = T();
+  const expenses = trip.expenses || [];
+  const panel = document.createElement('div');
+  panel.className = 'exp-panel';
+  const totalEur = expenses.reduce((sum, e) => {
+    const v = convertFx(Number(e.amount) || 0, e.currency || 'EUR', 'EUR');
+    return sum + (v != null ? v : (Number(e.amount) || 0));
+  }, 0);
+  // Gruppierung nach Kategorie (in EUR)
+  const byCat = {};
+  expenses.forEach(e => {
+    const v = convertFx(Number(e.amount) || 0, e.currency || 'EUR', 'EUR');
+    const key = EXPENSE_CATEGORIES[e.category] ? e.category : 'other';
+    byCat[key] = (byCat[key] || 0) + (v != null ? v : (Number(e.amount) || 0));
+  });
+  const maxCat = Math.max(1, ...Object.values(byCat));
+
+  let catRows = '';
+  Object.entries(byCat).sort((a,b) => b[1] - a[1]).forEach(([key, amt]) => {
+    const cat = EXPENSE_CATEGORIES[key];
+    const pct = Math.round((amt / maxCat) * 100);
+    catRows += `<div class="exp-cat-row">
+      <span>${cat.icon} ${cat.label}</span>
+      <div class="bar"><div class="bar-fill" style="width:${pct}%"></div></div>
+      <span>${formatFx(amt)} €</span>
+    </div>`;
+  });
+
+  // Letzte 5 Ausgaben
+  const recent = expenses.slice().sort((a,b) => (b.createdAt||0) - (a.createdAt||0)).slice(0, 5);
+  let itemsHtml = '';
+  if (recent.length === 0) {
+    itemsHtml = '<div class="exp-empty">Noch keine Ausgaben. Tippe auf „+ Ausgabe".</div>';
+  } else {
+    itemsHtml = recent.map(e => {
+      const cat = EXPENSE_CATEGORIES[e.category] || EXPENSE_CATEGORIES.other;
+      const eur = convertFx(Number(e.amount) || 0, e.currency || 'EUR', 'EUR');
+      const showConv = (e.currency && e.currency !== 'EUR' && eur != null);
+      return `<div class="exp-item" data-exp-id="${e.id}">
+        <span class="exp-ico">${cat.icon}</span>
+        <div class="exp-item-main">
+          <div class="exp-item-title">${escapeHtml(e.title || cat.label)}</div>
+          <div class="exp-item-meta">${e.date ? fmtDate(e.date) : ''}${e.paidBy ? ' · ' + escapeHtml(e.paidBy) : ''}</div>
+        </div>
+        <div style="text-align:right;">
+          <div class="exp-item-amt">${formatFx(Number(e.amount)||0)} ${escapeHtml(e.currency || 'EUR')}</div>
+          ${showConv ? `<div class="exp-item-conv">≈ ${formatFx(eur)} €</div>` : ''}
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  panel.innerHTML = `
+    <div class="exp-head"><h3>💶 Ausgaben</h3></div>
+    <div class="exp-body">
+      <div class="exp-total">
+        <div>
+          <div class="exp-total-lbl">Gesamt</div>
+          <div class="exp-total-amt">${formatFx(totalEur)} €</div>
+        </div>
+        <div class="exp-total-sub">${expenses.length} Ausgabe${expenses.length === 1 ? '' : 'n'}</div>
+      </div>
+      ${catRows ? `<div class="exp-by-cat">${catRows}</div>` : ''}
+      <div class="exp-list">${itemsHtml}</div>
+      <button class="btn-exp-add" id="exp-add-btn">+ Ausgabe hinzufügen</button>
+      ${expenses.length > 5 ? `<button class="btn-exp-add" id="exp-all-btn" style="margin-top:6px;">Alle ${expenses.length} anzeigen</button>` : ''}
+    </div>
+  `;
+  container.appendChild(panel);
+  makeCollapsible(panel, 'expenses', panel.querySelector('.exp-head'), panel.querySelector('.exp-body'));
+
+  panel.querySelector('#exp-add-btn').addEventListener('click', (e) => {
+    e.stopPropagation();
+    openExpenseModal(null);
+  });
+  const allBtn = panel.querySelector('#exp-all-btn');
+  if (allBtn) allBtn.addEventListener('click', (e) => { e.stopPropagation(); openExpenseListModal(); });
+  panel.querySelectorAll('[data-exp-id]').forEach(el => {
+    el.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openExpenseModal(el.dataset.expId);
+    });
+  });
+}
+
+let editingExpenseId = null;
+
+function openExpenseModal(id) {
+  editingExpenseId = id;
+  const trip = T();
+  const exp = id ? (trip.expenses || []).find(e => e.id === id) : null;
+  const baseCur = tripBaseCurrency();
+  const today = new Date().toISOString().slice(0, 10);
+  const title = document.getElementById('exp-title');
+  const amount = document.getElementById('exp-amount');
+  const currency = document.getElementById('exp-currency');
+  const category = document.getElementById('exp-category');
+  const date = document.getElementById('exp-date');
+  const paidBy = document.getElementById('exp-paidby');
+  const notes = document.getElementById('exp-notes');
+  const delBtn = document.getElementById('exp-delete-btn');
+
+  if (exp) {
+    title.value = exp.title || '';
+    amount.value = exp.amount != null ? exp.amount : '';
+    currency.value = exp.currency || baseCur;
+    category.value = exp.category || 'food';
+    date.value = exp.date || today;
+    paidBy.value = exp.paidBy || '';
+    notes.value = exp.notes || '';
+    delBtn.style.display = '';
+  } else {
+    title.value = '';
+    amount.value = '';
+    currency.value = baseCur;
+    category.value = 'food';
+    date.value = today;
+    paidBy.value = myName || 'Ich';
+    notes.value = '';
+    delBtn.style.display = 'none';
+  }
+  openModal('expense-modal');
+}
+
+function saveExpense() {
+  const title = document.getElementById('exp-title').value.trim();
+  const amountRaw = document.getElementById('exp-amount').value.trim().replace(',', '.');
+  const amount = parseFloat(amountRaw);
+  if (isNaN(amount) || amount <= 0) { toast('Bitte gültigen Betrag eingeben'); return; }
+  const currency = (document.getElementById('exp-currency').value || 'EUR').toUpperCase();
+  const category = document.getElementById('exp-category').value || 'other';
+  const date = document.getElementById('exp-date').value || '';
+  const paidBy = document.getElementById('exp-paidby').value.trim();
+  const notes = document.getElementById('exp-notes').value.trim();
+  const trip = T();
+  if (!Array.isArray(trip.expenses)) trip.expenses = [];
+  const now = Date.now();
+  if (editingExpenseId) {
+    const exp = trip.expenses.find(e => e.id === editingExpenseId);
+    if (exp) {
+      exp.title = title; exp.amount = amount; exp.currency = currency;
+      exp.category = category; exp.date = date; exp.paidBy = paidBy;
+      exp.notes = notes; exp.updatedAt = now;
+    }
+  } else {
+    trip.expenses.push({
+      id: 'ex-' + Math.random().toString(36).slice(2, 10),
+      title, amount, currency, category, date, paidBy, notes,
+      createdAt: now, updatedAt: now
+    });
+  }
+  saveState();
+  closeModal('expense-modal');
+  renderList();
+  toast('Ausgabe gespeichert');
+}
+
+function deleteExpense() {
+  if (!editingExpenseId) return;
+  if (!confirm('Diese Ausgabe löschen?')) return;
+  const trip = T();
+  trip.expenses = (trip.expenses || []).filter(e => e.id !== editingExpenseId);
+  if (!Array.isArray(trip._tombs)) trip._tombs = [];
+  // Konsistent mit dem bestehenden String-Tombstone-Format (z.B. 'i:<id>', 'p:<id>')
+  const tomb = 'x:' + editingExpenseId;
+  if (!trip._tombs.includes(tomb)) trip._tombs.push(tomb);
+  saveState();
+  closeModal('expense-modal');
+  renderList();
+  toast('Gelöscht');
+}
+
+function openExpenseListModal() {
+  const trip = T();
+  const list = (trip.expenses || []).slice().sort((a,b) => (b.date||'').localeCompare(a.date||'') || (b.createdAt||0) - (a.createdAt||0));
+  const c = document.getElementById('exp-list-body');
+  if (list.length === 0) {
+    c.innerHTML = '<div class="exp-empty">Noch keine Ausgaben.</div>';
+  } else {
+    c.innerHTML = list.map(e => {
+      const cat = EXPENSE_CATEGORIES[e.category] || EXPENSE_CATEGORIES.other;
+      const eur = convertFx(Number(e.amount) || 0, e.currency || 'EUR', 'EUR');
+      const showConv = (e.currency && e.currency !== 'EUR' && eur != null);
+      return `<div class="exp-item" data-exp-id="${e.id}" style="margin-bottom:6px;">
+        <span class="exp-ico">${cat.icon}</span>
+        <div class="exp-item-main">
+          <div class="exp-item-title">${escapeHtml(e.title || cat.label)}</div>
+          <div class="exp-item-meta">${e.date ? fmtDate(e.date) : ''}${e.paidBy ? ' · ' + escapeHtml(e.paidBy) : ''}</div>
+        </div>
+        <div style="text-align:right;">
+          <div class="exp-item-amt">${formatFx(Number(e.amount)||0)} ${escapeHtml(e.currency || 'EUR')}</div>
+          ${showConv ? `<div class="exp-item-conv">≈ ${formatFx(eur)} €</div>` : ''}
+        </div>
+      </div>`;
+    }).join('');
+    c.querySelectorAll('[data-exp-id]').forEach(el => {
+      el.addEventListener('click', () => {
+        closeModal('expense-list-modal');
+        openExpenseModal(el.dataset.expId);
+      });
+    });
+  }
+  openModal('expense-list-modal');
+}
+
+// =====================================================================
+// Dokumenten-Safe (v0.5.3) — AES-GCM clientseitige Verschlüsselung
+// Dateien werden NUR verschlüsselt gespeichert (Base64 in trip.documents).
+// Supabase / iCloud / Backups sehen niemals den Klartext.
+// Pro-Trip-Passwort, NICHT synced (lebt nur in localStorage einer Session).
+// =====================================================================
+const DOC_MAX_SIZE = 4 * 1024 * 1024; // 4 MB pro Datei (Base64-Aufschlag berücksichtigt)
+const DOC_PBKDF2_ITER = 200000;       // PBKDF2 Iterationen
+const DOC_SESSION_KEY = 'tripmate.docKey.v1'; // {tripId: base64Key}
+let docSessionKeys = {};              // tripId -> CryptoKey (im RAM)
+
+function loadDocSessionMeta() {
+  try {
+    const raw = sessionStorage.getItem(DOC_SESSION_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch (e) { return {}; }
+}
+function saveDocSessionMeta(obj) {
+  try { sessionStorage.setItem(DOC_SESSION_KEY, JSON.stringify(obj)); } catch (e) {}
+}
+function clearDocSession(tripId) {
+  delete docSessionKeys[tripId];
+  const meta = loadDocSessionMeta();
+  delete meta[tripId];
+  saveDocSessionMeta(meta);
+}
+
+function bufToBase64(buf) {
+  const bytes = new Uint8Array(buf);
+  let bin = '';
+  for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+  return btoa(bin);
+}
+function base64ToBuf(b64) {
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return bytes.buffer;
+}
+async function deriveDocKey(passphrase, saltBuf) {
+  const enc = new TextEncoder();
+  const baseKey = await crypto.subtle.importKey(
+    'raw', enc.encode(passphrase), { name: 'PBKDF2' }, false, ['deriveKey']
+  );
+  return crypto.subtle.deriveKey(
+    { name: 'PBKDF2', salt: saltBuf, iterations: DOC_PBKDF2_ITER, hash: 'SHA-256' },
+    baseKey,
+    { name: 'AES-GCM', length: 256 },
+    false,
+    ['encrypt', 'decrypt']
+  );
+}
+async function encryptDocFile(file, passphrase) {
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const iv   = crypto.getRandomValues(new Uint8Array(12));
+  const key  = await deriveDocKey(passphrase, salt.buffer);
+  const data = await file.arrayBuffer();
+  const ct   = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, data);
+  // Verifikations-Token: kurzer Klartext-String mit demselben Schlüssel verschlüsseln
+  return {
+    salt: bufToBase64(salt.buffer),
+    iv:   bufToBase64(iv.buffer),
+    ciphertext: bufToBase64(ct)
+  };
+}
+async function decryptDoc(doc, passphrase) {
+  const salt = new Uint8Array(base64ToBuf(doc.salt));
+  const iv   = new Uint8Array(base64ToBuf(doc.iv));
+  const ct   = base64ToBuf(doc.ciphertext);
+  const key  = await deriveDocKey(passphrase, salt.buffer);
+  const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ct);
+  return new Blob([plain], { type: doc.mime || 'application/octet-stream' });
+}
+
+// Verifikations-Eintrag (1 pro Trip): _docVerify = {salt, iv, ct} mit Klartext "ok"
+async function setDocPassphrase(passphrase) {
+  const trip = T();
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const iv   = crypto.getRandomValues(new Uint8Array(12));
+  const key  = await deriveDocKey(passphrase, salt.buffer);
+  const ct   = await crypto.subtle.encrypt(
+    { name: 'AES-GCM', iv },
+    key,
+    new TextEncoder().encode('tripmate-doc-verify')
+  );
+  trip._docVerify = {
+    salt: bufToBase64(salt.buffer),
+    iv:   bufToBase64(iv.buffer),
+    ct:   bufToBase64(ct)
+  };
+  trip._metaUpdatedAt = Date.now();
+  saveState();
+}
+async function verifyDocPassphrase(passphrase) {
+  const trip = T();
+  if (!trip._docVerify) return true; // erste Nutzung: alles wird mit dieser Phrase initialisiert
+  try {
+    const v = trip._docVerify;
+    const salt = new Uint8Array(base64ToBuf(v.salt));
+    const iv   = new Uint8Array(base64ToBuf(v.iv));
+    const key  = await deriveDocKey(passphrase, salt.buffer);
+    const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, base64ToBuf(v.ct));
+    return new TextDecoder().decode(plain) === 'tripmate-doc-verify';
+  } catch (e) {
+    return false;
+  }
+}
+function isDocSafeUnlocked() {
+  const trip = T();
+  if (!trip) return false;
+  return !!docSessionKeys[trip.id];
+}
+async function unlockDocSafe(passphrase) {
+  const trip = T();
+  const ok = await verifyDocPassphrase(passphrase);
+  if (!ok) return false;
+  if (!trip._docVerify) {
+    await setDocPassphrase(passphrase);
+  }
+  docSessionKeys[trip.id] = passphrase; // wir cachen die Passphrase im RAM (nicht persistent)
+  const meta = loadDocSessionMeta();
+  meta[trip.id] = true;
+  saveDocSessionMeta(meta);
+  return true;
+}
+
+function docFileIcon(mime, name) {
+  const m = (mime || '').toLowerCase();
+  const ext = (name || '').toLowerCase().split('.').pop();
+  if (m.startsWith('image/')) return '🖼️';
+  if (m === 'application/pdf' || ext === 'pdf') return '📄';
+  if (m.startsWith('video/')) return '🎬';
+  if (m.startsWith('audio/')) return '🎵';
+  if (['doc','docx','rtf','txt','md'].includes(ext)) return '📝';
+  if (['xls','xlsx','csv'].includes(ext)) return '📊';
+  return '📎';
+}
+function fmtBytes(n) {
+  if (!n && n !== 0) return '';
+  if (n < 1024) return n + ' B';
+  if (n < 1024 * 1024) return (n / 1024).toFixed(1) + ' KB';
+  return (n / 1024 / 1024).toFixed(1) + ' MB';
+}
+
+function renderDocsPanel(container) {
+  const trip = T();
+  const docs = trip.documents || [];
+  const unlocked = isDocSafeUnlocked();
+  const hasPassphrase = !!trip._docVerify;
+  const panel = document.createElement('div');
+  panel.className = 'docs-panel';
+
+  let body;
+  if (!unlocked) {
+    const sub = hasPassphrase
+      ? `<div class="docs-sub">${docs.length} verschlüsselte${docs.length === 1 ? 's' : ''} Dokument${docs.length === 1 ? '' : 'e'} · entsperren mit Passwort</div>`
+      : `<div class="docs-sub">Verschlüsselter Speicher für Pass-Kopien, Versicherung, Impfnachweise.</div>`;
+    body = `
+      <div class="docs-locked">
+        ${sub}
+        <button class="btn-doc-unlock" id="docs-unlock-btn">${hasPassphrase ? '🔑 Entsperren' : '🛡️ Passwort einrichten'}</button>
+        <div class="docs-hint">Das Passwort verlässt nie dein Gerät. Wer es nicht kennt, kann die Dokumente nicht lesen — auch wir nicht.</div>
+      </div>`;
+  } else {
+    let listHtml = '';
+    if (docs.length === 0) {
+      listHtml = '<div class="docs-empty">Noch keine Dokumente. Tippe auf „+ Datei hinzufügen".</div>';
+    } else {
+      listHtml = docs.slice().sort((a,b) => (b.createdAt||0) - (a.createdAt||0)).map(d => {
+        const ico = docFileIcon(d.mime, d.name);
+        const sizeStr = fmtBytes(d.size);
+        return `<div class="doc-item" data-doc-id="${d.id}">
+          <span class="doc-ico">${ico}</span>
+          <div class="doc-main">
+            <div class="doc-name">${escapeHtml(d.name || 'Dokument')}</div>
+            <div class="doc-meta">${sizeStr}${d.notes ? ' · ' + escapeHtml(d.notes) : ''}</div>
+          </div>
+          <div class="doc-actions">
+            <button class="btn-doc-act" data-doc-view="${d.id}" title="Öffnen">👁️</button>
+            <button class="btn-doc-act" data-doc-dl="${d.id}" title="Herunterladen">⬇️</button>
+            <button class="btn-doc-act doc-del" data-doc-del="${d.id}" title="Löschen">🗑️</button>
+          </div>
+        </div>`;
+      }).join('');
+    }
+    body = `
+      <div class="docs-unlocked">
+        ${listHtml}
+        <button class="btn-doc-add" id="docs-add-btn">+ Datei hinzufügen</button>
+        <button class="btn-doc-lock" id="docs-lock-btn">🔒 Sperren</button>
+      </div>`;
+  }
+
+  panel.innerHTML = `
+    <div class="docs-head"><h3>🔒 Dokumenten-Safe</h3></div>
+    <div class="docs-body">${body}</div>
+  `;
+  container.appendChild(panel);
+  makeCollapsible(panel, 'documents', panel.querySelector('.docs-head'), panel.querySelector('.docs-body'));
+
+  const unlockBtn = panel.querySelector('#docs-unlock-btn');
+  if (unlockBtn) unlockBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    openDocPassphraseModal(hasPassphrase ? 'unlock' : 'set');
+  });
+  const addBtn = panel.querySelector('#docs-add-btn');
+  if (addBtn) addBtn.addEventListener('click', (e) => { e.stopPropagation(); openDocAddModal(); });
+  const lockBtn = panel.querySelector('#docs-lock-btn');
+  if (lockBtn) lockBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    clearDocSession(T().id);
+    renderList();
+  });
+  panel.querySelectorAll('[data-doc-view]').forEach(el => {
+    el.addEventListener('click', (e) => { e.stopPropagation(); viewDoc(el.dataset.docView); });
+  });
+  panel.querySelectorAll('[data-doc-dl]').forEach(el => {
+    el.addEventListener('click', (e) => { e.stopPropagation(); downloadDoc(el.dataset.docDl); });
+  });
+  panel.querySelectorAll('[data-doc-del]').forEach(el => {
+    el.addEventListener('click', (e) => { e.stopPropagation(); deleteDoc(el.dataset.docDel); });
+  });
+}
+
+function openDocPassphraseModal(mode) {
+  // mode: 'set' | 'unlock'
+  const isSet = mode === 'set';
+  const titleEl = document.getElementById('doc-pp-title');
+  const subEl   = document.getElementById('doc-pp-sub');
+  const pp1     = document.getElementById('doc-pp-1');
+  const pp2     = document.getElementById('doc-pp-2');
+  const pp2Wrap = document.getElementById('doc-pp-2-wrap');
+  const errEl   = document.getElementById('doc-pp-err');
+  const submit  = document.getElementById('doc-pp-submit');
+  titleEl.textContent = isSet ? 'Passwort einrichten' : 'Safe entsperren';
+  subEl.textContent   = isSet
+    ? 'Wähle ein starkes Passwort. Es wird NICHT gespeichert. Wenn du es vergisst, sind die Dokumente unwiderruflich verloren.'
+    : 'Gib das Passwort für diesen Trip ein.';
+  pp1.value = ''; pp2.value = ''; errEl.textContent = '';
+  pp2Wrap.style.display = isSet ? '' : 'none';
+  submit.textContent = isSet ? 'Einrichten' : 'Entsperren';
+  submit.dataset.mode = mode;
+  openModal('doc-pp-modal');
+  setTimeout(() => pp1.focus(), 50);
+}
+
+async function submitDocPassphrase() {
+  const submit = document.getElementById('doc-pp-submit');
+  const mode = submit.dataset.mode;
+  const errEl = document.getElementById('doc-pp-err');
+  const pp1 = document.getElementById('doc-pp-1').value;
+  const pp2 = document.getElementById('doc-pp-2').value;
+  errEl.textContent = '';
+  if (!pp1 || pp1.length < 6) { errEl.textContent = 'Mindestens 6 Zeichen.'; return; }
+  if (mode === 'set') {
+    if (pp1 !== pp2) { errEl.textContent = 'Passwörter stimmen nicht überein.'; return; }
+    submit.disabled = true; submit.textContent = '…';
+    try {
+      const ok = await unlockDocSafe(pp1);
+      if (!ok) { errEl.textContent = 'Konnte nicht eingerichtet werden.'; return; }
+      closeModal('doc-pp-modal');
+      renderList();
+    } finally { submit.disabled = false; }
+  } else {
+    submit.disabled = true; submit.textContent = '…';
+    try {
+      const ok = await unlockDocSafe(pp1);
+      if (!ok) { errEl.textContent = 'Falsches Passwort.'; return; }
+      closeModal('doc-pp-modal');
+      renderList();
+    } finally { submit.disabled = false; }
+  }
+}
+
+function openDocAddModal() {
+  const trip = T();
+  if (!docSessionKeys[trip.id]) { openDocPassphraseModal(trip._docVerify ? 'unlock' : 'set'); return; }
+  const fileInput = document.getElementById('doc-add-file');
+  const notesInput = document.getElementById('doc-add-notes');
+  const errEl = document.getElementById('doc-add-err');
+  if (fileInput) fileInput.value = '';
+  if (notesInput) notesInput.value = '';
+  if (errEl) errEl.textContent = '';
+  openModal('doc-add-modal');
+}
+
+async function submitDocAdd() {
+  const trip = T();
+  const passphrase = docSessionKeys[trip.id];
+  const errEl = document.getElementById('doc-add-err');
+  const submit = document.getElementById('doc-add-submit');
+  errEl.textContent = '';
+  if (!passphrase) { errEl.textContent = 'Safe nicht entsperrt.'; return; }
+  const fileInput = document.getElementById('doc-add-file');
+  const file = fileInput && fileInput.files && fileInput.files[0];
+  if (!file) { errEl.textContent = 'Bitte Datei auswählen.'; return; }
+  if (file.size > DOC_MAX_SIZE) { errEl.textContent = 'Datei zu groß (max. 4 MB).'; return; }
+  const notes = (document.getElementById('doc-add-notes').value || '').trim();
+  submit.disabled = true; submit.textContent = '⏳ Verschlüssele…';
+  try {
+    const enc = await encryptDocFile(file, passphrase);
+    const doc = {
+      id: 'doc-' + Math.random().toString(36).slice(2, 10),
+      name: file.name,
+      mime: file.type || 'application/octet-stream',
+      size: file.size,
+      notes,
+      salt: enc.salt,
+      iv: enc.iv,
+      ciphertext: enc.ciphertext,
+      createdAt: Date.now(),
+      updatedAt: Date.now()
+    };
+    if (!Array.isArray(trip.documents)) trip.documents = [];
+    trip.documents.push(doc);
+    trip._metaUpdatedAt = Date.now();
+    saveState();
+    closeModal('doc-add-modal');
+    renderList();
+    cloudPushDebounced();
+  } catch (e) {
+    console.error('doc encrypt fail', e);
+    errEl.textContent = 'Verschlüsselung fehlgeschlagen.';
+  } finally {
+    submit.disabled = false; submit.textContent = 'Hinzufügen';
+  }
+}
+
+async function viewDoc(id) {
+  const trip = T();
+  const passphrase = docSessionKeys[trip.id];
+  if (!passphrase) return;
+  const doc = (trip.documents || []).find(d => d.id === id);
+  if (!doc) return;
+  try {
+    const blob = await decryptDoc(doc, passphrase);
+    const url = URL.createObjectURL(blob);
+    // In neuem Fenster öffnen — die meisten Browser können PDF/Bild inline anzeigen
+    const w = window.open(url, '_blank');
+    if (!w) {
+      // Fallback: download
+      const a = document.createElement('a'); a.href = url; a.download = doc.name; a.click();
+    }
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+  } catch (e) {
+    alert('Konnte nicht entschlüsselt werden.');
+  }
+}
+async function downloadDoc(id) {
+  const trip = T();
+  const passphrase = docSessionKeys[trip.id];
+  if (!passphrase) return;
+  const doc = (trip.documents || []).find(d => d.id === id);
+  if (!doc) return;
+  try {
+    const blob = await decryptDoc(doc, passphrase);
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = doc.name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  } catch (e) {
+    alert('Konnte nicht entschlüsselt werden.');
+  }
+}
+function deleteDoc(id) {
+  const trip = T();
+  if (!confirm('Dieses Dokument unwiderruflich löschen?')) return;
+  const idx = (trip.documents || []).findIndex(d => d.id === id);
+  if (idx < 0) return;
+  trip.documents.splice(idx, 1);
+  if (!Array.isArray(trip._tombs)) trip._tombs = [];
+  trip._tombs.push('d:' + id);
+  trip._metaUpdatedAt = Date.now();
+  saveState();
+  renderList();
+  cloudPushDebounced();
+}
+
+// =====================================================================
+// Email-Import (v0.5.3) — Klartext-Email einfügen, Regex-Parser zieht
+// Buchungsdaten heraus (Hotel, Flug, Zug, Airbnb, Veranstaltung).
+// Phase A: Paste-and-parse, läuft 100% lokal.
+// Phase B (optional): Cloudflare Email Worker, separate Datei email-worker.js.
+// =====================================================================
+const MONTHS_DE = { januar:'01', jan:'01', februar:'02', feb:'02', märz:'03', maerz:'03', mar:'03', mrz:'03',
+  april:'04', apr:'04', mai:'05', juni:'06', jun:'06', juli:'07', jul:'07', august:'08', aug:'08',
+  september:'09', sep:'09', sept:'09', oktober:'10', okt:'10', oct:'10', november:'11', nov:'11', dezember:'12', dez:'12', dec:'12' };
+const MONTHS_EN = { january:'01', february:'02', march:'03', april:'04', may:'05', june:'06',
+  july:'07', august:'08', september:'09', october:'10', november:'11', december:'12' };
+function parseEmailDate(s) {
+  if (!s) return '';
+  s = s.trim();
+  let m = s.match(/(\d{4})-(\d{2})-(\d{2})/);
+  if (m) return `${m[1]}-${m[2]}-${m[3]}`;
+  m = s.match(/(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{2,4})/);
+  if (m) {
+    let y = m[3]; if (y.length === 2) y = '20' + y;
+    return `${y}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;
+  }
+  m = s.match(/(\d{1,2})\.?\s*([A-Za-zäöüÄÖÜ]+)\.?\s*(\d{4})/);
+  if (m) {
+    const mo = MONTHS_DE[m[2].toLowerCase()] || MONTHS_EN[m[2].toLowerCase()];
+    if (mo) return `${m[3]}-${mo}-${m[1].padStart(2,'0')}`;
+  }
+  m = s.match(/([A-Za-z]+)\s+(\d{1,2}),?\s*(\d{4})/);
+  if (m) {
+    const mo = MONTHS_EN[m[1].toLowerCase()] || MONTHS_DE[m[1].toLowerCase()];
+    if (mo) return `${m[3]}-${mo}-${m[2].padStart(2,'0')}`;
+  }
+  return '';
+}
+function parseEmailTime(s) {
+  if (!s) return '';
+  // Nur Doppelpunkt — Punkte verwechseln sich mit Datums-Punkten (15.06)
+  const m = s.match(/(\d{1,2}):(\d{2})/);
+  return m ? `${m[1].padStart(2,'0')}:${m[2]}` : '';
+}
+function detectEmailKind(text) {
+  const t = text.toLowerCase();
+  if (/booking\.com|booking confirmation|buchungsbestätigung/i.test(t) && /(hotel|apartment|unterkunft|check[- ]in)/i.test(t)) return 'booking-hotel';
+  if (/airbnb/i.test(t)) return 'airbnb';
+  if (/lufthansa|easyjet|ryanair|eurowings|swiss\.com|aegean|condor|tap portugal|klm|air france|british airways|emirates|qatar/i.test(t)) return 'flight';
+  if (/(boarding pass|flugschein|flight confirmation|flugbestätigung|booking reference|airline)/i.test(t)) return 'flight';
+  if (/(deutsche bahn|bahn\.de|sncf|trenitalia|renfe|eurostar|öbb|oebb|ns nederland)/i.test(t)) return 'train';
+  if (/(zugticket|train ticket|bahn-ticket|railjet|tgv|fahrkarte)/i.test(t)) return 'train';
+  if (/(flixbus|busreise|coach ticket)/i.test(t)) return 'bus';
+  if (/(reservation|reservierung).*?restaurant|restaurant.*?(reservation|reservierung)|opentable|quandoo/i.test(t)) return 'event';
+  if (/(getyourguide|tiqets|viator|musement|tripadvisor experiences|ticketmaster|eventim)/i.test(t)) return 'event';
+  if (/(hotel|hostel|riad|guesthouse|pension)/i.test(t) && /(check[- ]in|check[- ]out|anreise|abreise)/i.test(t)) return 'hotel';
+  return 'unknown';
+}
+function extractAddressLine(text) {
+  let m = text.match(/(?:Adresse|Address|Anschrift)\s*[:\-]?\s*(.+)/i);
+  if (m) return m[1].split(/\n/)[0].trim().slice(0, 160);
+  m = text.match(/[A-Za-zäöüÄÖÜß0-9 .,'\-]{3,80}?,\s*\d{4,5}\s+[A-Za-zäöüÄÖÜß \-]+/);
+  if (m) return m[0].trim();
+  return '';
+}
+function parseHotelEmail(text) {
+  const out = { kind: 'hotel', name: '', address: '', start: '', end: '', notes: '' };
+  let m = text.match(/(?:Buchungsbestätigung|Booking confirmation|Reservation):?\s*([A-Z][^\n]{2,80})/);
+  if (m) out.name = m[1].trim();
+  if (!out.name) {
+    m = text.match(/Hotel[^\n]{0,4}:?\s*([^\n]{3,80})/);
+    if (m) out.name = m[1].trim();
+  }
+  m = text.match(/(?:Check[- ]in|Anreise|Anreisedatum|Arrival)[^\n]{0,40}?(\d{1,2}[.\/-]\d{1,2}[.\/-]\d{2,4}|\d{4}-\d{2}-\d{2}|\d{1,2}\.?\s*[A-Za-zäöü]+\s*\d{4}|[A-Za-z]+\s+\d{1,2},?\s*\d{4})/i);
+  if (m) out.start = parseEmailDate(m[1]);
+  m = text.match(/(?:Check[- ]out|Abreise|Abreisedatum|Departure)[^\n]{0,40}?(\d{1,2}[.\/-]\d{1,2}[.\/-]\d{2,4}|\d{4}-\d{2}-\d{2}|\d{1,2}\.?\s*[A-Za-zäöü]+\s*\d{4}|[A-Za-z]+\s+\d{1,2},?\s*\d{4})/i);
+  if (m) out.end = parseEmailDate(m[1]);
+  out.address = extractAddressLine(text);
+  return out;
+}
+function parseAirbnbEmail(text) {
+  const out = { kind: 'hotel', name: 'Airbnb', address: '', start: '', end: '', notes: 'Airbnb-Buchung' };
+  let m = text.match(/(?:Du fährst zu|Your trip to|Reise nach)\s+([^\n]{2,80})/i);
+  if (m) out.name = 'Airbnb · ' + m[1].trim();
+  m = text.match(/(?:Gastgeber|Host)\s*[:\-]?\s*([^\n]{2,40})/i);
+  if (m) out.notes += ' · Gastgeber: ' + m[1].trim();
+  m = text.match(/(?:Check[- ]in|Anreise)[^\n]{0,40}?(\d{1,2}[.\/-]\d{1,2}[.\/-]\d{2,4}|\d{4}-\d{2}-\d{2}|\d{1,2}\.?\s*[A-Za-zäöü]+\s*\d{4}|[A-Za-z]+\s+\d{1,2},?\s*\d{4})/i);
+  if (m) out.start = parseEmailDate(m[1]);
+  m = text.match(/(?:Check[- ]out|Abreise)[^\n]{0,40}?(\d{1,2}[.\/-]\d{1,2}[.\/-]\d{2,4}|\d{4}-\d{2}-\d{2}|\d{1,2}\.?\s*[A-Za-zäöü]+\s*\d{4}|[A-Za-z]+\s+\d{1,2},?\s*\d{4})/i);
+  if (m) out.end = parseEmailDate(m[1]);
+  out.address = extractAddressLine(text);
+  return out;
+}
+function parseFlightEmail(text) {
+  const out = { kind: 'event', type: 'flight', title: '', date: '', time: '', from: '', to: '', notes: '' };
+  let m = text.match(/\b([A-Z]{3})\b\s*[\-→to]+\s*\b([A-Z]{3})\b/);
+  if (m) { out.from = m[1]; out.to = m[2]; }
+  if (!out.from) {
+    m = text.match(/from\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)\s+to\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)/);
+    if (m) { out.from = m[1]; out.to = m[2]; }
+  }
+  if (!out.from) {
+    m = text.match(/von\s+([A-ZÄÖÜ][a-zäöü]+(?:\s+[A-ZÄÖÜ][a-zäöü]+)*)\s+nach\s+([A-ZÄÖÜ][a-zäöü]+(?:\s+[A-ZÄÖÜ][a-zäöü]+)*)/);
+    if (m) { out.from = m[1]; out.to = m[2]; }
+  }
+  m = text.match(/\b([A-Z]{2}\d{2,4})\b/);
+  const flightNo = m ? m[1] : '';
+  m = text.match(/(?:Abflug|Departure|Date|Datum)[^\n]{0,60}?(\d{1,2}[.\/-]\d{1,2}[.\/-]\d{2,4}|\d{4}-\d{2}-\d{2}|\d{1,2}\.?\s*[A-Za-zäöü]+\s*\d{4}|[A-Za-z]+\s+\d{1,2},?\s*\d{4})/i);
+  if (m) out.date = parseEmailDate(m[1]);
+  if (!out.date) {
+    m = text.match(/(\d{1,2}[.\/-]\d{1,2}[.\/-]\d{2,4})/);
+    if (m) out.date = parseEmailDate(m[1]);
+  }
+  m = text.match(/(?:Abflug|Departure)[^\n]{0,60}?(\d{1,2}:\d{2})/i);
+  if (m) out.time = parseEmailTime(m[1]);
+  out.title = (flightNo ? flightNo + ' · ' : '') + (out.from && out.to ? `${out.from} → ${out.to}` : 'Flug');
+  return out;
+}
+function parseTrainEmail(text) {
+  const out = { kind: 'event', type: 'train', title: '', date: '', time: '', from: '', to: '', notes: '' };
+  let m = text.match(/(?:von|from)\s+([A-ZÄÖÜ][A-Za-zäöüß \-\.]{2,40})\s+(?:nach|to)\s+([A-ZÄÖÜ][A-Za-zäöüß \-\.]{2,40})/);
+  if (m) { out.from = m[1].trim(); out.to = m[2].trim(); }
+  m = text.match(/(?:Abfahrt|Departure|Datum|Date)[^\n]{0,60}?(\d{1,2}[.\/-]\d{1,2}[.\/-]\d{2,4}|\d{4}-\d{2}-\d{2}|\d{1,2}\.?\s*[A-Za-zäöü]+\s*\d{4})/i);
+  if (m) out.date = parseEmailDate(m[1]);
+  if (!out.date) {
+    m = text.match(/(\d{1,2}[.\/-]\d{1,2}[.\/-]\d{2,4})/);
+    if (m) out.date = parseEmailDate(m[1]);
+  }
+  m = text.match(/(?:Abfahrt|Departure)[^\n]{0,60}?(\d{1,2}:\d{2})/i);
+  if (m) out.time = parseEmailTime(m[1]);
+  m = text.match(/\b(ICE|IC|EC|RJ|TGV|EUROSTAR|RE|RB)\s*(\d{1,4})\b/i);
+  const trainNo = m ? `${m[1].toUpperCase()} ${m[2]}` : '';
+  out.title = (trainNo ? trainNo + ' · ' : '') + (out.from && out.to ? `${out.from} → ${out.to}` : 'Zugfahrt');
+  return out;
+}
+function parseEventEmail(text) {
+  const out = { kind: 'event', type: 'event', title: '', date: '', time: '', from: '', to: '', notes: '' };
+  let m = text.match(/(?:Reservierung|Reservation|Buchung|Booking|Veranstaltung|Event)[^\n]{0,3}:?\s*([^\n]{3,80})/i);
+  if (m) out.title = m[1].trim();
+  m = text.match(/(?:am|on|Datum|Date)[^\n]{0,40}?(\d{1,2}[.\/-]\d{1,2}[.\/-]\d{2,4}|\d{4}-\d{2}-\d{2}|\d{1,2}\.?\s*[A-Za-zäöü]+\s*\d{4})/i);
+  if (m) out.date = parseEmailDate(m[1]);
+  m = text.match(/(?:um|at)[^\n]{0,20}?(\d{1,2}:\d{2})/i);
+  if (m) out.time = parseEmailTime(m[1]);
+  if (!out.title) out.title = 'Veranstaltung';
+  return out;
+}
+function parseEmail(text) {
+  const kind = detectEmailKind(text);
+  let parsed;
+  switch (kind) {
+    case 'booking-hotel':
+    case 'hotel':    parsed = parseHotelEmail(text); break;
+    case 'airbnb':   parsed = parseAirbnbEmail(text); break;
+    case 'flight':   parsed = parseFlightEmail(text); break;
+    case 'train':    parsed = parseTrainEmail(text); break;
+    case 'bus':      parsed = parseTrainEmail(text); parsed.type = 'bus'; break;
+    case 'event':    parsed = parseEventEmail(text); break;
+    default:         parsed = parseEventEmail(text); parsed.kind = 'event';
+  }
+  parsed._detectedKind = kind;
+  return parsed;
+}
+
+let lastParsedEmail = null;
+function openEmailImportModal() {
+  const ta = document.getElementById('email-import-ta');
+  const preview = document.getElementById('email-import-preview');
+  const err = document.getElementById('email-import-err');
+  if (ta) ta.value = '';
+  if (preview) preview.innerHTML = '';
+  if (err) err.textContent = '';
+  lastParsedEmail = null;
+  document.getElementById('email-import-add-btn').disabled = true;
+  openModal('email-import-modal');
+  setTimeout(() => ta && ta.focus(), 50);
+}
+function previewEmailImport() {
+  const ta = document.getElementById('email-import-ta');
+  const preview = document.getElementById('email-import-preview');
+  const err = document.getElementById('email-import-err');
+  const addBtn = document.getElementById('email-import-add-btn');
+  err.textContent = '';
+  const text = (ta.value || '').trim();
+  if (text.length < 20) {
+    err.textContent = 'Email-Text ist zu kurz.';
+    preview.innerHTML = '';
+    addBtn.disabled = true;
+    return;
+  }
+  const parsed = parseEmail(text);
+  lastParsedEmail = parsed;
+  let html = `<div class="email-pv-kind">Erkannt: <strong>${escapeHtml(parsed._detectedKind)}</strong></div>`;
+  if (parsed.kind === 'hotel') {
+    html += `
+      <div class="email-pv-row"><span>Name</span><strong>${escapeHtml(parsed.name || '–')}</strong></div>
+      <div class="email-pv-row"><span>Adresse</span><strong>${escapeHtml(parsed.address || '–')}</strong></div>
+      <div class="email-pv-row"><span>Check-in</span><strong>${escapeHtml(parsed.start || '–')}</strong></div>
+      <div class="email-pv-row"><span>Check-out</span><strong>${escapeHtml(parsed.end || '–')}</strong></div>
+    `;
+    if (!parsed.name && !parsed.start) { err.textContent = 'Konnte keine Hotel-Daten finden.'; addBtn.disabled = true; return; }
+  } else {
+    html += `
+      <div class="email-pv-row"><span>Typ</span><strong>${escapeHtml(parsed.type || 'event')}</strong></div>
+      <div class="email-pv-row"><span>Titel</span><strong>${escapeHtml(parsed.title || '–')}</strong></div>
+      <div class="email-pv-row"><span>Datum</span><strong>${escapeHtml(parsed.date || '–')}</strong></div>
+      <div class="email-pv-row"><span>Zeit</span><strong>${escapeHtml(parsed.time || '–')}</strong></div>
+      ${parsed.from ? `<div class="email-pv-row"><span>Von</span><strong>${escapeHtml(parsed.from)}</strong></div>` : ''}
+      ${parsed.to   ? `<div class="email-pv-row"><span>Nach</span><strong>${escapeHtml(parsed.to)}</strong></div>` : ''}
+    `;
+    if (!parsed.date) { err.textContent = 'Konnte kein Datum finden — bitte ggf. manuell ergänzen.'; }
+  }
+  preview.innerHTML = html;
+  addBtn.disabled = false;
+}
+function applyEmailImport() {
+  if (!lastParsedEmail) return;
+  const trip = T();
+  const now = Date.now();
+  if (lastParsedEmail.kind === 'hotel') {
+    if (!Array.isArray(trip.accommodations)) trip.accommodations = [];
+    trip.accommodations.push({
+      id: uid(), name: lastParsedEmail.name || 'Hotel',
+      address: lastParsedEmail.address || '',
+      start: lastParsedEmail.start || '',
+      end: lastParsedEmail.end || '',
+      notes: lastParsedEmail.notes || '',
+      lat: null, lng: null,
+      addedBy: myName || 'Email-Import',
+      createdAt: now, updatedAt: now
+    });
+    toast('Unterkunft aus Email importiert');
+  } else {
+    if (!Array.isArray(trip.events)) trip.events = [];
+    trip.events.push({
+      id: uid(),
+      type: lastParsedEmail.type || 'event',
+      title: lastParsedEmail.title || 'Termin',
+      date: lastParsedEmail.date || '',
+      time: lastParsedEmail.time || '',
+      from: lastParsedEmail.from || '',
+      to: lastParsedEmail.to || '',
+      notes: lastParsedEmail.notes || '',
+      addedBy: myName || 'Email-Import',
+      createdAt: now, updatedAt: now
+    });
+    toast('Termin aus Email importiert');
+  }
+  trip._metaUpdatedAt = now;
+  saveState();
+  closeModal('email-import-modal');
+  renderList();
+  cloudPushDebounced();
 }
 
 function renderCityRepeatSuggestions(container) {
@@ -1983,9 +3725,11 @@ function renderCityRepeatSuggestions(container) {
   const wrap = document.createElement('div');
   wrap.className = 'smart-suggestions';
   wrap.innerHTML = `
-    <div class="ss-head">🔁 Aus früheren Besuchen in <strong>${escapeHtml(trip.city.split(',')[0])}</strong></div>
-    <div class="ss-sub">${candidates.length} Orte aus ${others.length} vorherigen Reisen – tippe zum Hinzufügen:</div>
-    <div class="ss-chips"></div>
+    <div class="ss-head-wrap"><div class="ss-head">🔁 Aus früheren Besuchen in <strong>${escapeHtml(trip.city.split(',')[0])}</strong></div></div>
+    <div class="ss-body">
+      <div class="ss-sub">${candidates.length} Orte aus ${others.length} vorherigen Reisen – tippe zum Hinzufügen:</div>
+      <div class="ss-chips"></div>
+    </div>
   `;
   const chipWrap = wrap.querySelector('.ss-chips');
   top.forEach(s => {
@@ -2008,6 +3752,7 @@ function renderCityRepeatSuggestions(container) {
     chipWrap.appendChild(chip);
   });
   container.appendChild(wrap);
+  makeCollapsible(wrap, 'repeat', wrap.querySelector('.ss-head-wrap'), wrap.querySelector('.ss-body'));
 }
 
 function renderAccommodationsShort(container) {
@@ -2016,8 +3761,10 @@ function renderAccommodationsShort(container) {
   const wrap = document.createElement('div');
   wrap.className = 'category';
   wrap.innerHTML = `
-    <h2>🏨 Unterkunft <span class="badge">${acc.length}</span></h2>
-    <div class="accom-list" id="accom-short-list"></div>
+    <div class="ac-head"><h2 style="margin:0; flex:1;">🏨 Unterkunft <span class="badge">${acc.length}</span></h2></div>
+    <div class="ac-body">
+      <div class="accom-list" id="accom-short-list"></div>
+    </div>
   `;
   const list = wrap.querySelector('#accom-short-list');
   acc.forEach(a => {
@@ -2045,14 +3792,67 @@ function renderAccommodationsShort(container) {
   addBtn.className = 'btn secondary';
   addBtn.style.cssText = 'width:100%; margin-top:6px;';
   addBtn.textContent = '+ Weitere Unterkunft';
-  addBtn.addEventListener('click', () => openAccomModal(null));
-  wrap.appendChild(addBtn);
+  addBtn.addEventListener('click', (e) => { e.stopPropagation(); openAccomModal(null); });
+  wrap.querySelector('.ac-body').appendChild(addBtn);
   container.appendChild(wrap);
+  makeCollapsible(wrap, 'accom', wrap.querySelector('.ac-head'), wrap.querySelector('.ac-body'));
 }
 
 function escapeHtml(s) {
   if (!s) return '';
   return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+}
+
+// ============ Collapsible Sections ============
+// Per-Device UI-State: wird nicht gesynct. Key-Schema: collapsed.<tripId>.<section>
+function getCollapseKey(section) {
+  const tripId = state.currentTripId || 'default';
+  return 'collapsed.' + tripId + '.' + section;
+}
+function isSectionCollapsed(section) {
+  try { return localStorage.getItem(getCollapseKey(section)) === '1'; }
+  catch (e) { return false; }
+}
+function setSectionCollapsed(section, collapsed) {
+  try {
+    if (collapsed) localStorage.setItem(getCollapseKey(section), '1');
+    else localStorage.removeItem(getCollapseKey(section));
+  } catch (e) { /* private mode / quota */ }
+}
+// Wrappt ein Element zu einem Collapsible: head-Kind wird Klick-Trigger, body wird Toggle-Target.
+// Erwartet dass element bereits zwei Kinder-Elemente hat (oder zugehörige Selektoren liefert).
+// Ansatz: wir erstellen wrapper .collapsible-head um das Title-Element, und .collapsible-body
+// um alle nachfolgenden Geschwister. Einfacher: Caller markiert element mit collapsible und
+// gibt head+body-Elemente selbst mit.
+function makeCollapsible(panelEl, section, headEl, bodyEl) {
+  panelEl.classList.add('collapsible');
+  const collapsed = isSectionCollapsed(section);
+  if (collapsed) panelEl.classList.add('collapsed');
+
+  // Chevron in Head einfügen (falls noch nicht da)
+  headEl.classList.add('collapsible-head');
+  if (!headEl.querySelector('.collapsible-chev')) {
+    const chev = document.createElement('span');
+    chev.className = 'collapsible-chev';
+    chev.setAttribute('aria-hidden', 'true');
+    chev.textContent = '▾';
+    headEl.appendChild(chev);
+  }
+  bodyEl.classList.add('collapsible-body');
+
+  headEl.setAttribute('role', 'button');
+  headEl.setAttribute('tabindex', '0');
+  headEl.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+
+  const toggle = () => {
+    const nowCollapsed = panelEl.classList.toggle('collapsed');
+    setSectionCollapsed(section, nowCollapsed);
+    headEl.setAttribute('aria-expanded', nowCollapsed ? 'false' : 'true');
+  };
+  headEl.addEventListener('click', toggle);
+  headEl.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
+  });
 }
 
 // ============ Detail view ============
@@ -3287,24 +5087,25 @@ function renderPacklist() {
   if (smartSuggestions.length > 0 || staticAvail.length > 0) {
     const sg = document.createElement('div');
     sg.className = 'pack-suggest-wrap';
-    sg.innerHTML = `<strong>💡 Schnell hinzufügen</strong><div class="pack-suggest-chips"></div>`;
+    sg.innerHTML = `<div class="ps-head"><strong>💡 Schnell hinzufügen</strong></div><div class="ps-body"><div class="pack-suggest-chips"></div></div>`;
     const chipWrap = sg.querySelector('.pack-suggest-chips');
     smartSuggestions.forEach(s => {
       const chip = document.createElement('button');
       chip.className = 'pack-chip smart';
       chip.innerHTML = `+ ${escapeHtml(s.name)} <span class="freq">${s.freq}×</span>`;
       chip.title = `In ${s.freq} anderen Reisen vorhanden`;
-      chip.addEventListener('click', () => quickAddPack(s.name, s.category, s.forKid));
+      chip.addEventListener('click', (e) => { e.stopPropagation(); quickAddPack(s.name, s.category, s.forKid); });
       chipWrap.appendChild(chip);
     });
     staticAvail.forEach(s => {
       const chip = document.createElement('button');
       chip.className = 'pack-chip';
       chip.textContent = `+ ${s.name}`;
-      chip.addEventListener('click', () => quickAddPack(s.name, s.category, false));
+      chip.addEventListener('click', (e) => { e.stopPropagation(); quickAddPack(s.name, s.category, false); });
       chipWrap.appendChild(chip);
     });
     container.appendChild(sg);
+    makeCollapsible(sg, 'packsugg', sg.querySelector('.ps-head'), sg.querySelector('.ps-body'));
   }
 
   // Filter anwenden
@@ -3573,6 +5374,40 @@ document.getElementById('accom-delete').addEventListener('click', () => {
   }
 });
 
+// Ausgabe-Modal-Handler
+document.getElementById('exp-cancel').addEventListener('click', () => closeModal('expense-modal'));
+document.getElementById('exp-save').addEventListener('click', saveExpense);
+document.getElementById('exp-delete-btn').addEventListener('click', deleteExpense);
+document.getElementById('expense-modal').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('expense-modal')) closeModal('expense-modal');
+});
+document.getElementById('exp-list-close').addEventListener('click', () => closeModal('expense-list-modal'));
+document.getElementById('expense-list-modal').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('expense-list-modal')) closeModal('expense-list-modal');
+});
+
+// Doc-Safe-Modal-Handler
+document.getElementById('doc-pp-cancel').addEventListener('click', () => closeModal('doc-pp-modal'));
+document.getElementById('doc-pp-submit').addEventListener('click', submitDocPassphrase);
+document.getElementById('doc-pp-1').addEventListener('keydown', (e) => { if (e.key === 'Enter') submitDocPassphrase(); });
+document.getElementById('doc-pp-2').addEventListener('keydown', (e) => { if (e.key === 'Enter') submitDocPassphrase(); });
+document.getElementById('doc-pp-modal').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('doc-pp-modal')) closeModal('doc-pp-modal');
+});
+document.getElementById('doc-add-cancel').addEventListener('click', () => closeModal('doc-add-modal'));
+document.getElementById('doc-add-submit').addEventListener('click', submitDocAdd);
+document.getElementById('doc-add-modal').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('doc-add-modal')) closeModal('doc-add-modal');
+});
+
+// Email-Import-Modal-Handler
+document.getElementById('email-import-cancel').addEventListener('click', () => closeModal('email-import-modal'));
+document.getElementById('email-import-preview-btn').addEventListener('click', previewEmailImport);
+document.getElementById('email-import-add-btn').addEventListener('click', applyEmailImport);
+document.getElementById('email-import-modal').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('email-import-modal')) closeModal('email-import-modal');
+});
+
 // Standort-Button auf der Karte
 document.getElementById('my-location-btn').addEventListener('click', toggleMyLocation);
 
@@ -3704,6 +5539,7 @@ function showWelcomeIfNeeded() {
 document.body.setAttribute('data-view', 'list');
 importFromHash();
 checkInviteInURL();
+preloadFx();
 renderHeader();
 renderList();
 showWelcomeIfNeeded();
