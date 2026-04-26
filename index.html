@@ -109,6 +109,83 @@
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
   header .title-caret { font-size: 12px; color: var(--text-muted); flex-shrink: 0; }
+  /* === Auth-Gate (Pflicht-Login Overlay) === */
+  .auth-gate {
+    position: fixed; inset: 0; z-index: 1000;
+    background: linear-gradient(160deg, #FAFAF7 0%, #FFF0F4 100%);
+    display: flex; align-items: center; justify-content: center;
+    padding: env(safe-area-inset-top) 24px env(safe-area-inset-bottom);
+    overflow-y: auto;
+    animation: fadeIn 0.25s ease;
+  }
+  .auth-gate[aria-hidden="true"] { display: none; }
+  body.is-authed .auth-gate { display: none; }
+  .auth-gate .auth-card {
+    background: var(--surface); border-radius: var(--radius-xl);
+    padding: 32px 24px; width: 100%; max-width: 420px;
+    box-shadow: var(--shadow-lg);
+    text-align: center;
+  }
+  .auth-gate .auth-brand {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    margin-bottom: 24px;
+    font-weight: 800; font-size: 18px; letter-spacing: -0.02em;
+  }
+  .auth-gate .auth-brand .auth-mark { color: var(--accent); font-size: 22px; }
+  .auth-gate .auth-title {
+    margin: 0 0 8px; font-size: 26px; font-weight: 800; letter-spacing: -0.025em;
+    color: var(--text);
+  }
+  .auth-gate .auth-sub {
+    margin: 0 0 24px; font-size: 14px; color: var(--text-muted); line-height: 1.5;
+  }
+  .auth-gate .auth-label {
+    display: block; text-align: left;
+    font-size: 12px; font-weight: 600; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px;
+  }
+  .auth-gate input[type="email"] {
+    width: 100%; padding: 14px 16px;
+    border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+    font-size: 16px; background: var(--surface); color: var(--text);
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .auth-gate input[type="email"]:focus {
+    outline: none; border-color: var(--accent);
+    box-shadow: 0 0 0 4px rgba(255,56,92,0.10);
+  }
+  .auth-gate .auth-btn-primary {
+    width: 100%; margin-top: 16px;
+    padding: 15px 18px; border-radius: var(--radius-sm);
+    background: var(--accent-gradient); color: white;
+    font-size: 15px; font-weight: 700; letter-spacing: -0.01em;
+    box-shadow: var(--shadow-pink);
+    transition: transform 0.1s, box-shadow 0.2s;
+  }
+  .auth-gate .auth-btn-primary:active { transform: scale(0.98); box-shadow: 0 2px 8px rgba(255,56,92,0.3); }
+  .auth-gate .auth-btn-primary:disabled { opacity: 0.55; box-shadow: none; }
+  .auth-gate .auth-link-btn {
+    margin-top: 14px; font-size: 13px; color: var(--text-muted); font-weight: 500;
+    text-decoration: underline; text-underline-offset: 2px;
+  }
+  .auth-gate .auth-link-btn:active { color: var(--text); }
+  .auth-gate .auth-hint {
+    margin-top: 16px; font-size: 12px; color: var(--text-soft); line-height: 1.5;
+    padding: 12px 14px; background: var(--bg-soft); border-radius: var(--radius-sm);
+  }
+  .auth-gate .auth-err {
+    margin-top: 10px; font-size: 13px; color: var(--danger); min-height: 18px;
+    text-align: left;
+  }
+  .auth-gate .auth-icon-big { font-size: 64px; margin: 8px 0 16px; line-height: 1; }
+  .auth-gate .auth-step-title {
+    margin: 0 0 8px; font-size: 20px; font-weight: 700; color: var(--text);
+  }
+  .auth-gate .auth-step-text {
+    margin: 0 0 16px; font-size: 14px; color: var(--text-muted); line-height: 1.55;
+  }
+  .auth-gate .auth-step-text strong { color: var(--text); font-weight: 700; }
+
   /* Brand (Logo) im Header */
   header .brand {
     display: flex; align-items: center; gap: 8px; flex: 1;
@@ -1160,6 +1237,16 @@
   .more-row .mr-badge.muted { background: var(--bg-soft); color: var(--text-muted); }
   .more-row .mr-ch { color: var(--text-soft); font-size: 14px; flex-shrink: 0; }
 
+  /* Account-Row (zeigt Email + "seit"-Datum) */
+  .more-row.account-row { cursor: default; align-items: center; }
+  .more-row.account-row:active { background: transparent; }
+  .more-row.account-row .account-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  .more-row.account-row .account-email { font-size: 14px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .more-row.account-row .account-meta { font-size: 12px; color: var(--text-muted); }
+  /* Danger-Row (z.B. Abmelden) */
+  .more-row.danger-row .mr-lbl { color: var(--danger); font-weight: 600; }
+  .more-row.danger-row:active { background: rgba(220,38,38,0.08); }
+
   /* Toggle-Switch (Mehr-Tab Pref-Row) */
   .more-row.toggle-row { cursor: default; }
   .more-row.toggle-row:active { background: transparent; }
@@ -1401,6 +1488,44 @@
   <div class="sheet-overlay" data-sheet-close="trip-switcher-sheet"></div>
   <div class="sheet-body" role="dialog" aria-modal="true">
     <span class="sheet-grabber"></span>
+  </div>
+</div>
+
+<!-- Auth-Gate: blockt App bis User mit Magic-Link eingeloggt ist -->
+<div class="auth-gate" id="auth-gate" aria-hidden="false">
+  <div class="auth-card">
+    <div class="auth-brand">
+      <span class="auth-mark">✦</span>
+      <span class="auth-name">TripMate</span>
+    </div>
+    <h1 class="auth-title">Plane deine Reisen</h1>
+    <p class="auth-sub">Erstelle einen Account, damit deine Reisen sicher in der Cloud liegen und auf allen Geräten verfügbar sind.</p>
+
+    <!-- Step 1: Email-Eingabe -->
+    <div class="auth-step" id="auth-step-email">
+      <label class="auth-label" for="auth-email">Deine Email-Adresse</label>
+      <input type="email" id="auth-email" placeholder="du@beispiel.de" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" />
+      <button type="button" class="auth-btn-primary" id="auth-send-link-btn">📧 Magic-Link senden</button>
+      <div class="auth-err" id="auth-err"></div>
+      <div class="auth-hint">
+        Wir senden dir einen Bestätigungs-Link per Email. Kein Passwort nötig — einfach in deinem Postfach auf den Link klicken.
+      </div>
+      <button type="button" class="auth-link-btn" id="auth-setup-backend-btn">⚙ Cloud-Backend einrichten</button>
+    </div>
+
+    <!-- Step 2: Email gesendet -->
+    <div class="auth-step" id="auth-step-sent" style="display:none;">
+      <div class="auth-icon-big">📬</div>
+      <h2 class="auth-step-title">Email versendet</h2>
+      <p class="auth-step-text">Wir haben einen Bestätigungs-Link an <strong id="auth-sent-email"></strong> geschickt. Klicke darauf — du landest dann automatisch wieder hier und bist eingeloggt.</p>
+      <button type="button" class="auth-link-btn" id="auth-resend-btn">Anderen Email-Adresse?</button>
+    </div>
+
+    <!-- Step 3: Login wird verarbeitet -->
+    <div class="auth-step" id="auth-step-loading" style="display:none;">
+      <div class="auth-icon-big">⏳</div>
+      <p class="auth-step-text">Anmeldung wird verarbeitet…</p>
+    </div>
   </div>
 </div>
 
@@ -1954,7 +2079,7 @@ create policy "u" on trips for update using (true);</pre>
 // ============ App-Version ============
 // Bei Schema-Änderungen SCHEMA_VERSION hochzählen + Migration ergänzen.
 // APP_VERSION ist die User-sichtbare Version.
-const APP_VERSION = '0.5.4';
+const APP_VERSION = '0.6.0';
 const SCHEMA_VERSION = 3;
 
 // ============ Constants & Demo Data ============
@@ -2358,6 +2483,216 @@ const CLOUD = {
   syncing: false,
   skipNextPush: false
 };
+
+// ============ Account / Auth (Magic-Link via Supabase) ============
+// Wir nutzen Supabase Auth REST API (kein SDK nötig). Flow:
+//   1. User gibt Email ein → POST {url}/auth/v1/otp { email, create_user: true }
+//   2. Supabase schickt Bestätigungs-Mail mit Link
+//   3. User klickt Link → kommt zurück mit ?access_token=...&refresh_token=... (im URL-Hash)
+//   4. App parst Hash, holt User-Info via GET {url}/auth/v1/user mit Bearer Token
+//   5. App speichert Account in localStorage, room_code = user.id, lokale Trips automatisch hochladen
+const ACCOUNT_KEY = 'tm.account';
+function getAccount() {
+  try {
+    const raw = localStorage.getItem(ACCOUNT_KEY);
+    if (!raw) return null;
+    const acc = JSON.parse(raw);
+    if (!acc || !acc.email || !acc.userId) return null;
+    return acc;
+  } catch (e) { return null; }
+}
+function setAccount(acc) {
+  localStorage.setItem(ACCOUNT_KEY, JSON.stringify(acc));
+}
+function clearAccount() {
+  localStorage.removeItem(ACCOUNT_KEY);
+  localStorage.removeItem('tm_cloud_room'); // Room war user-scoped
+}
+function isAuthenticated() {
+  const acc = getAccount();
+  if (!acc) return false;
+  // Token-Ablauf prüfen — falls expired, Refresh-Versuch wäre nötig.
+  // Für jetzt: wenn überhaupt accessToken vorhanden, akzeptieren.
+  if (!acc.accessToken) return false;
+  if (acc.expiresAt && Date.now() > acc.expiresAt) {
+    // Versuche Token-Refresh asynchron, blockiere aber nicht
+    refreshAccessToken().catch(() => {});
+  }
+  return true;
+}
+
+async function sendMagicLink(email) {
+  if (!CLOUD.url || !CLOUD.key) {
+    throw new Error('Cloud-Backend nicht eingerichtet. Klicke unten "Cloud-Backend einrichten".');
+  }
+  const url = CLOUD.url.replace(/\/+$/, '') + '/auth/v1/otp';
+  const r = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', apikey: CLOUD.key },
+    body: JSON.stringify({
+      email: email,
+      create_user: true,
+      options: { emailRedirectTo: location.origin + location.pathname }
+    })
+  });
+  if (!r.ok) {
+    let msg = 'Magic-Link konnte nicht gesendet werden';
+    try { const j = await r.json(); if (j.msg || j.error_description) msg = j.msg || j.error_description; } catch(e){}
+    throw new Error(msg);
+  }
+  return true;
+}
+
+function parseAuthHash() {
+  // Supabase liefert Tokens im URL-Hash (#access_token=...&...&type=magiclink)
+  if (!location.hash || location.hash.length < 2) return null;
+  const params = new URLSearchParams(location.hash.replace(/^#/, ''));
+  const access = params.get('access_token');
+  const refresh = params.get('refresh_token');
+  const expiresIn = parseInt(params.get('expires_in') || '3600', 10);
+  const type = params.get('type');
+  if (!access) return null;
+  return { access, refresh, expiresIn, type };
+}
+
+async function fetchUserFromToken(accessToken) {
+  const url = CLOUD.url.replace(/\/+$/, '') + '/auth/v1/user';
+  const r = await fetch(url, {
+    headers: { apikey: CLOUD.key, Authorization: 'Bearer ' + accessToken }
+  });
+  if (!r.ok) throw new Error('User-Info konnte nicht geladen werden');
+  return await r.json();
+}
+
+async function refreshAccessToken() {
+  const acc = getAccount();
+  if (!acc || !acc.refreshToken) return false;
+  const url = CLOUD.url.replace(/\/+$/, '') + '/auth/v1/token?grant_type=refresh_token';
+  try {
+    const r = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', apikey: CLOUD.key },
+      body: JSON.stringify({ refresh_token: acc.refreshToken })
+    });
+    if (!r.ok) return false;
+    const data = await r.json();
+    if (data.access_token) {
+      acc.accessToken = data.access_token;
+      acc.refreshToken = data.refresh_token || acc.refreshToken;
+      acc.expiresAt = Date.now() + (data.expires_in || 3600) * 1000;
+      setAccount(acc);
+      return true;
+    }
+  } catch (e) { /* ignore */ }
+  return false;
+}
+
+async function handleAuthCallback() {
+  const hash = parseAuthHash();
+  if (!hash) return false;
+  // Hash sofort entfernen, damit er nicht im History-Stack bleibt
+  history.replaceState(null, '', location.pathname + location.search);
+  showAuthLoading();
+  try {
+    const user = await fetchUserFromToken(hash.access);
+    if (!user || !user.id || !user.email) throw new Error('User-Daten unvollständig');
+    const acc = {
+      email: user.email,
+      userId: user.id,
+      accessToken: hash.access,
+      refreshToken: hash.refresh,
+      expiresAt: Date.now() + (hash.expiresIn || 3600) * 1000,
+      createdAt: Date.now()
+    };
+    setAccount(acc);
+    // Room = user.id → eigene Cloud-Sektion
+    CLOUD.room = user.id;
+    localStorage.setItem('tm_cloud_room', user.id);
+    // Lokale Trips automatisch in Cloud merge'n (cloudPull holt dann ggf. existierenden Stand)
+    await cloudPull(true);
+    if (Object.keys(state.trips || {}).length > 0) {
+      await cloudPushImmediate();
+    }
+    return true;
+  } catch (e) {
+    console.error('handleAuthCallback error', e);
+    showAuthError('Anmeldung fehlgeschlagen: ' + (e.message || 'unbekannt'));
+    return false;
+  }
+}
+
+function logout() {
+  clearAccount();
+  // State NICHT löschen — bleibt lokal verfügbar, falls User wieder einloggt.
+  // Aber Cloud-Sync stoppen.
+  clearInterval(CLOUD.pollTimer);
+  CLOUD.pollTimer = null;
+  showAuthGate();
+  toast('Abgemeldet');
+}
+
+function showAuthGate() {
+  const gate = document.getElementById('auth-gate');
+  if (gate) gate.setAttribute('aria-hidden', 'false');
+  document.body.classList.remove('is-authed');
+  // Zurück zu Step 1 (Email-Eingabe)
+  showAuthStep('email');
+}
+function hideAuthGate() {
+  const gate = document.getElementById('auth-gate');
+  if (gate) gate.setAttribute('aria-hidden', 'true');
+  document.body.classList.add('is-authed');
+}
+function showAuthStep(step) {
+  ['email','sent','loading'].forEach(s => {
+    const el = document.getElementById('auth-step-' + s);
+    if (el) el.style.display = (s === step ? '' : 'none');
+  });
+  showAuthError('');
+}
+function showAuthError(msg) {
+  const el = document.getElementById('auth-err');
+  if (el) el.textContent = msg || '';
+}
+function showAuthLoading() {
+  const gate = document.getElementById('auth-gate');
+  if (gate) gate.setAttribute('aria-hidden', 'false');
+  document.body.classList.remove('is-authed');
+  showAuthStep('loading');
+}
+
+function bindAuthGate() {
+  const sendBtn = document.getElementById('auth-send-link-btn');
+  if (sendBtn) sendBtn.addEventListener('click', async () => {
+    const emailInput = document.getElementById('auth-email');
+    const email = (emailInput.value || '').trim().toLowerCase();
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      showAuthError('Bitte gültige Email-Adresse eingeben');
+      return;
+    }
+    sendBtn.disabled = true; sendBtn.textContent = '⏳ Sende…';
+    try {
+      await sendMagicLink(email);
+      document.getElementById('auth-sent-email').textContent = email;
+      showAuthStep('sent');
+    } catch (e) {
+      showAuthError(e.message || 'Fehler beim Senden');
+    } finally {
+      sendBtn.disabled = false; sendBtn.textContent = '📧 Magic-Link senden';
+    }
+  });
+  const resendBtn = document.getElementById('auth-resend-btn');
+  if (resendBtn) resendBtn.addEventListener('click', () => showAuthStep('email'));
+  const setupBtn = document.getElementById('auth-setup-backend-btn');
+  if (setupBtn) setupBtn.addEventListener('click', () => {
+    document.getElementById('open-sync-setup')?.click();
+  });
+  // Email-Input Enter-Taste = Senden
+  const emailInput = document.getElementById('auth-email');
+  if (emailInput) emailInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') sendBtn?.click();
+  });
+}
 function cloudEnabled() { return !!(CLOUD.url && CLOUD.key && CLOUD.room); }
 function cloudFullUrl(path) { return CLOUD.url.replace(/\/+$/, '') + path; }
 function cloudHeaders(extra) {
@@ -3041,11 +3376,27 @@ function renderMehr() {
     <button class="more-row" data-mehr-row="trip-list" type="button"><span class="mr-ic">🧳</span><span class="mr-lbl">Reisen verwalten</span><span class="mr-ch">›</span></button>
   </div>`;
 
+  // ACCOUNT
+  const acc = getAccount();
+  if (acc) {
+    html += `<div class="caption">Account</div>`;
+    html += `<div class="more-section">
+      <div class="more-row account-row">
+        <span class="mr-ic">👤</span>
+        <div class="account-info">
+          <span class="account-email">${escapeHtml(acc.email)}</span>
+          <span class="account-meta">Angemeldet seit ${new Date(acc.createdAt || Date.now()).toLocaleDateString('de-DE')}</span>
+        </div>
+      </div>
+      <button class="more-row danger-row" data-mehr-row="logout" type="button"><span class="mr-ic">🚪</span><span class="mr-lbl">Abmelden</span><span class="mr-ch">›</span></button>
+    </div>`;
+  }
+
   // APP
   const sosOn = state.prefs && state.prefs.sosFabEnabled !== false;
   html += `<div class="caption">App</div>`;
   html += `<div class="more-section">
-    <button class="more-row" data-mehr-row="settings" type="button"><span class="mr-ic">👤</span><span class="mr-lbl">Profil &amp; Einstellungen</span><span class="mr-ch">›</span></button>
+    <button class="more-row" data-mehr-row="settings" type="button"><span class="mr-ic">⚙️</span><span class="mr-lbl">Einstellungen</span><span class="mr-ch">›</span></button>
     <div class="more-row toggle-row">
       <span class="mr-ic">🚨</span><span class="mr-lbl">SOS-Knopf permanent zeigen</span>
       <label class="toggle"><input type="checkbox" id="pref-sos-fab" ${sosOn ? 'checked' : ''}><span class="toggle-slider"></span></label>
@@ -3087,6 +3438,11 @@ function handleMehrRow(action) {
     case 'trip-list': openTripManager(); break;
     case 'settings': openSettings(); break;
     case 'help': openHelp(); break;
+    case 'logout':
+      if (confirm('Wirklich abmelden? Deine lokalen Reisen bleiben erhalten und werden beim nächsten Login wieder synchronisiert.')) {
+        logout();
+      }
+      break;
   }
 }
 function scrollToPanel(panelClass, fallbackView) {
@@ -6604,16 +6960,53 @@ try {
 } catch (e) { /* private mode / quota */ }
 
 document.body.setAttribute('data-view', 'heute');
-importFromHash();
-checkInviteInURL();
-preloadFx();
-renderHeader();
-renderHeute();
-showWelcomeIfNeeded();
-updateSyncIndicator();
-startCloudPolling();
-refreshFabVisibility();
-refreshSosFab();
+
+// Auth-Gate verdrahten
+bindAuthGate();
+
+// Boot-Auth: Magic-Link Callback ODER existierende Session ODER Login-Gate zeigen
+(async function bootAuth() {
+  // 1. Kommen wir gerade von einem Magic-Link zurück? (#access_token=... im URL-Hash)
+  const cb = parseAuthHash();
+  if (cb && cb.access) {
+    const ok = await handleAuthCallback();
+    if (ok) {
+      hideAuthGate();
+      proceedToApp();
+      return;
+    }
+    // Wenn Callback fehlschlägt → Gate zeigen mit Fehlermeldung
+    showAuthGate();
+    return;
+  }
+  // 2. Schon eingeloggt?
+  if (isAuthenticated()) {
+    const acc = getAccount();
+    // Room sicherstellen
+    if (acc && acc.userId && CLOUD.room !== acc.userId) {
+      CLOUD.room = acc.userId;
+      localStorage.setItem('tm_cloud_room', acc.userId);
+    }
+    hideAuthGate();
+    proceedToApp();
+    return;
+  }
+  // 3. Kein Account → Gate zeigen
+  showAuthGate();
+})();
+
+function proceedToApp() {
+  importFromHash();
+  checkInviteInURL();
+  preloadFx();
+  renderHeader();
+  renderHeute();
+  showWelcomeIfNeeded();
+  updateSyncIndicator();
+  startCloudPolling();
+  refreshFabVisibility();
+  refreshSosFab();
+}
 
 // SOS-FAB Click → Notruf-Sheet
 document.getElementById('sos-fab')?.addEventListener('click', openSosSheet);
