@@ -1237,6 +1237,52 @@
   .more-row .mr-badge.muted { background: var(--bg-soft); color: var(--text-muted); }
   .more-row .mr-ch { color: var(--text-soft); font-size: 14px; flex-shrink: 0; }
 
+  /* Trip-Edit: Mitglieder & Live-Sync Sektion */
+  .te-share-section {
+    margin-top: 18px; padding: 14px; background: var(--bg-soft);
+    border-radius: var(--radius-md); border: 1px solid var(--border-soft);
+  }
+  .te-share-head { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 10px; }
+  .te-share-ic { font-size: 22px; line-height: 1; }
+  .te-share-title { font-size: 14px; font-weight: 700; color: var(--text); }
+  .te-share-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; line-height: 1.4; }
+  .te-members-list { display: flex; flex-direction: column; gap: 4px; }
+  .te-member-row {
+    display: flex; align-items: center; gap: 8px; padding: 8px 10px;
+    background: var(--surface); border-radius: var(--radius-sm);
+    font-size: 13px; color: var(--text);
+  }
+  .te-member-row .me-ic { font-size: 14px; flex-shrink: 0; }
+  .te-member-row .me-email { flex: 1; min-width: 0; word-break: break-word; }
+  .te-member-row .me-tag {
+    font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+    background: var(--accent-soft); color: var(--accent-dark); padding: 2px 6px; border-radius: 4px;
+  }
+  .te-link-row { display: flex; gap: 6px; align-items: center; margin-top: 6px; }
+  .te-link-row input {
+    flex: 1; min-width: 0; padding: 10px 12px; font-size: 12.5px; font-family: ui-monospace, monospace;
+    border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+    background: white; color: var(--text);
+  }
+  .btn-tiny {
+    padding: 10px 12px; font-size: 12.5px; font-weight: 600;
+    border-radius: var(--radius-sm); background: var(--text); color: white;
+    flex-shrink: 0; transition: transform 0.1s;
+  }
+  .btn-tiny:active { transform: scale(0.95); }
+
+  /* Trip-Strip: Live-Sync Indikator */
+  .ts-live-dot {
+    display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+    background: var(--success); margin-left: 6px;
+    box-shadow: 0 0 0 3px rgba(22,163,74,0.18);
+    animation: pulseLive 2s ease-in-out infinite;
+  }
+  @keyframes pulseLive {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.25); opacity: 0.7; }
+  }
+
   /* Account-Row (zeigt Email + "seit"-Datum) */
   .more-row.account-row { cursor: default; align-items: center; }
   .more-row.account-row:active { background: transparent; }
@@ -1664,6 +1710,32 @@
       Tipp: Im Kalender unten zuerst Start-Tag, dann End-Tag antippen.
     </div>
 
+    <!-- Mitglieder & Live-Sharing (v0.6.1) -->
+    <div class="te-share-section" id="te-share-section">
+      <div class="te-share-head">
+        <span class="te-share-ic">👥</span>
+        <div style="flex:1; min-width:0;">
+          <div class="te-share-title">Mitglieder & Live-Sync</div>
+          <div class="te-share-sub" id="te-share-sub">Lade Personen ein, die mit dir an dieser Reise planen sollen.</div>
+        </div>
+      </div>
+      <div id="te-members-list" class="te-members-list"></div>
+      <div id="te-share-link-wrap" style="display:none;">
+        <label style="margin-top:8px;">Einladungs-Link</label>
+        <div class="te-link-row">
+          <input type="text" id="te-share-link" readonly />
+          <button class="btn-tiny" id="te-copy-link" type="button">📋 Kopieren</button>
+        </div>
+        <div style="font-size:11.5px; color:var(--text-muted); margin-top:4px; line-height:1.4;">
+          Sende den Link an die Person, die mitplanen soll. Nach dem Klick + Anmelden sieht sie alle Änderungen live.
+        </div>
+      </div>
+      <div class="te-share-actions">
+        <button class="btn secondary" id="te-enable-share-btn" type="button" style="margin-top:10px;">🔗 Reise live teilen</button>
+        <button class="btn ghost" id="te-disable-share-btn" type="button" style="margin-top:6px; display:none; color:var(--danger);">Live-Sharing beenden</button>
+      </div>
+    </div>
+
     <div class="modal-actions">
       <button class="btn secondary" id="trip-edit-cancel">Abbrechen</button>
       <button class="btn primary" id="trip-edit-save">Speichern</button>
@@ -2079,7 +2151,7 @@ create policy "u" on trips for update using (true);</pre>
 // ============ App-Version ============
 // Bei Schema-Änderungen SCHEMA_VERSION hochzählen + Migration ergänzen.
 // APP_VERSION ist die User-sichtbare Version.
-const APP_VERSION = '0.6.0';
+const APP_VERSION = '0.6.1';
 const SCHEMA_VERSION = 3;
 
 // ============ Constants & Demo Data ============
@@ -2331,6 +2403,10 @@ function ensureTripDefaults(t) {
   if (!Array.isArray(t._tombs)) t._tombs = [];
   if (typeof t._metaUpdatedAt !== 'number') t._metaUpdatedAt = 0;
   if (typeof t.country !== 'string') t.country = '';
+  // v0.6.1 Live-Collab Felder
+  if (typeof t.sharedRoom !== 'string') t.sharedRoom = '';        // UUID, falls Trip live geteilt wird
+  if (!Array.isArray(t.members)) t.members = [];                   // Liste der Member-Emails (inkl. Owner)
+  if (typeof t.ownerEmail !== 'string') t.ownerEmail = '';         // Email des Erstellers
   return t;
 }
 // T() gibt die aktuelle Reise zurück — benutzt überall statt state.XXX
@@ -2805,7 +2881,230 @@ function cloudPushDebounced() {
   if (!cloudEnabled()) return;
   if (CLOUD.skipNextPush) { CLOUD.skipNextPush = false; return; }
   clearTimeout(CLOUD.pushDebounceTimer);
-  CLOUD.pushDebounceTimer = setTimeout(cloudPushImmediate, 1200);
+  CLOUD.pushDebounceTimer = setTimeout(() => {
+    cloudPushImmediate();
+    pushAllSharedTrips(); // Live-geteilte Trips zusätzlich in ihre Shared-Rooms pushen
+  }, 1200);
+}
+
+// ============ Live-Collab: Shared-Trip Sync (v0.6.1) ============
+// Konzept: Eine Reise kann live mit anderen Personen geteilt werden.
+// Geteilte Reisen haben t.sharedRoom (UUID) gesetzt und werden parallel zu der
+// User-eigenen Cloud-Row in einer separaten Row mit room_code = sharedRoom gespeichert.
+// Alle Mitglieder des Shared-Rooms pollen diese Row und sehen dadurch live alle Änderungen.
+
+function genUuid() {
+  if (crypto.randomUUID) return crypto.randomUUID();
+  // Fallback
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+    const r = Math.random()*16|0; const v = c === 'x' ? r : (r&0x3|0x8); return v.toString(16);
+  });
+}
+
+function getSharedTrips() {
+  // Alle lokalen Trips die einen sharedRoom haben → werden separat gepusht/gepullt
+  if (!state.trips) return [];
+  return Object.values(state.trips).filter(t => t && t.sharedRoom);
+}
+
+async function pushSharedTrip(tripId) {
+  if (!cloudEnabled()) return;
+  const t = state.trips[tripId];
+  if (!t || !t.sharedRoom) return;
+  try {
+    const acc = getAccount();
+    // Owner-Email setzen falls noch leer
+    if (!t.ownerEmail && acc) t.ownerEmail = acc.email;
+    // Eigene Email zu members hinzufügen falls noch nicht drin
+    if (acc && !t.members.includes(acc.email)) t.members.push(acc.email);
+    const body = [{
+      room_code: t.sharedRoom,
+      state: { trip: t, members: t.members, ownerEmail: t.ownerEmail },
+      updated_at: new Date().toISOString()
+    }];
+    const r = await fetch(
+      cloudFullUrl('/rest/v1/trips?on_conflict=room_code'),
+      {
+        method: 'POST',
+        headers: cloudHeaders({ Prefer: 'resolution=merge-duplicates,return=representation' }),
+        body: JSON.stringify(body)
+      }
+    );
+    if (!r.ok) throw new Error('shared push ' + r.status);
+  } catch (e) {
+    console.error('pushSharedTrip error', e);
+  }
+}
+
+async function pushAllSharedTrips() {
+  if (!cloudEnabled()) return;
+  const shared = getSharedTrips();
+  for (const t of shared) {
+    await pushSharedTrip(t.id);
+  }
+}
+
+async function pullSharedTrip(tripId) {
+  if (!cloudEnabled()) return false;
+  const t = state.trips[tripId];
+  if (!t || !t.sharedRoom) return false;
+  try {
+    const r = await fetch(
+      cloudFullUrl('/rest/v1/trips?room_code=eq.' + encodeURIComponent(t.sharedRoom) + '&select=state,updated_at'),
+      { headers: cloudHeaders() }
+    );
+    if (!r.ok) return false;
+    const rows = await r.json();
+    if (!rows || rows.length === 0) return false;
+    const remoteTrip = rows[0].state && rows[0].state.trip;
+    if (!remoteTrip) return false;
+    // Pro-Item-Merge: arrays via mergeArrayById, atomare Felder via Timestamp
+    const changedItems = mergeArrayById(t.items, remoteTrip.items || [], t._tombs, 'i');
+    const changedPack = mergeArrayById(t.packlist, remoteTrip.packlist || [], t._tombs, 'p');
+    const changedAcc = mergeArrayById(t.accommodations, remoteTrip.accommodations || [], t._tombs, 'a');
+    const changedEvents = mergeArrayById(t.events, remoteTrip.events || [], t._tombs, 'e');
+    const changedExp = mergeArrayById(t.expenses, remoteTrip.expenses || [], t._tombs, 'x');
+    const changedDocs = mergeArrayById(t.documents, remoteTrip.documents || [], t._tombs, 'd');
+    // Meta-Felder per _metaUpdatedAt: nur überschreiben wenn remote neuer
+    let changedMeta = false;
+    const remoteMeta = remoteTrip._metaUpdatedAt || 0;
+    if (remoteMeta > (t._metaUpdatedAt || 0)) {
+      ['name','city','country','start','end','center','currency'].forEach(k => {
+        if (remoteTrip[k] !== undefined && remoteTrip[k] !== t[k]) { t[k] = remoteTrip[k]; changedMeta = true; }
+      });
+      t._metaUpdatedAt = remoteMeta;
+    }
+    // Members-Liste mergen (Union)
+    const remoteMembers = (rows[0].state && rows[0].state.members) || [];
+    const beforeMembers = t.members.length;
+    remoteMembers.forEach(m => { if (!t.members.includes(m)) t.members.push(m); });
+    const changedMembers = t.members.length !== beforeMembers;
+    return changedItems || changedPack || changedAcc || changedEvents || changedExp || changedDocs || changedMeta || changedMembers;
+  } catch (e) {
+    console.error('pullSharedTrip error', e);
+    return false;
+  }
+}
+
+async function pullAllSharedTrips() {
+  if (!cloudEnabled()) return;
+  const shared = getSharedTrips();
+  let anyChanged = false;
+  for (const t of shared) {
+    const changed = await pullSharedTrip(t.id);
+    if (changed) anyChanged = true;
+  }
+  if (anyChanged) {
+    saveStateLocal();
+    refreshCurrentView();
+    toast('☁️ Geteilte Reise aktualisiert');
+  }
+}
+
+// Trip live teilen: erzeugt sharedRoom UUID falls noch nicht da, pusht Trip in Shared-Room,
+// gibt Invite-Link zurück.
+async function enableTripSharing(tripId) {
+  const t = state.trips[tripId];
+  if (!t) throw new Error('Trip nicht gefunden');
+  const acc = getAccount();
+  if (!acc) throw new Error('Bitte erst anmelden');
+  if (!cloudEnabled()) throw new Error('Cloud-Sync nicht eingerichtet');
+  if (!t.sharedRoom) {
+    t.sharedRoom = 'sr-' + genUuid();
+    t.ownerEmail = acc.email;
+    if (!t.members.includes(acc.email)) t.members.push(acc.email);
+    saveState();
+  }
+  await pushSharedTrip(tripId);
+  // Invite-Link generieren
+  const url = location.origin + location.pathname + '?join=' + encodeURIComponent(t.sharedRoom)
+    + '&from=' + encodeURIComponent(acc.email)
+    + '&name=' + encodeURIComponent(t.name || 'Reise');
+  return url;
+}
+
+// Trip-Sharing wieder deaktivieren — Trip bleibt lokal, wird nicht mehr in Shared-Room gepusht
+function disableTripSharing(tripId) {
+  const t = state.trips[tripId];
+  if (!t) return;
+  t.sharedRoom = '';
+  t.members = [];
+  saveState();
+}
+
+// User klickt einen Invite-Link mit ?join=ROOM_UUID — Trip aus Shared-Room laden
+async function joinTripFromInvite(roomCode, fromEmail, tripName) {
+  if (!cloudEnabled()) {
+    toast('Cloud-Sync nicht eingerichtet');
+    return false;
+  }
+  const acc = getAccount();
+  if (!acc) {
+    toast('Bitte erst anmelden');
+    return false;
+  }
+  try {
+    const r = await fetch(
+      cloudFullUrl('/rest/v1/trips?room_code=eq.' + encodeURIComponent(roomCode) + '&select=state,updated_at'),
+      { headers: cloudHeaders() }
+    );
+    if (!r.ok) throw new Error('Lade-Fehler ' + r.status);
+    const rows = await r.json();
+    if (!rows || rows.length === 0) {
+      toast('Einladung nicht mehr gültig');
+      return false;
+    }
+    const sharedState = rows[0].state || {};
+    const remoteTrip = sharedState.trip;
+    if (!remoteTrip) {
+      toast('Reise konnte nicht geladen werden');
+      return false;
+    }
+    // Falls Trip schon lokal existiert: nur members ergänzen
+    let localTrip = state.trips[remoteTrip.id];
+    if (localTrip) {
+      if (!localTrip.sharedRoom) localTrip.sharedRoom = roomCode;
+      if (!localTrip.members.includes(acc.email)) localTrip.members.push(acc.email);
+    } else {
+      // Neu importieren
+      localTrip = structuredClone(remoteTrip);
+      ensureTripDefaults(localTrip);
+      localTrip.sharedRoom = roomCode;
+      if (!localTrip.members.includes(acc.email)) localTrip.members.push(acc.email);
+      state.trips[localTrip.id] = localTrip;
+    }
+    state.currentTripId = localTrip.id;
+    saveState();
+    // Mich als Member zurück in die Shared-Row pushen, damit Owner mich sieht
+    await pushSharedTrip(localTrip.id);
+    renderHeader();
+    refreshCurrentView();
+    toast('🎉 Reise "' + (localTrip.name || 'Reise') + '" beigetreten');
+    return true;
+  } catch (e) {
+    console.error('joinTripFromInvite error', e);
+    toast('Beitritt fehlgeschlagen: ' + (e.message || 'unbekannt'));
+    return false;
+  }
+}
+
+// URL-Parameter ?join=... beim App-Start prüfen (nach Login)
+function checkJoinInviteInURL() {
+  const sp = new URLSearchParams(location.search);
+  const roomCode = sp.get('join');
+  if (!roomCode) return;
+  const fromEmail = sp.get('from') || '';
+  const tripName = sp.get('name') || 'eine Reise';
+  // URL-Parameter aufräumen, damit Refresh nicht erneut joint
+  const newSearch = new URLSearchParams(location.search);
+  newSearch.delete('join'); newSearch.delete('from'); newSearch.delete('name');
+  const newUrl = location.pathname + (newSearch.toString() ? '?' + newSearch.toString() : '');
+  history.replaceState(null, '', newUrl);
+  // Bestätigungsdialog → dann beitreten
+  if (confirm((fromEmail ? fromEmail + ' möchte ' : 'Jemand möchte ')
+            + 'die Reise "' + decodeURIComponent(tripName) + '" mit dir teilen.\n\nMöchtest du beitreten?')) {
+    joinTripFromInvite(roomCode, fromEmail, tripName);
+  }
 }
 // Generischer Array-Merge per id + Tombstone-Präfix.
 // prefix ist z.B. 'i' (items), 'p' (pack), 'a' (accommodations), 'e' (events).
@@ -2943,20 +3242,27 @@ function startCloudPolling() {
   // Initialer Pull — wenn wir dirty sind (z.B. Offline-Edit, Hash-Import), danach pushen
   (async function initialSync() {
     await cloudPull(true);
+    await pullAllSharedTrips();
     if (localStorage.getItem('tm_cloud_dirty') === '1') {
       await cloudPushImmediate();
+      await pushAllSharedTrips();
     }
   })();
   CLOUD.pollTimer = setInterval(function(){
-    if (document.visibilityState === 'visible') cloudPull(true);
+    if (document.visibilityState === 'visible') {
+      cloudPull(true);
+      pullAllSharedTrips();
+    }
   }, 15000);
 }
 document.addEventListener('visibilitychange', function(){
   if (document.visibilityState === 'visible' && cloudEnabled()) {
     cloudPull(true);
+    pullAllSharedTrips();
     // Bei Rückkehr: falls wir offline was geändert haben, nachholen
     if (navigator.onLine && localStorage.getItem('tm_cloud_dirty') === '1') {
       cloudPushImmediate();
+      pushAllSharedTrips();
     }
   }
 });
@@ -3074,11 +3380,15 @@ function buildTripStripHTML() {
   const flag = countryFlag(t.country) || '✈️';
   const dateLabel = tripDateRangeLabel(t);
   const dayLabel = tripDayProgressLabel(t);
+  const memberCount = (t.members || []).length;
+  const isLive = !!t.sharedRoom;
+  // Bei Live-Sharing zusätzlich kleine Mitglieder-Pille
+  const liveBadge = isLive ? `<span class="ts-live-dot" title="Live geteilt mit ${memberCount} Person${memberCount === 1 ? '' : 'en'}"></span>` : '';
   return `<button class="trip-strip" id="trip-strip-btn" type="button" aria-label="Reise wechseln">
     <span class="ts-flag">${flag}</span>
     <span class="ts-info">
-      <span class="ts-name">${escapeHtml(t.name || 'Reise')}</span>
-      <span class="ts-meta">${escapeHtml(dateLabel + (dayLabel ? ' · ' + dayLabel : ''))}</span>
+      <span class="ts-name">${escapeHtml(t.name || 'Reise')}${liveBadge}</span>
+      <span class="ts-meta">${escapeHtml(dateLabel + (dayLabel ? ' · ' + dayLabel : ''))}${isLive ? ' · ' + memberCount + (memberCount === 1 ? ' Person' : ' Personen') : ''}</span>
     </span>
     <span class="ts-caret">⌄</span>
   </button>`;
@@ -6107,8 +6417,62 @@ function openTripEdit(tripId) {
   // Löschen nur anzeigen, wenn editieren + mehr als 1 Reise existiert (letzte Reise nicht löschbar)
   const canDelete = !!tripId && Object.keys(state.trips).length > 1;
   document.getElementById('trip-edit-delete-wrap').style.display = canDelete ? 'flex' : 'none';
+  // Share-Sektion (nur bei existierenden Trips, nicht beim Anlegen)
+  renderTripEditShareSection(t);
   document.getElementById('trip-edit-modal').classList.add('open');
   setTimeout(() => document.getElementById('te-name').focus(), 100);
+}
+
+// Mitglieder & Live-Sync Sektion in Trip-Edit-Modal befüllen
+function renderTripEditShareSection(t) {
+  const sec = document.getElementById('te-share-section');
+  if (!sec) return;
+  // Nur bei existierenden Trips zeigen
+  if (!t) { sec.style.display = 'none'; return; }
+  sec.style.display = '';
+  const acc = getAccount();
+  const list = document.getElementById('te-members-list');
+  const linkWrap = document.getElementById('te-share-link-wrap');
+  const linkInput = document.getElementById('te-share-link');
+  const enableBtn = document.getElementById('te-enable-share-btn');
+  const disableBtn = document.getElementById('te-disable-share-btn');
+  const sub = document.getElementById('te-share-sub');
+
+  if (t.sharedRoom) {
+    // Live-Sharing aktiv → Mitglieder zeigen + Link bereitstellen
+    sub.textContent = 'Live-Sync aktiv. Alle Mitglieder sehen Änderungen sofort.';
+    list.innerHTML = '';
+    (t.members || []).forEach(email => {
+      const isOwner = email === t.ownerEmail;
+      const isMe = acc && email === acc.email;
+      const row = document.createElement('div');
+      row.className = 'te-member-row';
+      row.innerHTML = `<span class="me-ic">${isOwner ? '👑' : '👤'}</span>
+        <span class="me-email">${escapeHtml(email)}${isMe ? ' (du)' : ''}</span>
+        ${isOwner ? '<span class="me-tag">Owner</span>' : ''}`;
+      list.appendChild(row);
+    });
+    // Link generieren (re-use existierender sharedRoom)
+    const url = location.origin + location.pathname + '?join=' + encodeURIComponent(t.sharedRoom)
+      + '&from=' + encodeURIComponent(t.ownerEmail || (acc && acc.email) || '')
+      + '&name=' + encodeURIComponent(t.name || 'Reise');
+    linkInput.value = url;
+    linkWrap.style.display = '';
+    enableBtn.style.display = 'none';
+    disableBtn.style.display = '';
+  } else {
+    sub.textContent = 'Lade Personen ein, die mit dir an dieser Reise planen sollen.';
+    list.innerHTML = '';
+    if (acc) {
+      const row = document.createElement('div');
+      row.className = 'te-member-row';
+      row.innerHTML = `<span class="me-ic">👤</span><span class="me-email">${escapeHtml(acc.email)} (du)</span>`;
+      list.appendChild(row);
+    }
+    linkWrap.style.display = 'none';
+    enableBtn.style.display = '';
+    disableBtn.style.display = 'none';
+  }
 }
 
 // Visueller Zeitraum-Picker (2 Monate nebeneinander auf Desktop, 1 auf Mobile)
@@ -6204,6 +6568,44 @@ function buildDpCell(d, otherMonth) {
 document.getElementById('trip-edit-cancel').addEventListener('click', () => {
   closeModal('trip-edit-modal');
   editingTripId = null;
+});
+
+// Live-Sharing Buttons im Trip-Edit Modal
+document.getElementById('te-enable-share-btn')?.addEventListener('click', async (e) => {
+  e.preventDefault();
+  if (!editingTripId) { toast('Speichere die Reise zuerst'); return; }
+  const btn = e.currentTarget;
+  btn.disabled = true; btn.textContent = '⏳ Erstelle Link…';
+  try {
+    const url = await enableTripSharing(editingTripId);
+    // UI re-rendern (zeigt jetzt den Link)
+    renderTripEditShareSection(state.trips[editingTripId]);
+    // Direkt versuchen zu kopieren
+    try { await navigator.clipboard.writeText(url); toast('🔗 Link kopiert — jetzt versenden!'); }
+    catch (e2) { toast('🔗 Link erstellt — kopiere ihn aus dem Feld'); }
+  } catch (err) {
+    toast(err.message || 'Live-Sharing konnte nicht aktiviert werden');
+  } finally {
+    btn.disabled = false; btn.textContent = '🔗 Reise live teilen';
+  }
+});
+document.getElementById('te-disable-share-btn')?.addEventListener('click', () => {
+  if (!editingTripId) return;
+  if (!confirm('Live-Sharing wirklich beenden? Andere Mitglieder verlieren den Zugriff (sie behalten ihre Kopie). Du kannst es jederzeit wieder aktivieren.')) return;
+  disableTripSharing(editingTripId);
+  renderTripEditShareSection(state.trips[editingTripId]);
+  toast('Live-Sharing beendet');
+});
+document.getElementById('te-copy-link')?.addEventListener('click', async () => {
+  const inp = document.getElementById('te-share-link');
+  if (!inp || !inp.value) return;
+  try {
+    await navigator.clipboard.writeText(inp.value);
+    toast('🔗 Link kopiert');
+  } catch (e) {
+    inp.select();
+    toast('Bitte manuell kopieren (Cmd/Strg+C)');
+  }
 });
 document.getElementById('trip-edit-save').addEventListener('click', async () => {
   const name = document.getElementById('te-name').value.trim() || 'Meine Reise';
@@ -6998,6 +7400,7 @@ bindAuthGate();
 function proceedToApp() {
   importFromHash();
   checkInviteInURL();
+  checkJoinInviteInURL();   // v0.6.1: Live-Collab Einladungs-Link
   preloadFx();
   renderHeader();
   renderHeute();
