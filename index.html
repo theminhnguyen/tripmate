@@ -2986,6 +2986,8 @@ function renderGeld() {
   container.querySelectorAll('.gt').forEach(btn => {
     btn.addEventListener('click', () => {
       geldSubTab = btn.dataset.gt;
+      // Active-Class auf allen Sub-Tab-Buttons updaten — sonst bleibt UI auf altem Tab fett
+      container.querySelectorAll('.gt').forEach(b => b.classList.toggle('active', b.dataset.gt === geldSubTab));
       renderGeldSub();
     });
   });
@@ -3349,6 +3351,69 @@ function quickRateItem(id, rating) {
   }
 }
 
+// Primäre IANA-Zeitzone pro Land (für die meisten Reiseziele). Bei großen Ländern
+// (US, RU, CA, AU, BR, CN) nehmen wir die Zeitzone der bekanntesten Stadt.
+const COUNTRY_TZ = {
+  DE:'Europe/Berlin', AT:'Europe/Vienna', CH:'Europe/Zurich',
+  FR:'Europe/Paris', IT:'Europe/Rome', ES:'Europe/Madrid', PT:'Europe/Lisbon',
+  NL:'Europe/Amsterdam', BE:'Europe/Brussels', LU:'Europe/Luxembourg',
+  GB:'Europe/London', IE:'Europe/Dublin', IS:'Atlantic/Reykjavik',
+  DK:'Europe/Copenhagen', SE:'Europe/Stockholm', NO:'Europe/Oslo', FI:'Europe/Helsinki',
+  PL:'Europe/Warsaw', CZ:'Europe/Prague', SK:'Europe/Bratislava', HU:'Europe/Budapest',
+  HR:'Europe/Zagreb', SI:'Europe/Ljubljana', RO:'Europe/Bucharest', BG:'Europe/Sofia',
+  GR:'Europe/Athens', RS:'Europe/Belgrade', BA:'Europe/Sarajevo', AL:'Europe/Tirane',
+  ME:'Europe/Podgorica', MK:'Europe/Skopje', MD:'Europe/Chisinau', UA:'Europe/Kyiv',
+  EE:'Europe/Tallinn', LV:'Europe/Riga', LT:'Europe/Vilnius',
+  TR:'Europe/Istanbul', RU:'Europe/Moscow', BY:'Europe/Minsk',
+  US:'America/New_York', CA:'America/Toronto', MX:'America/Mexico_City',
+  BR:'America/Sao_Paulo', AR:'America/Argentina/Buenos_Aires',
+  CL:'America/Santiago', PE:'America/Lima', CO:'America/Bogota',
+  CN:'Asia/Shanghai', JP:'Asia/Tokyo', KR:'Asia/Seoul', HK:'Asia/Hong_Kong', TW:'Asia/Taipei',
+  TH:'Asia/Bangkok', VN:'Asia/Ho_Chi_Minh', ID:'Asia/Jakarta',
+  MY:'Asia/Kuala_Lumpur', SG:'Asia/Singapore', PH:'Asia/Manila',
+  IN:'Asia/Kolkata', NP:'Asia/Kathmandu', LK:'Asia/Colombo', BD:'Asia/Dhaka',
+  AE:'Asia/Dubai', SA:'Asia/Riyadh', IL:'Asia/Jerusalem', JO:'Asia/Amman',
+  EG:'Africa/Cairo', MA:'Africa/Casablanca', TN:'Africa/Tunis', ZA:'Africa/Johannesburg',
+  KE:'Africa/Nairobi', NG:'Africa/Lagos',
+  AU:'Australia/Sydney', NZ:'Pacific/Auckland', FJ:'Pacific/Fiji'
+};
+function getTzOffsetMinutes(tz, when) {
+  // Berechnet UTC-Offset einer IANA-Zone in Minuten zu einem Zeitpunkt.
+  try {
+    const dtf = new Intl.DateTimeFormat('en-US', {
+      timeZone: tz, hour12: false,
+      year:'numeric', month:'2-digit', day:'2-digit',
+      hour:'2-digit', minute:'2-digit', second:'2-digit'
+    });
+    const parts = dtf.formatToParts(when);
+    const map = {};
+    parts.forEach(p => { if (p.type !== 'literal') map[p.type] = p.value; });
+    // Date.UTC akzeptiert month als 0-indexed
+    const tzDate = Date.UTC(+map.year, +map.month - 1, +map.day, +map.hour, +map.minute, +map.second);
+    return Math.round((tzDate - when.getTime()) / 60000);
+  } catch (e) { return null; }
+}
+function getCountryTimezoneInfo(countryCode) {
+  // Liefert { local, offsetVsBerlinHours, offsetLabel } — relativ zu Europe/Berlin (Heimat-TZ)
+  const tz = COUNTRY_TZ[countryCode];
+  if (!tz) return null;
+  const now = new Date();
+  const tzMin = getTzOffsetMinutes(tz, now);
+  const beMin = getTzOffsetMinutes('Europe/Berlin', now);
+  if (tzMin == null || beMin == null) return null;
+  const diffH = (tzMin - beMin) / 60;
+  // Lokal-Zeit im Reiseland
+  let local = '';
+  try {
+    local = new Intl.DateTimeFormat('de-DE', { timeZone: tz, hour: '2-digit', minute: '2-digit', hour12: false }).format(now);
+  } catch(e) {}
+  let offsetLabel;
+  if (diffH === 0) offsetLabel = 'gleiche Zeit wie Deutschland';
+  else if (diffH > 0) offsetLabel = '+' + (Number.isInteger(diffH) ? diffH : diffH.toFixed(1)) + ' h zu DE';
+  else offsetLabel = (Number.isInteger(diffH) ? diffH : diffH.toFixed(1)) + ' h zu DE';
+  return { local, offsetLabel, tz };
+}
+
 function renderCountryPanel(container) {
   const trip = T();
   if (!trip.country) return;
@@ -3357,9 +3422,14 @@ function renderCountryPanel(container) {
   const panel = document.createElement('div');
   panel.className = 'country-panel';
   const driveClass = /links/i.test(info.drive) ? 'cp-drive-left' : '';
+  const tzInfo = getCountryTimezoneInfo(trip.country);
+  const tzRow = tzInfo
+    ? `<div class="cp-row"><strong>Zeitzone</strong><span>${escapeHtml(tzInfo.local + ' Uhr · ' + tzInfo.offsetLabel)}</span></div>`
+    : '';
   panel.innerHTML = `
     <div class="cp-head"><h3>🌍 Reiseinfos ${escapeHtml(info.name)}</h3></div>
     <div class="cp-body">
+      ${tzRow}
       <div class="cp-row"><strong>Steckdose</strong><span>${escapeHtml(info.plug)} · ${escapeHtml(info.volt)}</span></div>
       <div class="cp-row"><strong>Verkehr</strong><span class="${driveClass}">Fährt ${escapeHtml(info.drive)}</span></div>
       <div class="cp-row"><strong>Währung</strong><span>${escapeHtml(info.curr)}</span></div>
@@ -3715,10 +3785,10 @@ function renderFxPanel(container, opts) {
     <div class="fx-head"><h3>💱 Währungsrechner</h3></div>
     <div class="fx-body">
       <div class="fx-row">
-        <input type="number" inputmode="decimal" class="fx-input" id="fx-from-val" value="10" min="0" step="0.01" />
+        <input type="text" inputmode="decimal" class="fx-input" id="fx-from-val" value="10" autocomplete="off" />
         <select class="fx-select" id="fx-from-cur"></select>
         <button class="fx-swap" id="fx-swap" aria-label="Tauschen">⇄</button>
-        <input type="number" inputmode="decimal" class="fx-input" id="fx-to-val" />
+        <input type="text" inputmode="decimal" class="fx-input" id="fx-to-val" autocomplete="off" />
         <select class="fx-select" id="fx-to-cur"></select>
       </div>
       <div class="fx-info" id="fx-info">Lädt Kurse…</div>
@@ -3755,14 +3825,20 @@ function renderFxPanel(container, opts) {
   fill(fromSel, tripCurr);
   fill(toSel, 'EUR');
 
+  // Hilfsfunktion: deutsches Komma + Punkt akzeptieren
+  const parseAmount = (s) => {
+    if (s == null) return NaN;
+    const cleaned = String(s).replace(/\s/g, '').replace(',', '.');
+    return parseFloat(cleaned);
+  };
   const recompute = () => {
-    const amt = parseFloat(fromVal.value);
+    const amt = parseAmount(fromVal.value);
     if (isNaN(amt)) { toVal.value = ''; return; }
     const result = convertFx(amt, fromSel.value, toSel.value);
     toVal.value = result != null ? formatFx(result) : '–';
   };
   const recomputeReverse = () => {
-    const amt = parseFloat(toVal.value);
+    const amt = parseAmount(toVal.value);
     if (isNaN(amt)) { fromVal.value = ''; return; }
     const result = convertFx(amt, toSel.value, fromSel.value);
     fromVal.value = result != null ? formatFx(result) : '–';
@@ -5108,7 +5184,15 @@ document.getElementById('save-item').addEventListener('click', () => {
   editingItemId = null;
 });
 
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function openModal(id) {
+  const el = document.getElementById(id);
+  if (!el) { console.warn('openModal: missing element', id); return; }
+  el.classList.add('open');
+}
+function closeModal(id) {
+  const el = document.getElementById(id);
+  if (el) el.classList.remove('open');
+}
 document.querySelectorAll('.modal-backdrop').forEach(m => {
   m.addEventListener('click', (e) => { if (e.target === m) m.classList.remove('open'); });
 });
