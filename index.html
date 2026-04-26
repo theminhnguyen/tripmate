@@ -2151,7 +2151,7 @@ create policy "u" on trips for update using (true);</pre>
 // ============ App-Version ============
 // Bei Schema-Änderungen SCHEMA_VERSION hochzählen + Migration ergänzen.
 // APP_VERSION ist die User-sichtbare Version.
-const APP_VERSION = '0.6.1';
+const APP_VERSION = '0.6.2';
 const SCHEMA_VERSION = 3;
 
 // ============ Constants & Demo Data ============
@@ -2601,14 +2601,18 @@ async function sendMagicLink(email) {
   if (!CLOUD.url || !CLOUD.key) {
     throw new Error('Cloud-Backend nicht eingerichtet. Klicke unten "Cloud-Backend einrichten".');
   }
-  const url = CLOUD.url.replace(/\/+$/, '') + '/auth/v1/otp';
+  // WICHTIG: Supabase liest redirect_to aus dem Query-String, NICHT aus dem Body.
+  // Wenn wir es im Body senden, ignoriert Supabase es und fällt auf die in der
+  // Dashboard-Konfiguration gesetzte "Site URL" zurück (default: localhost:3000).
+  const redirectTo = location.origin + location.pathname;
+  const url = CLOUD.url.replace(/\/+$/, '') + '/auth/v1/otp?redirect_to=' + encodeURIComponent(redirectTo);
   const r = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', apikey: CLOUD.key },
     body: JSON.stringify({
       email: email,
       create_user: true,
-      options: { emailRedirectTo: location.origin + location.pathname }
+      gotrue_meta_security: {}
     })
   });
   if (!r.ok) {
@@ -2621,8 +2625,15 @@ async function sendMagicLink(email) {
 
 function parseAuthHash() {
   // Supabase liefert Tokens im URL-Hash (#access_token=...&...&type=magiclink)
+  // ODER bei Fehlern: #error=access_denied&error_code=otp_expired&error_description=...
   if (!location.hash || location.hash.length < 2) return null;
   const params = new URLSearchParams(location.hash.replace(/^#/, ''));
+  const error = params.get('error');
+  const errorDescription = params.get('error_description');
+  const errorCode = params.get('error_code');
+  if (error) {
+    return { error, errorCode, errorDescription };
+  }
   const access = params.get('access_token');
   const refresh = params.get('refresh_token');
   const expiresIn = parseInt(params.get('expires_in') || '3600', 10);
@@ -7370,6 +7381,19 @@ bindAuthGate();
 (async function bootAuth() {
   // 1. Kommen wir gerade von einem Magic-Link zurück? (#access_token=... im URL-Hash)
   const cb = parseAuthHash();
+  if (cb && cb.error) {
+    // Magic-Link kam mit Fehler zurück (z.B. otp_expired, access_denied)
+    history.replaceState(null, '', location.pathname + location.search);
+    showAuthGate();
+    let msg = 'Anmeldung fehlgeschlagen';
+    if (cb.errorCode === 'otp_expired') {
+      msg = 'Der Link ist abgelaufen oder wurde schon benutzt. Bitte einen neuen anfordern.';
+    } else if (cb.errorDescription) {
+      msg = decodeURIComponent(cb.errorDescription.replace(/\+/g, ' '));
+    }
+    showAuthError(msg);
+    return;
+  }
   if (cb && cb.access) {
     const ok = await handleAuthCallback();
     if (ok) {
