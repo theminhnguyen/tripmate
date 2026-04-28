@@ -144,15 +144,30 @@
     font-size: 12px; font-weight: 600; color: var(--text-muted);
     text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px;
   }
-  .auth-gate input[type="email"] {
+  .auth-gate input[type="email"],
+  .auth-gate input[type="password"] {
     width: 100%; padding: 14px 16px;
     border: 1.5px solid var(--border); border-radius: var(--radius-sm);
     font-size: 16px; background: var(--surface); color: var(--text);
     transition: border-color 0.15s, box-shadow 0.15s;
   }
-  .auth-gate input[type="email"]:focus {
+  .auth-gate input[type="email"]:focus,
+  .auth-gate input[type="password"]:focus {
     outline: none; border-color: var(--accent);
     box-shadow: 0 0 0 4px rgba(255,56,92,0.10);
+  }
+  /* Tab-Toggle Anmelden / Registrieren */
+  .auth-gate .auth-tabs {
+    display: flex; gap: 4px; padding: 4px; margin-bottom: 20px;
+    background: var(--bg-soft); border-radius: var(--radius-sm);
+  }
+  .auth-gate .auth-tab {
+    flex: 1; padding: 10px 12px; font-size: 14px; font-weight: 600;
+    color: var(--text-muted); border-radius: 6px; transition: background 0.15s, color 0.15s;
+  }
+  .auth-gate .auth-tab.active {
+    background: var(--surface); color: var(--text);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
   }
   .auth-gate .auth-btn-primary {
     width: 100%; margin-top: 16px;
@@ -1547,27 +1562,27 @@
     <h1 class="auth-title">Plane deine Reisen</h1>
     <p class="auth-sub">Erstelle einen Account, damit deine Reisen sicher in der Cloud liegen und auf allen Geräten verfügbar sind.</p>
 
-    <!-- Step 1: Email-Eingabe -->
-    <div class="auth-step" id="auth-step-email">
-      <label class="auth-label" for="auth-email">Deine Email-Adresse</label>
+    <!-- Tab-Wechsel zwischen Anmelden / Registrieren -->
+    <div class="auth-tabs">
+      <button type="button" class="auth-tab active" id="auth-tab-signin" data-mode="signin">Anmelden</button>
+      <button type="button" class="auth-tab" id="auth-tab-signup" data-mode="signup">Registrieren</button>
+    </div>
+
+    <!-- Step 1: Email + Passwort -->
+    <div class="auth-step" id="auth-step-form">
+      <label class="auth-label" for="auth-email">Email</label>
       <input type="email" id="auth-email" placeholder="du@beispiel.de" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" />
-      <button type="button" class="auth-btn-primary" id="auth-send-link-btn">📧 Magic-Link senden</button>
+      <label class="auth-label" for="auth-password" style="margin-top:14px;">Passwort</label>
+      <input type="password" id="auth-password" placeholder="Mindestens 6 Zeichen" autocomplete="current-password" />
+      <button type="button" class="auth-btn-primary" id="auth-submit-btn">Anmelden</button>
       <div class="auth-err" id="auth-err"></div>
-      <div class="auth-hint">
-        Wir senden dir einen Bestätigungs-Link per Email. Kein Passwort nötig — einfach in deinem Postfach auf den Link klicken.
+      <div class="auth-hint" id="auth-hint">
+        Du hast schon einen Account? Logge dich oben ein. Falls nicht, oben auf "Registrieren" wechseln.
       </div>
       <button type="button" class="auth-link-btn" id="auth-setup-backend-btn">⚙ Cloud-Backend einrichten</button>
     </div>
 
-    <!-- Step 2: Email gesendet -->
-    <div class="auth-step" id="auth-step-sent" style="display:none;">
-      <div class="auth-icon-big">📬</div>
-      <h2 class="auth-step-title">Email versendet</h2>
-      <p class="auth-step-text">Wir haben einen Bestätigungs-Link an <strong id="auth-sent-email"></strong> geschickt. Klicke darauf — du landest dann automatisch wieder hier und bist eingeloggt.</p>
-      <button type="button" class="auth-link-btn" id="auth-resend-btn">Anderen Email-Adresse?</button>
-    </div>
-
-    <!-- Step 3: Login wird verarbeitet -->
+    <!-- Step 2: Login wird verarbeitet -->
     <div class="auth-step" id="auth-step-loading" style="display:none;">
       <div class="auth-icon-big">⏳</div>
       <p class="auth-step-text">Anmeldung wird verarbeitet…</p>
@@ -2151,7 +2166,7 @@ create policy "u" on trips for update using (true);</pre>
 // ============ App-Version ============
 // Bei Schema-Änderungen SCHEMA_VERSION hochzählen + Migration ergänzen.
 // APP_VERSION ist die User-sichtbare Version.
-const APP_VERSION = '0.6.2';
+const APP_VERSION = '0.6.3';
 const SCHEMA_VERSION = 3;
 
 // ============ Constants & Demo Data ============
@@ -2597,30 +2612,63 @@ function isAuthenticated() {
   return true;
 }
 
-async function sendMagicLink(email) {
-  if (!CLOUD.url || !CLOUD.key) {
-    throw new Error('Cloud-Backend nicht eingerichtet. Klicke unten "Cloud-Backend einrichten".');
-  }
-  // WICHTIG: Supabase liest redirect_to aus dem Query-String, NICHT aus dem Body.
-  // Wenn wir es im Body senden, ignoriert Supabase es und fällt auf die in der
-  // Dashboard-Konfiguration gesetzte "Site URL" zurück (default: localhost:3000).
-  const redirectTo = location.origin + location.pathname;
-  const url = CLOUD.url.replace(/\/+$/, '') + '/auth/v1/otp?redirect_to=' + encodeURIComponent(redirectTo);
+// Email + Passwort Login (POST /auth/v1/token?grant_type=password)
+async function signInWithPassword(email, password) {
+  if (!CLOUD.url || !CLOUD.key) throw new Error('Cloud-Backend nicht eingerichtet');
+  const url = CLOUD.url.replace(/\/+$/, '') + '/auth/v1/token?grant_type=password';
   const r = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', apikey: CLOUD.key },
-    body: JSON.stringify({
-      email: email,
-      create_user: true,
-      gotrue_meta_security: {}
-    })
+    body: JSON.stringify({ email, password })
   });
+  const data = await r.json().catch(() => ({}));
   if (!r.ok) {
-    let msg = 'Magic-Link konnte nicht gesendet werden';
-    try { const j = await r.json(); if (j.msg || j.error_description) msg = j.msg || j.error_description; } catch(e){}
+    const msg = data.error_description || data.msg || data.error || 'Login fehlgeschlagen';
     throw new Error(msg);
   }
-  return true;
+  return data; // { access_token, refresh_token, expires_in, user }
+}
+
+// Email + Passwort Registrierung (POST /auth/v1/signup)
+async function signUpWithPassword(email, password) {
+  if (!CLOUD.url || !CLOUD.key) throw new Error('Cloud-Backend nicht eingerichtet');
+  const url = CLOUD.url.replace(/\/+$/, '') + '/auth/v1/signup';
+  const r = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', apikey: CLOUD.key },
+    body: JSON.stringify({ email, password })
+  });
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) {
+    const msg = data.error_description || data.msg || data.error || 'Registrierung fehlgeschlagen';
+    throw new Error(msg);
+  }
+  // Wenn Email-Confirmation in Supabase deaktiviert ist, kommt direkt access_token + user.
+  // Andernfalls kommt nur user, kein Token → User muss Mail bestätigen (deprecated, sollte aus sein).
+  return data;
+}
+
+// Tokens + User → Account speichern (gemeinsamer Pfad für Login + Signup)
+async function persistAuthSession(data) {
+  if (!data || !data.access_token || !data.user) {
+    throw new Error('Anmeldung erfolgreich, aber Email-Bestätigung wird verlangt. Bitte in Supabase "Confirm email" deaktivieren.');
+  }
+  const acc = {
+    email: data.user.email,
+    userId: data.user.id,
+    accessToken: data.access_token,
+    refreshToken: data.refresh_token,
+    expiresAt: Date.now() + (data.expires_in || 3600) * 1000,
+    createdAt: Date.now()
+  };
+  setAccount(acc);
+  CLOUD.room = data.user.id;
+  localStorage.setItem('tm_cloud_room', data.user.id);
+  await cloudPull(true);
+  if (Object.keys(state.trips || {}).length > 0) {
+    await cloudPushImmediate();
+  }
+  return acc;
 }
 
 function parseAuthHash() {
@@ -2720,10 +2768,13 @@ function logout() {
 
 function showAuthGate() {
   const gate = document.getElementById('auth-gate');
-  if (gate) gate.setAttribute('aria-hidden', 'false');
+  if (gate) {
+    gate.setAttribute('aria-hidden', 'false');
+    gate.style.display = ''; // ggf. zurück zur default
+  }
   document.body.classList.remove('is-authed');
-  // Zurück zu Step 1 (Email-Eingabe)
-  showAuthStep('email');
+  // Zurück zum Form-Step
+  showAuthStep('form');
 }
 function hideAuthGate() {
   const gate = document.getElementById('auth-gate');
@@ -2731,7 +2782,7 @@ function hideAuthGate() {
   document.body.classList.add('is-authed');
 }
 function showAuthStep(step) {
-  ['email','sent','loading'].forEach(s => {
+  ['form','loading'].forEach(s => {
     const el = document.getElementById('auth-step-' + s);
     if (el) el.style.display = (s === step ? '' : 'none');
   });
@@ -2748,36 +2799,85 @@ function showAuthLoading() {
   showAuthStep('loading');
 }
 
+// Auth-Modus: 'signin' (Login) oder 'signup' (Registrieren)
+let authMode = 'signin';
+
+function setAuthMode(mode) {
+  authMode = mode === 'signup' ? 'signup' : 'signin';
+  const tabs = document.querySelectorAll('.auth-tab');
+  tabs.forEach(t => t.classList.toggle('active', t.dataset.mode === authMode));
+  const submit = document.getElementById('auth-submit-btn');
+  const hint = document.getElementById('auth-hint');
+  const pwd = document.getElementById('auth-password');
+  if (submit) submit.textContent = authMode === 'signup' ? 'Account erstellen' : 'Anmelden';
+  if (pwd) {
+    pwd.autocomplete = authMode === 'signup' ? 'new-password' : 'current-password';
+    pwd.placeholder = authMode === 'signup' ? 'Mindestens 6 Zeichen' : 'Dein Passwort';
+  }
+  if (hint) hint.textContent = authMode === 'signup'
+    ? 'Erstelle einen neuen Account. Dein Passwort wird verschlüsselt — niemand außer dir kennt es.'
+    : 'Logge dich in deinen bestehenden Account ein. Noch keinen Account? Oben auf "Registrieren".';
+  showAuthError('');
+}
+
 function bindAuthGate() {
-  const sendBtn = document.getElementById('auth-send-link-btn');
-  if (sendBtn) sendBtn.addEventListener('click', async () => {
-    const emailInput = document.getElementById('auth-email');
+  // Tabs verdrahten
+  document.querySelectorAll('.auth-tab').forEach(tab => {
+    tab.addEventListener('click', () => setAuthMode(tab.dataset.mode));
+  });
+  setAuthMode('signin');
+
+  const submitBtn = document.getElementById('auth-submit-btn');
+  const emailInput = document.getElementById('auth-email');
+  const pwdInput = document.getElementById('auth-password');
+
+  const submit = async () => {
     const email = (emailInput.value || '').trim().toLowerCase();
+    const password = pwdInput.value || '';
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       showAuthError('Bitte gültige Email-Adresse eingeben');
       return;
     }
-    sendBtn.disabled = true; sendBtn.textContent = '⏳ Sende…';
-    try {
-      await sendMagicLink(email);
-      document.getElementById('auth-sent-email').textContent = email;
-      showAuthStep('sent');
-    } catch (e) {
-      showAuthError(e.message || 'Fehler beim Senden');
-    } finally {
-      sendBtn.disabled = false; sendBtn.textContent = '📧 Magic-Link senden';
+    if (!password || password.length < 6) {
+      showAuthError('Passwort muss mindestens 6 Zeichen haben');
+      return;
     }
-  });
-  const resendBtn = document.getElementById('auth-resend-btn');
-  if (resendBtn) resendBtn.addEventListener('click', () => showAuthStep('email'));
+    if (!CLOUD.url || !CLOUD.key) {
+      showAuthError('Cloud-Backend nicht eingerichtet. Klicke unten "Cloud-Backend einrichten".');
+      return;
+    }
+    submitBtn.disabled = true;
+    const oldText = submitBtn.textContent;
+    submitBtn.textContent = '⏳ ' + (authMode === 'signup' ? 'Erstelle…' : 'Logge ein…');
+    try {
+      const data = authMode === 'signup'
+        ? await signUpWithPassword(email, password)
+        : await signInWithPassword(email, password);
+      await persistAuthSession(data);
+      hideAuthGate();
+      proceedToApp();
+    } catch (e) {
+      let msg = e.message || 'Fehler';
+      // Häufige Fehler hübsch übersetzen
+      if (/invalid login credentials/i.test(msg)) msg = 'Email oder Passwort falsch';
+      else if (/user already registered|already exists/i.test(msg)) msg = 'Ein Account mit dieser Email existiert schon — wechsle auf "Anmelden"';
+      else if (/password.*should be at least/i.test(msg)) msg = 'Passwort zu kurz (min. 6 Zeichen)';
+      showAuthError(msg);
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = oldText;
+    }
+  };
+
+  if (submitBtn) submitBtn.addEventListener('click', submit);
+  // Enter in Email/Passwort feuert Submit
+  [emailInput, pwdInput].forEach(inp => inp && inp.addEventListener('keydown', e => {
+    if (e.key === 'Enter') submit();
+  }));
+
   const setupBtn = document.getElementById('auth-setup-backend-btn');
   if (setupBtn) setupBtn.addEventListener('click', () => {
     document.getElementById('open-sync-setup')?.click();
-  });
-  // Email-Input Enter-Taste = Senden
-  const emailInput = document.getElementById('auth-email');
-  if (emailInput) emailInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') sendBtn?.click();
   });
 }
 function cloudEnabled() { return !!(CLOUD.url && CLOUD.key && CLOUD.room); }
