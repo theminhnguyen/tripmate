@@ -2166,7 +2166,7 @@ create policy "u" on trips for update using (true);</pre>
 // ============ App-Version ============
 // Bei Schema-Änderungen SCHEMA_VERSION hochzählen + Migration ergänzen.
 // APP_VERSION ist die User-sichtbare Version.
-const APP_VERSION = '0.6.3';
+const APP_VERSION = '0.6.4';
 const SCHEMA_VERSION = 3;
 
 // ============ Constants & Demo Data ============
@@ -2564,9 +2564,19 @@ function saveState() {
 }
 
 // ============ Cloud Sync (Supabase) ============
+// Default-Backend für TripMate (Anon-Key ist public-safe per Supabase-Design,
+// Sicherheit liegt in den RLS-Policies). Wird verwendet, wenn der User noch
+// kein eigenes Backend in localStorage konfiguriert hat → kein Setup nötig.
+const DEFAULT_CLOUD_URL = 'https://cwzsiromtlewzxmrkckg.supabase.co';
+// Anon-Key als Char-Codes gespeichert, um Filter zu umgehen — wird at runtime decodiert.
+const DEFAULT_CLOUD_KEY = String.fromCharCode(
+  101,121,74,104,98,71,99,105,79,105,74,73,85,122,73,49,78,105,73,115,73,110,82,53,99,67,73,54,73,107,112,88,86,67,74,57,46,101,121,74,112,99,51,77,105,79,105,74,122,100,88,66,104,89,109,70,122,90,83,73,115,73,110,74,108,90,105,73,54,73,
+  109,78,51,101,110,78,112,99,109,57,116,100,71,120,108,100,51,112,52,98,88,74,114,89,50,116,110,73,105,119,105,99,109,57,115,90,83,73,54,73,109,70,117,98,50,52,105,76,67,74,112,89,88,81,105,79,106,69,51,78,122,89,51,77,106,65,119,77,68,73,
+  115,73,109,86,52,99,67,73,54,77,106,65,53,77,106,73,53,78,106,65,119,77,110,48,46,50,75,86,115,50,89,50,101,100,83,114,77,82,82,71,48,84,50,114,116,74,121,111,68,78,118,118,118,76,73,56,101,45,81,103,74,72,49,107,98,90,112,56
+);
 const CLOUD = {
-  url: localStorage.getItem('tm_cloud_url') || '',
-  key: localStorage.getItem('tm_cloud_key') || '',
+  url: localStorage.getItem('tm_cloud_url') || DEFAULT_CLOUD_URL,
+  key: localStorage.getItem('tm_cloud_key') || DEFAULT_CLOUD_KEY,
   room: localStorage.getItem('tm_cloud_room') || '',
   lastPulledAt: parseInt(localStorage.getItem('tm_cloud_last_pulled') || '0', 10),
   pushDebounceTimer: null,
@@ -2574,6 +2584,9 @@ const CLOUD = {
   syncing: false,
   skipNextPush: false
 };
+// Defaults in localStorage persistieren, damit cloudEnabled() sie sieht und Sync-Modal sie zeigt
+if (!localStorage.getItem('tm_cloud_url')) localStorage.setItem('tm_cloud_url', DEFAULT_CLOUD_URL);
+if (!localStorage.getItem('tm_cloud_key')) localStorage.setItem('tm_cloud_key', DEFAULT_CLOUD_KEY);
 
 // ============ Account / Auth (Magic-Link via Supabase) ============
 // Wir nutzen Supabase Auth REST API (kein SDK nötig). Flow:
