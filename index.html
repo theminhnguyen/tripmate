@@ -617,6 +617,15 @@
   .itin-entry .time { font-size: 11.5px; color: var(--text-muted); font-variant-numeric: tabular-nums; min-width: 46px; flex-shrink: 0; padding-top: 2px; font-weight: 600; }
   .itin-entry .title { font-weight: 600; font-size: 13.5px; color: var(--text); line-height: 1.3; }
   .itin-entry .meta { font-size: 11.5px; color: var(--text-muted); margin-top: 2px; }
+  .itin-actions { display: flex; gap: 2px; flex-shrink: 0; opacity: 0.6; transition: opacity 0.15s; }
+  .itin-entry:hover .itin-actions, .itin-entry:active .itin-actions { opacity: 1; }
+  .itin-act-btn {
+    width: 28px; height: 28px; border-radius: 6px; font-size: 13px;
+    background: transparent; padding: 0; flex-shrink: 0;
+    transition: background 0.1s, transform 0.1s;
+  }
+  .itin-act-btn:active { transform: scale(0.92); background: rgba(0,0,0,0.05); }
+  .itin-act-btn.itin-del:active { background: rgba(220,38,38,0.10); }
   .itin-empty { color: #7E22CE; font-style: italic; font-size: 12.5px; padding: 10px 0; text-align: center; }
   .itin-source { font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: #8B5CF6; font-weight: 700; padding: 2px 6px; background: #F5F3FF; border-radius: 4px; margin-left: 6px; }
 
@@ -675,6 +684,26 @@
     font-size: 13px; text-decoration: none; transition: background 0.15s;
   }
   .visa-panel .v-link:active { background: #DBEAFE; }
+  .visa-panel .v-photo-wrap { position: relative; margin-top: 12px; }
+  .visa-panel .v-photo {
+    width: 100%; max-height: 320px; object-fit: cover;
+    border-radius: var(--radius-md); cursor: pointer; display: block;
+    box-shadow: var(--shadow-sm);
+  }
+  .visa-panel .v-photo-del {
+    position: absolute; top: 8px; right: 8px;
+    width: 32px; height: 32px; border-radius: 50%;
+    background: rgba(255,255,255,0.92); font-size: 13px;
+    box-shadow: var(--shadow-sm); transition: transform 0.1s;
+  }
+  .visa-panel .v-photo-del:active { transform: scale(0.92); }
+  .visa-panel .v-photo-add {
+    display: inline-flex; align-items: center; gap: 6px;
+    margin-top: 10px; padding: 10px 14px; background: white; color: #1E3A8A;
+    border: 1.5px dashed #BFDBFE; border-radius: var(--radius-sm);
+    font-weight: 600; font-size: 13px; cursor: pointer; transition: background 0.15s;
+  }
+  .visa-panel .v-photo-add:active { background: #DBEAFE; }
   .visa-panel .v-warn { color: #991B1B; font-weight: 600; }
 
   /* Ausgabe-Tracker */
@@ -1157,10 +1186,19 @@
     box-shadow: var(--shadow-pink);
   }
   .empty-card .btn-primary:active { transform: scale(0.97); }
+  .empty-card .empty-btn-row {
+    display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;
+  }
+  .empty-card .btn-secondary {
+    background: var(--bg-soft); color: var(--text); padding: 10px 18px;
+    border-radius: 999px; font-size: 13px; font-weight: 600;
+    border: 1px solid var(--border);
+  }
+  .empty-card .btn-secondary:active { transform: scale(0.97); }
 
-  /* Quick-Actions Grid */
+  /* Quick-Actions Grid — auto-fit für 4-6 Buttons */
   .quick-actions {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px;
   }
   .qa-btn {
     background: var(--surface); border: 1px solid var(--border);
@@ -2166,7 +2204,7 @@ create policy "u" on trips for update using (true);</pre>
 // ============ App-Version ============
 // Bei Schema-Änderungen SCHEMA_VERSION hochzählen + Migration ergänzen.
 // APP_VERSION ist die User-sichtbare Version.
-const APP_VERSION = '0.6.4';
+const APP_VERSION = '0.6.5';
 const SCHEMA_VERSION = 3;
 
 // ============ Constants & Demo Data ============
@@ -2278,7 +2316,7 @@ const VISA_INFO = {
   'GR': { visa:'none',    passportMonths:0,  stay:'90 Tage (Schengen)',      note:'Personalausweis ausreichend.',      url:'https://www.auswaertiges-amt.de/de/service/laender/griechenland-node' },
   'HR': { visa:'none',    passportMonths:0,  stay:'90 Tage (Schengen)',      note:'Personalausweis ausreichend.',      url:'https://www.auswaertiges-amt.de/de/service/laender/kroatien-node' },
   'IE': { visa:'none',    passportMonths:0,  stay:'90 Tage',                  note:'Personalausweis/Reisepass.',        url:'https://www.auswaertiges-amt.de/de/service/laender/irland-node' },
-  'GB': { visa:'none',    passportMonths:0,  stay:'6 Monate',                 note:'⚠️ Seit Brexit: Reisepass PFLICHT (kein PersAusweis mehr). ETA geplant.', url:'https://www.auswaertiges-amt.de/de/service/laender/grossbritannien-node' },
+  'GB': { visa:'eta',     passportMonths:0,  stay:'6 Monate',                 note:'⚠️ ETA-Pflicht seit 2. April 2025! £16, online vor Reise beantragen, gilt 2 Jahre. Reisepass nötig (kein PersAusweis).', url:'https://www.gov.uk/guidance/apply-for-an-electronic-travel-authorisation-eta' },
   'TR': { visa:'none',    passportMonths:6,  stay:'90 Tage',                  note:'Reisepass ≥6 Monate gültig. Personalausweis-Einreise nur Reisegruppen.', url:'https://www.auswaertiges-amt.de/de/service/laender/tuerkei-node' },
   'US': { visa:'esta',    passportMonths:0,  stay:'90 Tage (VWP)',            note:'ESTA nötig (~$21) — unter esta.cbp.dhs.gov beantragen, vor Abflug.', url:'https://esta.cbp.dhs.gov/' },
   'CA': { visa:'eta',     passportMonths:0,  stay:'6 Monate',                 note:'eTA nötig (~7 CAD) für Flüge — 24h+ vorher.', url:'https://www.canada.ca/de/einwanderung-fluechtlinge-buergerschaft/dienstleistungen/elektronische-reisegenehmigung.html' },
@@ -2422,6 +2460,8 @@ function ensureTripDefaults(t) {
   if (typeof t.sharedRoom !== 'string') t.sharedRoom = '';        // UUID, falls Trip live geteilt wird
   if (!Array.isArray(t.members)) t.members = [];                   // Liste der Member-Emails (inkl. Owner)
   if (typeof t.ownerEmail !== 'string') t.ownerEmail = '';         // Email des Erstellers
+  // v0.6.5: Foto/Screenshot des Visums oder ETA
+  if (typeof t.visaPhoto !== 'string') t.visaPhoto = '';
   return t;
 }
 // T() gibt die aktuelle Reise zurück — benutzt überall statt state.XXX
@@ -2675,8 +2715,13 @@ async function persistAuthSession(data) {
     createdAt: Date.now()
   };
   setAccount(acc);
-  CLOUD.room = data.user.id;
-  localStorage.setItem('tm_cloud_room', data.user.id);
+  // Room-Code: Wenn der User MANUELL einen Raum gesetzt hat (z.B. um mit Partner zu syncen),
+  // den respektieren. Ansonsten user.id als private Sandbox.
+  const isManualRoom = localStorage.getItem('tm_cloud_room_manual') === '1';
+  if (!isManualRoom) {
+    CLOUD.room = data.user.id;
+    localStorage.setItem('tm_cloud_room', data.user.id);
+  }
   await cloudPull(true);
   if (Object.keys(state.trips || {}).length > 0) {
     await cloudPushImmediate();
@@ -2753,9 +2798,11 @@ async function handleAuthCallback() {
       createdAt: Date.now()
     };
     setAccount(acc);
-    // Room = user.id → eigene Cloud-Sektion
-    CLOUD.room = user.id;
-    localStorage.setItem('tm_cloud_room', user.id);
+    // Room: nur überschreiben wenn nicht manuell gesetzt (für Partner-Sharing)
+    if (localStorage.getItem('tm_cloud_room_manual') !== '1') {
+      CLOUD.room = user.id;
+      localStorage.setItem('tm_cloud_room', user.id);
+    }
     // Lokale Trips automatisch in Cloud merge'n (cloudPull holt dann ggf. existierenden Stand)
     await cloudPull(true);
     if (Object.keys(state.trips || {}).length > 0) {
@@ -3642,13 +3689,17 @@ function renderHeute() {
       <div class="ec-icon">🌤</div>
       <div class="ec-title">Heute ist ungeplant</div>
       <div class="ec-text">Keine Termine, keine Items für ${dateLong}.</div>
-      <button class="btn-primary" id="empty-add-plan-btn" type="button">+ Termin hinzufügen</button>
+      <div class="empty-btn-row">
+        <button class="btn-primary" id="empty-add-plan-btn" type="button">📅 Termin</button>
+        <button class="btn-secondary" id="empty-add-hotel-btn" type="button">🏨 Hotel</button>
+      </div>
     </div>`;
   }
 
   // Schnellaktionen
   html += `<div class="caption">Schnellaktionen</div>`;
   html += `<div class="quick-actions">
+    <button class="qa-btn" data-qa="hotel" type="button"><span class="qa-icon">🏨</span><span class="qa-label">Hotel</span></button>
     <button class="qa-btn" data-qa="expense" type="button"><span class="qa-icon">＋</span><span class="qa-label">Ausgabe</span></button>
     <button class="qa-btn" data-qa="fx" type="button"><span class="qa-icon">€€</span><span class="qa-label">Wechseln</span></button>
     <button class="qa-btn" data-qa="safe" type="button"><span class="qa-icon">🔒</span><span class="qa-label">Safe</span></button>
@@ -3692,10 +3743,13 @@ function renderHeute() {
   });
   const emptyBtn = container.querySelector('#empty-add-plan-btn');
   if (emptyBtn) emptyBtn.addEventListener('click', () => openEventModal(null));
+  const emptyHotelBtn = container.querySelector('#empty-add-hotel-btn');
+  if (emptyHotelBtn) emptyHotelBtn.addEventListener('click', () => openAccomModal(null));
   container.querySelectorAll('.qa-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const qa = btn.dataset.qa;
-      if (qa === 'expense') openExpenseModal(null);
+      if (qa === 'hotel') openAccomModal(null);
+      else if (qa === 'expense') openExpenseModal(null);
       else if (qa === 'fx') { geldSubTab = 'fx'; switchView('geld'); }
       else if (qa === 'safe') { switchView('mehr'); setTimeout(() => { const el = document.querySelector('[data-mehr-row="docs"]'); if (el) el.click(); }, 80); }
       else if (qa === 'email') openEmailImportModal();
@@ -4248,7 +4302,8 @@ function buildItinerary() {
       date: e.date, time: e.time || '',
       icon: icons[e.type] || '📌',
       title: e.title || 'Termin', meta: e.notes || '',
-      source: e.type || 'event'
+      source: e.type || 'event',
+      kind: 'event', id: e.id
     });
   });
   // Accommodations → je Check-in und Check-out eine Zeile
@@ -4256,12 +4311,14 @@ function buildItinerary() {
     if (a.start) entries.push({
       date: a.start, time: '',
       icon: '🏨', title: `Check-in: ${a.name || 'Unterkunft'}`,
-      meta: a.address || '', source: 'stay'
+      meta: a.address || '', source: 'stay',
+      kind: 'accom', id: a.id
     });
     if (a.end) entries.push({
       date: a.end, time: '',
       icon: '🏨', title: `Check-out: ${a.name || 'Unterkunft'}`,
-      meta: a.address || '', source: 'stay'
+      meta: a.address || '', source: 'stay',
+      kind: 'accom', id: a.id
     });
   });
   // Geplante Items (mit scheduledDate)
@@ -4272,7 +4329,8 @@ function buildItinerary() {
     entries.push({
       date: it.scheduledDate, time: it.scheduledTime || '',
       icon: cat.icon, title: it.name, meta: it.address || '',
-      source: it.category
+      source: it.category,
+      kind: 'item', id: it.id
     });
   });
   // Sortieren: Datum, dann Zeit, dann title
@@ -4317,12 +4375,16 @@ function renderItineraryPanel(container) {
     const weekday = new Date(date).toLocaleDateString('de-DE', { weekday: 'long' });
     let dayHtml = `<div class="itin-day"><div class="itin-day-head"><span>${escapeHtml(weekday)} · ${escapeHtml(prettyDate)}</span><span class="count">${items.length} Termin${items.length === 1 ? '' : 'e'}</span></div>`;
     items.forEach(e => {
-      dayHtml += `<div class="itin-entry">
+      dayHtml += `<div class="itin-entry" data-itin-kind="${e.kind}" data-itin-id="${escapeHtml(e.id || '')}">
         <span class="ico">${e.icon}</span>
         <span class="time">${e.time || '–'}</span>
         <div style="flex:1; min-width:0;">
           <div class="title">${escapeHtml(e.title)}</div>
           ${e.meta ? `<div class="meta">${escapeHtml(e.meta)}</div>` : ''}
+        </div>
+        <div class="itin-actions">
+          <button class="itin-act-btn" data-itin-edit="${e.kind}|${escapeHtml(e.id || '')}" title="Bearbeiten" type="button">✏️</button>
+          <button class="itin-act-btn itin-del" data-itin-del="${e.kind}|${escapeHtml(e.id || '')}" title="Löschen" type="button">🗑️</button>
         </div>
       </div>`;
     });
@@ -4337,6 +4399,56 @@ function renderItineraryPanel(container) {
   container.appendChild(panel);
   makeCollapsible(panel, 'itinerary', panel.querySelector('.itin-head'), panel.querySelector('.itin-body'));
   panel.querySelector('#itin-email-import-btn').addEventListener('click', (e) => { e.stopPropagation(); openEmailImportModal(); });
+  // Edit-Buttons → richtigen Modal öffnen
+  panel.querySelectorAll('[data-itin-edit]').forEach(btn => {
+    btn.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      const [kind, id] = (btn.dataset.itinEdit || '').split('|');
+      if (!id) return;
+      if (kind === 'event') openEventModal(id);
+      else if (kind === 'accom') openAccomModal(id);
+      else if (kind === 'item') showDetail(id);
+    });
+  });
+  // Delete-Buttons → bestätigen, dann aus state entfernen
+  panel.querySelectorAll('[data-itin-del]').forEach(btn => {
+    btn.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      const [kind, id] = (btn.dataset.itinDel || '').split('|');
+      if (!id) return;
+      const t = T();
+      let label = 'Eintrag';
+      if (kind === 'event') {
+        const e = (t.events || []).find(x => x.id === id);
+        label = e?.title || 'Termin';
+      } else if (kind === 'accom') {
+        const a = (t.accommodations || []).find(x => x.id === id);
+        label = a?.name || 'Unterkunft';
+      } else if (kind === 'item') {
+        const it = (t.items || []).find(x => x.id === id);
+        label = it?.name || 'Ort';
+      }
+      if (!confirm('"' + label + '" wirklich löschen?')) return;
+      // Tombstone-fähig löschen — gleiches Format wie restlicher Code: 'kind:id' als String
+      if (!Array.isArray(t._tombs)) t._tombs = [];
+      const now = Date.now();
+      const pushTomb = (tomb) => { if (!t._tombs.includes(tomb)) t._tombs.push(tomb); };
+      if (kind === 'event') {
+        t.events = (t.events || []).filter(x => x.id !== id);
+        pushTomb('e:' + id);
+      } else if (kind === 'accom') {
+        t.accommodations = (t.accommodations || []).filter(x => x.id !== id);
+        pushTomb('a:' + id);
+      } else if (kind === 'item') {
+        t.items = (t.items || []).filter(x => x.id !== id);
+        pushTomb('i:' + id);
+      }
+      t._metaUpdatedAt = now;
+      saveState();
+      refreshCurrentView();
+      toast('🗑 ' + label + ' gelöscht');
+    });
+  });
 }
 
 // ============ Notfall-Assistent ============
@@ -4461,6 +4573,13 @@ function renderVisaPanel(container, opts) {
     passHint = 'Pass während der Reise gültig.';
   }
 
+  // Foto/Screenshot des Visums oder ETA-Bestätigung (base64 in trip.visaPhoto)
+  const photoHtml = trip.visaPhoto
+    ? `<div class="v-photo-wrap">
+         <img src="${trip.visaPhoto}" alt="Visa/ETA-Bestätigung" class="v-photo" id="v-photo-img" />
+         <button class="v-photo-del" id="v-photo-del" type="button" title="Foto löschen">🗑</button>
+       </div>`
+    : '';
   panel.innerHTML = `
     <div class="v-head"><h3>🛂 Einreise ${country ? escapeHtml(country.name) : ''}</h3></div>
     <div class="v-body">
@@ -4469,12 +4588,63 @@ function renderVisaPanel(container, opts) {
       <div class="v-row"><strong>Reisedokument</strong><span>${escapeHtml(passHint)}</span></div>
       ${visa.note ? `<div class="v-note">${escapeHtml(visa.note)}</div>` : ''}
       <a class="v-link" href="${visa.url}" target="_blank" rel="noopener noreferrer">🔗 Details & Antrag</a>
+      ${photoHtml}
+      <label class="v-photo-add" for="v-photo-input">${trip.visaPhoto ? '🖼 Foto ersetzen' : '📷 Foto/Screenshot anhängen'}</label>
+      <input type="file" id="v-photo-input" accept="image/*" style="display:none" />
     </div>
   `;
   container.appendChild(panel);
   if (!opts.skipCollapse) {
     makeCollapsible(panel, 'visa', panel.querySelector('.v-head'), panel.querySelector('.v-body'));
   }
+  // Photo-Upload
+  const fileInput = panel.querySelector('#v-photo-input');
+  if (fileInput) fileInput.addEventListener('change', (ev) => {
+    const file = ev.target.files && ev.target.files[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) { toast('Foto zu groß (max 2 MB)'); return; }
+    const reader = new FileReader();
+    reader.onload = (re) => {
+      // Optional: Bild ggf. resizen über Canvas (max 1200px Breite) — spart Cloud-Sync-Bandbreite
+      const img = new Image();
+      img.onload = () => {
+        const maxW = 1200;
+        let w = img.width, h = img.height;
+        if (w > maxW) { h = Math.round(h * maxW / w); w = maxW; }
+        const c = document.createElement('canvas');
+        c.width = w; c.height = h;
+        c.getContext('2d').drawImage(img, 0, 0, w, h);
+        const dataUrl = c.toDataURL('image/jpeg', 0.85);
+        const trip = T();
+        trip.visaPhoto = dataUrl;
+        trip._metaUpdatedAt = Date.now();
+        saveState();
+        refreshCurrentView();
+        toast('🖼 Foto gespeichert');
+      };
+      img.onerror = () => { toast('Foto konnte nicht geladen werden'); };
+      img.src = re.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+  // Photo-Delete
+  const photoDelBtn = panel.querySelector('#v-photo-del');
+  if (photoDelBtn) photoDelBtn.addEventListener('click', (ev) => {
+    ev.stopPropagation();
+    if (!confirm('Visa-Foto wirklich löschen?')) return;
+    const trip = T();
+    trip.visaPhoto = '';
+    trip._metaUpdatedAt = Date.now();
+    saveState();
+    refreshCurrentView();
+    toast('Foto gelöscht');
+  });
+  // Photo-Klick → Vollbild
+  const photoImg = panel.querySelector('#v-photo-img');
+  if (photoImg) photoImg.addEventListener('click', (ev) => {
+    ev.stopPropagation();
+    window.open(photoImg.src, '_blank');
+  });
 }
 
 // ============ Währungsrechner (FX) ============
@@ -6919,6 +7089,9 @@ document.getElementById('sync-enable').addEventListener('click', async () => {
   localStorage.setItem('tm_cloud_url', url);
   localStorage.setItem('tm_cloud_key', key);
   localStorage.setItem('tm_cloud_room', room);
+  // Wichtig: User hat den Raum-Code MANUELL gesetzt (z.B. um mit jemandem zu teilen).
+  // Login-Flow soll diesen Wert NICHT mit user.id überschreiben.
+  localStorage.setItem('tm_cloud_room_manual', '1');
   localStorage.setItem('tm_cloud_last_pulled', '0');
   toast('🔄 Verbinde mit Cloud...');
   updateSyncIndicator();
@@ -6940,6 +7113,7 @@ document.getElementById('sync-disable').addEventListener('click', () => {
   localStorage.removeItem('tm_cloud_url');
   localStorage.removeItem('tm_cloud_key');
   localStorage.removeItem('tm_cloud_room');
+  localStorage.removeItem('tm_cloud_room_manual');
   localStorage.removeItem('tm_cloud_last_pulled');
   updateSyncIndicator();
   closeModal('sync-modal');
@@ -7521,8 +7695,9 @@ bindAuthGate();
   // 2. Schon eingeloggt?
   if (isAuthenticated()) {
     const acc = getAccount();
-    // Room sicherstellen
-    if (acc && acc.userId && CLOUD.room !== acc.userId) {
+    // Room sicherstellen — aber NICHT überschreiben falls manuell gesetzt (Partner-Sync)
+    const isManualRoom = localStorage.getItem('tm_cloud_room_manual') === '1';
+    if (!isManualRoom && acc && acc.userId && CLOUD.room !== acc.userId) {
       CLOUD.room = acc.userId;
       localStorage.setItem('tm_cloud_room', acc.userId);
     }
