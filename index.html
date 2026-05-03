@@ -2204,7 +2204,7 @@ create policy "u" on trips for update using (true);</pre>
 // ============ App-Version ============
 // Bei Schema-Änderungen SCHEMA_VERSION hochzählen + Migration ergänzen.
 // APP_VERSION ist die User-sichtbare Version.
-const APP_VERSION = '0.6.5';
+const APP_VERSION = '0.6.6';
 const SCHEMA_VERSION = 3;
 
 // ============ Constants & Demo Data ============
@@ -2650,7 +2650,9 @@ function setAccount(acc) {
 }
 function clearAccount() {
   localStorage.removeItem(ACCOUNT_KEY);
-  localStorage.removeItem('tm_cloud_room'); // Room war user-scoped
+  // ABSICHTLICH: tm_cloud_room und tm_cloud_room_manual werden NICHT gelöscht.
+  // So überlebt ein manuell gesetzter Partner-Raum-Code einen Logout → Login.
+  // Wer den Raum komplett zurücksetzen will, nutzt sync-disable in der Sync-Modal.
 }
 function isAuthenticated() {
   const acc = getAccount();
@@ -2959,12 +2961,14 @@ function updateSyncIndicator() {
     if (stat) stat.textContent = '☁️ Cloud-Sync: deaktiviert – Listen sind nur auf diesem Gerät.';
     return;
   }
+  const isManual = localStorage.getItem('tm_cloud_room_manual') === '1';
+  const modeLabel = isManual ? 'geteilter Raum' : 'privat';
   if (btn) {
     btn.style.display = 'flex';
     btn.textContent = CLOUD.syncing ? '🔄' : '☁️';
-    btn.title = 'Cloud-Sync aktiv – Raum: ' + CLOUD.room;
+    btn.title = 'Cloud-Sync aktiv (' + modeLabel + ') – Raum: ' + CLOUD.room;
   }
-  if (stat) stat.textContent = '☁️ Cloud-Sync aktiv (Raum: ' + CLOUD.room + ')';
+  if (stat) stat.textContent = '☁️ Sync aktiv · ' + modeLabel + ' · Raum: ' + CLOUD.room;
 }
 async function cloudPull(silent) {
   if (!cloudEnabled() || CLOUD.syncing) return;
@@ -7049,6 +7053,9 @@ function checkInviteInURL() {
       localStorage.setItem('tm_cloud_url', payload.u);
       localStorage.setItem('tm_cloud_key', payload.k);
       localStorage.setItem('tm_cloud_room', payload.r);
+      // Wichtig: Invite-Annahme ist eine explizite Auswahl des Users —
+      // Login-Flow soll diesen Wert nicht später mit user.id überschreiben.
+      localStorage.setItem('tm_cloud_room_manual', '1');
       localStorage.setItem('tm_cloud_last_pulled', '0');
       closeModal('invite-modal');
       toast('🔄 Verbinde...');
