@@ -2228,7 +2228,7 @@ create policy "u" on trips for update using (true);</pre>
 // ============ App-Version ============
 // Bei Schema-Änderungen SCHEMA_VERSION hochzählen + Migration ergänzen.
 // APP_VERSION ist die User-sichtbare Version.
-const APP_VERSION = '0.6.8';
+const APP_VERSION = '0.6.9';
 const SCHEMA_VERSION = 3;
 
 // ============ Constants & Demo Data ============
@@ -2869,7 +2869,8 @@ async function handleAuthCallback() {
     document.body.classList.remove('is-authed');
     showAuthStep('reset-password');
     setTimeout(() => document.getElementById('auth-new-password')?.focus(), 50);
-    return true;
+    // Sentinel: bootAuth darf NICHT proceedToApp aufrufen — User ist noch nicht eingeloggt.
+    return 'recovery';
   }
   showAuthLoading();
   try {
@@ -7865,6 +7866,9 @@ bindAuthGate();
   }
   if (cb && cb.access) {
     const ok = await handleAuthCallback();
+    // Recovery-Flow: handleAuthCallback hat Gate + Reset-Password-Step bereits gesetzt.
+    // Hier KEIN proceedToApp — User wird erst nach Passwort-Update voll eingeloggt.
+    if (ok === 'recovery') return;
     if (ok) {
       hideAuthGate();
       proceedToApp();
