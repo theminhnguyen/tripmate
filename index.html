@@ -1617,6 +1617,7 @@
       <div class="auth-hint" id="auth-hint">
         Du hast schon einen Account? Logge dich oben ein. Falls nicht, oben auf "Registrieren" wechseln.
       </div>
+      <button type="button" class="auth-link-btn" id="auth-forgot-btn">Passwort vergessen?</button>
       <button type="button" class="auth-link-btn" id="auth-setup-backend-btn">⚙ Cloud-Backend einrichten</button>
     </div>
 
@@ -1624,6 +1625,29 @@
     <div class="auth-step" id="auth-step-loading" style="display:none;">
       <div class="auth-icon-big">⏳</div>
       <p class="auth-step-text">Anmeldung wird verarbeitet…</p>
+    </div>
+
+    <!-- Step 3: Reset-Email anfordern -->
+    <div class="auth-step" id="auth-step-reset-request" style="display:none;">
+      <div class="auth-icon-big">📧</div>
+      <p class="auth-step-text">Wir schicken dir einen Reset-Link an deine Email. Beim Klick kommst du hierher zurück und kannst ein neues Passwort setzen.</p>
+      <label class="auth-label" for="auth-reset-email" style="margin-top:14px;">Email</label>
+      <input type="email" id="auth-reset-email" placeholder="du@beispiel.de" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" />
+      <button type="button" class="auth-btn-primary" id="auth-reset-send-btn">Reset-Link senden</button>
+      <div class="auth-err" id="auth-reset-err"></div>
+      <button type="button" class="auth-link-btn" id="auth-reset-back-btn">← Zurück zum Login</button>
+    </div>
+
+    <!-- Step 4: Neues Passwort setzen (nach Recovery-Klick) -->
+    <div class="auth-step" id="auth-step-reset-password" style="display:none;">
+      <div class="auth-icon-big">🔑</div>
+      <p class="auth-step-text">Setze ein neues Passwort für deinen Account.</p>
+      <label class="auth-label" for="auth-new-password" style="margin-top:14px;">Neues Passwort</label>
+      <input type="password" id="auth-new-password" placeholder="Mindestens 6 Zeichen" autocomplete="new-password" />
+      <label class="auth-label" for="auth-new-password-confirm" style="margin-top:14px;">Nochmal eingeben</label>
+      <input type="password" id="auth-new-password-confirm" placeholder="Passwort wiederholen" autocomplete="new-password" />
+      <button type="button" class="auth-btn-primary" id="auth-new-password-save-btn">Passwort speichern</button>
+      <div class="auth-err" id="auth-new-password-err"></div>
     </div>
   </div>
 </div>
@@ -2204,7 +2228,7 @@ create policy "u" on trips for update using (true);</pre>
 // ============ App-Version ============
 // Bei Schema-Änderungen SCHEMA_VERSION hochzählen + Migration ergänzen.
 // APP_VERSION ist die User-sichtbare Version.
-const APP_VERSION = '0.6.7';
+const APP_VERSION = '0.6.8';
 const SCHEMA_VERSION = 3;
 
 // ============ Constants & Demo Data ============
@@ -2782,11 +2806,71 @@ async function refreshAccessToken() {
   return false;
 }
 
+// === Password Reset (v0.6.8) ===
+// Recovery-Token wird zwischen handleAuthCallback und dem "Neues Passwort"-Submit
+// im Memory gehalten (NICHT in localStorage — Token gilt nur für diesen Flow).
+let _recoveryAccessToken = null;
+let _recoveryRefreshToken = null;
+let _recoveryExpiresIn = 0;
+
+async function requestPasswordReset(email) {
+  if (!CLOUD.url || !CLOUD.key) throw new Error('Cloud-Backend nicht eingerichtet');
+  const url = CLOUD.url.replace(/\/+$/, '') + '/auth/v1/recover';
+  const r = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', apikey: CLOUD.key },
+    body: JSON.stringify({ email, redirect_to: location.origin + location.pathname })
+  });
+  // Supabase /recover liefert auch 200 wenn die Email nicht existiert
+  // (Email-Enumeration-Schutz). Echte Fehler bekommen einen Fehler-Body.
+  if (!r.ok) {
+    const data = await r.json().catch(() => ({}));
+    throw new Error(data.error_description || data.msg || data.error || 'Reset-Request fehlgeschlagen');
+  }
+  return true;
+}
+
+async function updatePasswordWithToken(accessToken, newPassword) {
+  const url = CLOUD.url.replace(/\/+$/, '') + '/auth/v1/user';
+  const r = await fetch(url, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      apikey: CLOUD.key,
+      Authorization: 'Bearer ' + accessToken
+    },
+    body: JSON.stringify({ password: newPassword })
+  });
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) {
+    throw new Error(data.error_description || data.msg || data.error || 'Passwort konnte nicht geändert werden');
+  }
+  return data;
+}
+
 async function handleAuthCallback() {
   const hash = parseAuthHash();
   if (!hash) return false;
+  if (hash.error) {
+    history.replaceState(null, '', location.pathname + location.search);
+    showAuthError(hash.errorDescription || 'Anmeldung fehlgeschlagen');
+    return false;
+  }
   // Hash sofort entfernen, damit er nicht im History-Stack bleibt
   history.replaceState(null, '', location.pathname + location.search);
+  // Recovery-Flow: Token zwischenspeichern, "Neues Passwort"-Step zeigen.
+  // Wir loggen den User NICHT vollständig ein, bis das Passwort gesetzt ist.
+  if (hash.type === 'recovery') {
+    _recoveryAccessToken = hash.access;
+    _recoveryRefreshToken = hash.refresh;
+    _recoveryExpiresIn = hash.expiresIn;
+    const gate = document.getElementById('auth-gate');
+    if (gate) gate.setAttribute('aria-hidden', 'false');
+    document.body.classList.remove('is-authed');
+    showAuthStep('reset-password');
+    setTimeout(() => document.getElementById('auth-new-password')?.focus(), 50);
+    return true;
+  }
   showAuthLoading();
   try {
     const user = await fetchUserFromToken(hash.access);
@@ -2844,11 +2928,15 @@ function hideAuthGate() {
   document.body.classList.add('is-authed');
 }
 function showAuthStep(step) {
-  ['form','loading'].forEach(s => {
+  ['form','loading','reset-request','reset-password'].forEach(s => {
     const el = document.getElementById('auth-step-' + s);
     if (el) el.style.display = (s === step ? '' : 'none');
   });
   showAuthError('');
+  // Step-spezifische Error-Felder ebenfalls clearen
+  ['auth-reset-err','auth-new-password-err'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.textContent = '';
+  });
 }
 function showAuthError(msg) {
   const el = document.getElementById('auth-err');
@@ -2941,6 +3029,102 @@ function bindAuthGate() {
   if (setupBtn) setupBtn.addEventListener('click', () => {
     document.getElementById('open-sync-setup')?.click();
   });
+
+  // === Password Reset (v0.6.8) ===
+  // Klick auf "Passwort vergessen?" → Reset-Request-Step
+  document.getElementById('auth-forgot-btn')?.addEventListener('click', () => {
+    const resetEmail = document.getElementById('auth-reset-email');
+    if (resetEmail) resetEmail.value = (emailInput.value || '').trim();
+    showAuthStep('reset-request');
+    setTimeout(() => resetEmail?.focus(), 50);
+  });
+
+  // Zurück-Link auf der Reset-Request-View
+  document.getElementById('auth-reset-back-btn')?.addEventListener('click', () => {
+    showAuthStep('form');
+  });
+
+  // Reset-Link versenden
+  const resetSendBtn = document.getElementById('auth-reset-send-btn');
+  const resetEmailInput = document.getElementById('auth-reset-email');
+  const resetErr = document.getElementById('auth-reset-err');
+  const sendReset = async () => {
+    const email = (resetEmailInput?.value || '').trim().toLowerCase();
+    if (resetErr) resetErr.textContent = '';
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      if (resetErr) resetErr.textContent = 'Bitte gültige Email-Adresse eingeben';
+      return;
+    }
+    if (!CLOUD.url || !CLOUD.key) {
+      if (resetErr) resetErr.textContent = 'Cloud-Backend nicht eingerichtet';
+      return;
+    }
+    resetSendBtn.disabled = true;
+    const old = resetSendBtn.textContent;
+    resetSendBtn.textContent = '⏳ Sende…';
+    try {
+      await requestPasswordReset(email);
+      toast('📧 Reset-Link an ' + email + ' gesendet — schau in dein Postfach');
+      showAuthStep('form');
+    } catch (e) {
+      if (resetErr) resetErr.textContent = e.message || 'Fehler';
+    } finally {
+      resetSendBtn.disabled = false;
+      resetSendBtn.textContent = old;
+    }
+  };
+  if (resetSendBtn) resetSendBtn.addEventListener('click', sendReset);
+  if (resetEmailInput) resetEmailInput.addEventListener('keydown', e => { if (e.key === 'Enter') sendReset(); });
+
+  // Neues Passwort speichern (nach Recovery-Klick)
+  const newPwdBtn = document.getElementById('auth-new-password-save-btn');
+  const newPwdInput = document.getElementById('auth-new-password');
+  const newPwdConfirm = document.getElementById('auth-new-password-confirm');
+  const newPwdErr = document.getElementById('auth-new-password-err');
+  const saveNewPwd = async () => {
+    const pwd = newPwdInput?.value || '';
+    const pwd2 = newPwdConfirm?.value || '';
+    if (newPwdErr) newPwdErr.textContent = '';
+    if (!pwd || pwd.length < 6) {
+      if (newPwdErr) newPwdErr.textContent = 'Passwort muss mindestens 6 Zeichen haben';
+      return;
+    }
+    if (pwd !== pwd2) {
+      if (newPwdErr) newPwdErr.textContent = 'Passwörter stimmen nicht überein';
+      return;
+    }
+    if (!_recoveryAccessToken) {
+      if (newPwdErr) newPwdErr.textContent = 'Recovery-Token abgelaufen — Reset-Link nochmal anfordern';
+      return;
+    }
+    newPwdBtn.disabled = true;
+    const old = newPwdBtn.textContent;
+    newPwdBtn.textContent = '⏳ Speichere…';
+    try {
+      const updated = await updatePasswordWithToken(_recoveryAccessToken, pwd);
+      // Erst nach erfolgreichem Update vollständige Session etablieren
+      await persistAuthSession({
+        access_token: _recoveryAccessToken,
+        refresh_token: _recoveryRefreshToken,
+        expires_in: _recoveryExpiresIn,
+        user: updated
+      });
+      _recoveryAccessToken = null;
+      _recoveryRefreshToken = null;
+      hideAuthGate();
+      proceedToApp();
+      toast('✅ Passwort geändert — du bist jetzt eingeloggt');
+    } catch (e) {
+      if (newPwdErr) newPwdErr.textContent = e.message || 'Fehler';
+    } finally {
+      newPwdBtn.disabled = false;
+      newPwdBtn.textContent = old;
+    }
+  };
+  if (newPwdBtn) newPwdBtn.addEventListener('click', saveNewPwd);
+  [newPwdInput, newPwdConfirm].forEach(inp => inp && inp.addEventListener('keydown', e => {
+    if (e.key === 'Enter') saveNewPwd();
+  }));
 }
 function cloudEnabled() { return !!(CLOUD.url && CLOUD.key && CLOUD.room); }
 function cloudFullUrl(path) { return CLOUD.url.replace(/\/+$/, '') + path; }
