@@ -2228,7 +2228,7 @@ create policy "u" on trips for update using (true);</pre>
 // ============ App-Version ============
 // Bei Schema-Änderungen SCHEMA_VERSION hochzählen + Migration ergänzen.
 // APP_VERSION ist die User-sichtbare Version.
-const APP_VERSION = '0.6.9';
+const APP_VERSION = '0.6.10';
 const SCHEMA_VERSION = 3;
 
 // ============ Constants & Demo Data ============
@@ -3130,9 +3130,14 @@ function bindAuthGate() {
 function cloudEnabled() { return !!(CLOUD.url && CLOUD.key && CLOUD.room); }
 function cloudFullUrl(path) { return CLOUD.url.replace(/\/+$/, '') + path; }
 function cloudHeaders(extra) {
+  // v0.6.10: User-JWT als Bearer wenn eingeloggt (für RLS-Policies). Anon-Key bleibt
+  // als apikey (Project-Identifier + Rate-Limit). Vor v0.6.10 wurde der anon-key auch
+  // als Authorization genutzt → Requests waren immer anonym → RLS hätte alles geblockt.
+  const acc = getAccount();
+  const bearerToken = (acc && acc.accessToken) ? acc.accessToken : CLOUD.key;
   const h = {
     apikey: CLOUD.key,
-    Authorization: 'Bearer ' + CLOUD.key,
+    Authorization: 'Bearer ' + bearerToken,
     'Content-Type': 'application/json'
   };
   if (extra) Object.assign(h, extra);
