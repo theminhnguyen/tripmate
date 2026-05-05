@@ -1366,6 +1366,13 @@
   }
   .te-member-row .me-ic { font-size: 14px; flex-shrink: 0; }
   .te-member-row .me-email { flex: 1; min-width: 0; word-break: break-word; }
+  .te-member-row .me-remove {
+    background: transparent; border: 1px solid var(--border, #ddd);
+    border-radius: 6px; padding: 2px 8px; cursor: pointer;
+    font-size: 12px; line-height: 1; color: #c83a3a;
+    transition: background 0.15s;
+  }
+  .te-member-row .me-remove:active { background: #ffeae6; transform: scale(0.96); }
   .te-member-row .me-tag {
     font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
     background: var(--accent-soft); color: var(--accent-dark); padding: 2px 6px; border-radius: 4px;
@@ -2308,7 +2315,7 @@ create policy "u" on trips for update using (true);</pre>
 // ============ App-Version ============
 // Bei Schema-Änderungen SCHEMA_VERSION hochzählen + Migration ergänzen.
 // APP_VERSION ist die User-sichtbare Version.
-const APP_VERSION = '0.7.1';
+const APP_VERSION = '0.7.2';
 const SCHEMA_VERSION = 3;
 
 // ============ Constants & Demo Data ============
@@ -4382,6 +4389,7 @@ function renderMehr() {
   const packCount = (t.packlist || []).length;
   const packDone = (t.packlist || []).filter(p => p.checked).length;
   const docsCount = (t.documents || []).length;
+  const acc = getAccount();
   html += `<div class="caption">Reise</div>`;
   html += `<div class="more-section">
     <button class="more-row" data-mehr-row="packlist" type="button"><span class="mr-ic">📋</span><span class="mr-lbl">Packliste</span><span class="mr-badge muted">${packDone}/${packCount}</span><span class="mr-ch">›</span></button>
@@ -4394,9 +4402,36 @@ function renderMehr() {
 
   // TRIP
   html += `<div class="caption">Trip</div>`;
+  // v0.7.2: Mitglieder-Row zeigt aktuelle Sharing-Situation
+  const _isShared = !!t.sharedRoom;
+  const _members = t.members || [];
+  const _otherMembers = _members.filter(m => m !== (acc && acc.email));
+  let _membersLabel, _membersSub;
+  if (_isShared) {
+    _membersLabel = 'Mitglieder · ' + _members.length;
+    if (_otherMembers.length > 0) {
+      const shortList = _otherMembers.slice(0, 2).map(m => m.split('@')[0]).join(', ');
+      const more = _otherMembers.length > 2 ? ' +' + (_otherMembers.length - 2) : '';
+      _membersSub = 'Geteilt mit ' + shortList + more;
+    } else {
+      _membersSub = 'Nur du — teile den Invite-Link';
+    }
+  } else {
+    _membersLabel = 'Trip teilen';
+    _membersSub = '';
+  }
   html += `<div class="more-section">
     <button class="more-row" data-mehr-row="trip-edit" type="button"><span class="mr-ic">⚙️</span><span class="mr-lbl">Trip bearbeiten</span><span class="mr-ch">›</span></button>
-    <button class="more-row" data-mehr-row="trip-share" type="button"><span class="mr-ic">📤</span><span class="mr-lbl">Trip teilen</span><span class="mr-ch">›</span></button>
+    <button class="more-row" data-mehr-row="members" type="button">
+      <span class="mr-ic">${_isShared ? '👥' : '📤'}</span>
+      <span class="mr-lbl" style="display:flex; flex-direction:column; align-items:flex-start; gap:2px; line-height:1.2;">
+        <span>${_membersLabel}</span>
+        ${_membersSub ? `<span style="font-size:12px; color:var(--text-muted); font-weight:400;">${escapeHtml(_membersSub)}</span>` : ''}
+      </span>
+      ${_isShared ? '<span class="mr-badge success">Live</span>' : ''}
+      <span class="mr-ch">›</span>
+    </button>
+    <button class="more-row" data-mehr-row="trip-share-snapshot" type="button"><span class="mr-ic">🔗</span><span class="mr-lbl">Snapshot-Link teilen</span><span class="mr-ch">›</span></button>
     <button class="more-row" data-mehr-row="sync" type="button"><span class="mr-ic">🔄</span><span class="mr-lbl">Sync</span><span class="mr-badge ${cloudEnabled() ? 'success' : 'muted'}">${cloudEnabled() ? 'aktiv' : 'aus'}</span><span class="mr-ch">›</span></button>
     <button class="more-row" data-mehr-row="trip-list" type="button"><span class="mr-ic">🧳</span><span class="mr-lbl">Reisen verwalten</span><span class="mr-ch">›</span></button>
     <button class="more-row" data-mehr-row="export-trips" type="button"><span class="mr-ic">💾</span><span class="mr-lbl">Backup als JSON exportieren</span><span class="mr-ch">›</span></button>
@@ -4404,7 +4439,6 @@ function renderMehr() {
   </div>`;
 
   // ACCOUNT
-  const acc = getAccount();
   if (acc) {
     html += `<div class="caption">Account</div>`;
     html += `<div class="more-section">
@@ -4463,6 +4497,8 @@ function handleMehrRow(action) {
     case 'trip-share': document.getElementById('share-btn')?.click(); break;
     case 'sync': document.getElementById('open-sync-setup')?.click(); break;
     case 'trip-list': openTripManager(); break;
+    case 'members': openTripEdit(state.currentTripId); setTimeout(() => { document.getElementById('te-share-section')?.scrollIntoView({behavior:'smooth', block:'start'}); }, 200); break;
+    case 'trip-share-snapshot': document.getElementById('share-btn')?.click(); break;
     case 'export-trips': exportAllTrips(); break;
     case 'import-trips': openImportTripsDialog(); break;
     case 'settings': openSettings(); break;
@@ -7524,15 +7560,35 @@ function renderTripEditShareSection(t) {
     // Live-Sharing aktiv → Mitglieder zeigen + Link bereitstellen
     sub.textContent = 'Live-Sync aktiv. Alle Mitglieder sehen Änderungen sofort.';
     list.innerHTML = '';
+    const isOwnerMe = acc && acc.email === t.ownerEmail;
     (t.members || []).forEach(email => {
       const isOwner = email === t.ownerEmail;
       const isMe = acc && email === acc.email;
       const row = document.createElement('div');
       row.className = 'te-member-row';
+      // v0.7.2: Owner kann andere Members entfernen (sich selbst nicht — der nutzt "Live-Sharing beenden")
+      const canRemove = isOwnerMe && !isOwner;
       row.innerHTML = `<span class="me-ic">${isOwner ? '👑' : '👤'}</span>
         <span class="me-email">${escapeHtml(email)}${isMe ? ' (du)' : ''}</span>
-        ${isOwner ? '<span class="me-tag">Owner</span>' : ''}`;
+        ${isOwner ? '<span class="me-tag">Owner</span>' : ''}
+        ${canRemove ? `<button class="me-remove" data-remove-email="${escapeHtml(email)}" title="Mitglied entfernen" type="button">🗑</button>` : ''}`;
       list.appendChild(row);
+    });
+    // Remove-Buttons verdrahten
+    list.querySelectorAll('[data-remove-email]').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        e.preventDefault(); e.stopPropagation();
+        const email = btn.dataset.removeEmail;
+        if (!confirm(email + ' aus der geteilten Reise entfernen?\n\nDie Person verliert den Zugriff. Ihre lokale Kopie bleibt aber bei ihr — sie sieht nur keine neuen Updates mehr.')) return;
+        const trip = state.trips[editingTripId];
+        if (!trip) return;
+        trip.members = (trip.members || []).filter(m => m !== email);
+        trip._metaUpdatedAt = Date.now();
+        saveState();
+        try { await pushSharedTrip(editingTripId); } catch(_) {}
+        renderTripEditShareSection(trip);
+        toast('🚪 ' + (email.split('@')[0]) + ' entfernt');
+      });
     });
     // Link generieren (re-use existierender sharedRoom)
     const url = location.origin + location.pathname + '?join=' + encodeURIComponent(t.sharedRoom)
