@@ -2228,7 +2228,7 @@ create policy "u" on trips for update using (true);</pre>
 // ============ App-Version ============
 // Bei Schema-Änderungen SCHEMA_VERSION hochzählen + Migration ergänzen.
 // APP_VERSION ist die User-sichtbare Version.
-const APP_VERSION = '0.6.10';
+const APP_VERSION = '0.6.11';
 const SCHEMA_VERSION = 3;
 
 // ============ Constants & Demo Data ============
@@ -3143,6 +3143,22 @@ function cloudHeaders(extra) {
   if (extra) Object.assign(h, extra);
   return h;
 }
+
+// v0.6.11: fetch-Wrapper für Cloud-Calls. Setzt Headers automatisch und versucht
+// bei 401 einmal Token-Refresh + Retry. Verhindert "Sync-Fehler"-Toasts wenn der
+// User-JWT abgelaufen ist (Token gilt 1h, App lebt manchmal länger).
+async function cloudFetch(url, options) {
+  options = options || {};
+  const headers = cloudHeaders(options.headers);
+  let r = await fetch(url, Object.assign({}, options, { headers: headers }));
+  if (r.status !== 401) return r;
+  // 401 → Token-Refresh versuchen. refreshAccessToken updated localStorage,
+  // sodass die nächste cloudHeaders-Call den frischen Token nutzt.
+  const refreshed = await refreshAccessToken();
+  if (!refreshed) return r;
+  const retryHeaders = cloudHeaders(options.headers);
+  return await fetch(url, Object.assign({}, options, { headers: retryHeaders }));
+}
 function updateSyncIndicator() {
   const btn = document.getElementById('sync-status');
   const stat = document.getElementById('sync-status-text');
@@ -3164,9 +3180,8 @@ async function cloudPull(silent) {
   if (!cloudEnabled() || CLOUD.syncing) return;
   CLOUD.syncing = true; updateSyncIndicator();
   try {
-    const r = await fetch(
-      cloudFullUrl('/rest/v1/trips?room_code=eq.' + encodeURIComponent(CLOUD.room) + '&select=state,updated_at'),
-      { headers: cloudHeaders() }
+    const r = await cloudFetch(
+      cloudFullUrl('/rest/v1/trips?room_code=eq.' + encodeURIComponent(CLOUD.room) + '&select=state,updated_at')
     );
     if (!r.ok) throw new Error('pull ' + r.status);
     const rows = await r.json();
@@ -3216,11 +3231,11 @@ async function cloudPushImmediate() {
       state: state,
       updated_at: new Date().toISOString()
     }];
-    const r = await fetch(
+    const r = await cloudFetch(
       cloudFullUrl('/rest/v1/trips?on_conflict=room_code'),
       {
         method: 'POST',
-        headers: cloudHeaders({ Prefer: 'resolution=merge-duplicates,return=representation' }),
+        headers: { Prefer: 'resolution=merge-duplicates,return=representation' },
         body: JSON.stringify(body)
       }
     );
@@ -3287,11 +3302,11 @@ async function pushSharedTrip(tripId) {
       state: { trip: t, members: t.members, ownerEmail: t.ownerEmail },
       updated_at: new Date().toISOString()
     }];
-    const r = await fetch(
+    const r = await cloudFetch(
       cloudFullUrl('/rest/v1/trips?on_conflict=room_code'),
       {
         method: 'POST',
-        headers: cloudHeaders({ Prefer: 'resolution=merge-duplicates,return=representation' }),
+        headers: { Prefer: 'resolution=merge-duplicates,return=representation' },
         body: JSON.stringify(body)
       }
     );
@@ -3314,9 +3329,8 @@ async function pullSharedTrip(tripId) {
   const t = state.trips[tripId];
   if (!t || !t.sharedRoom) return false;
   try {
-    const r = await fetch(
-      cloudFullUrl('/rest/v1/trips?room_code=eq.' + encodeURIComponent(t.sharedRoom) + '&select=state,updated_at'),
-      { headers: cloudHeaders() }
+    const r = await cloudFetch(
+      cloudFullUrl('/rest/v1/trips?room_code=eq.' + encodeURIComponent(t.sharedRoom) + '&select=state,updated_at')
     );
     if (!r.ok) return false;
     const rows = await r.json();
@@ -3400,9 +3414,8 @@ async function joinTripFromInvite(roomCode, fromEmail, tripName) {
     return false;
   }
   try {
-    const r = await fetch(
-      cloudFullUrl('/rest/v1/trips?room_code=eq.' + encodeURIComponent(roomCode) + '&select=state,updated_at'),
-      { headers: cloudHeaders() }
+    const r = await cloudFetch(
+      cloudFullUrl('/rest/v1/trips?room_code=eq.' + encodeURIComponent(roomCode) + '&select=state,updated_at')
     );
     if (!r.ok) throw new Error('Lade-Fehler ' + r.status);
     const rows = await r.json();
