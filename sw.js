@@ -1,5 +1,5 @@
-// TripMate Service Worker — einfaches Offline-Caching
-const CACHE = 'tripmate-v0.6.11';
+// TripMate Service Worker — Offline-Caching + Update-Toast (v0.6.14)
+const CACHE = 'tripmate-v0.7.1';
 const ASSETS = [
   './',
   './index.html',
@@ -13,7 +13,8 @@ const ASSETS = [
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS).catch(() => {})));
-  self.skipWaiting();
+  // v0.6.14: KEIN skipWaiting() im install — wir warten auf User-Bestätigung
+  // via postMessage. Der Main-Thread erkennt waiting-SW und zeigt Update-Toast.
 });
 
 self.addEventListener('activate', (e) => {
@@ -21,6 +22,13 @@ self.addEventListener('activate', (e) => {
     caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
   );
   self.clients.claim();
+});
+
+// v0.6.14: User klickt im Update-Toast → Main-Thread sendet SKIP_WAITING → wir aktivieren.
+self.addEventListener('message', (e) => {
+  if (e.data && e.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
 
 self.addEventListener('fetch', (e) => {

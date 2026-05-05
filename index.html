@@ -398,16 +398,75 @@
 
   /* Map view */
   #map { position: absolute; inset: 0; }
-  /* Legende oben rechts — Zoom-Buttons sind oben links (Leaflet-Default) */
-  .map-legend {
-    position: absolute; top: 12px; right: 12px; z-index: 500; background: white;
-    padding: 9px 11px; border-radius: var(--radius-md); font-size: 11px;
-    box-shadow: var(--shadow-md); display: flex; flex-direction: column; gap: 4px;
-    max-width: 160px;
+  /* v0.7.0: Filter-Chips oben — Pillen-Reihe, scrollbar wenn überfüllt */
+  .map-chips {
+    position: absolute; top: 12px; left: 12px; right: 70px;
+    z-index: 500;
+    display: flex; gap: 6px;
+    overflow-x: auto; -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 4px;
   }
-  .map-legend .lg-row { display: flex; align-items: center; gap: 8px; font-weight: 500; }
-  .map-legend .lg-dot { width: 12px; height: 12px; border-radius: 50%; border: 2px solid white;
-    box-shadow: 0 0 0 1px rgba(0,0,0,0.1); }
+  .map-chips::-webkit-scrollbar { display: none; }
+  .map-chips .m-chip {
+    padding: 7px 13px; border: none; border-radius: 999px;
+    background: rgba(255,255,255,0.95); color: var(--text);
+    font-size: 13px; font-weight: 600; white-space: nowrap;
+    box-shadow: var(--shadow-sm); cursor: pointer; flex-shrink: 0;
+    transition: transform 0.1s, background 0.15s;
+  }
+  .map-chips .m-chip:active { transform: scale(0.96); }
+  .map-chips .m-chip.active { background: var(--accent, #FF385C); color: white; }
+  /* v0.7.0: Bottom-Sheet — snap-points collapsed/half/full */
+  .map-sheet {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: white;
+    border-radius: 20px 20px 0 0;
+    box-shadow: 0 -4px 24px rgba(0,0,0,0.12);
+    z-index: 600;
+    display: flex; flex-direction: column;
+    transition: max-height 0.25s ease, transform 0.25s ease;
+    will-change: max-height;
+    max-height: 30%;
+  }
+  .map-sheet[data-snap="collapsed"] { max-height: 30%; }
+  .map-sheet[data-snap="half"] { max-height: 60%; }
+  .map-sheet[data-snap="full"] { max-height: 90%; }
+  .map-sheet-handle {
+    width: 100%; height: 24px;
+    display: flex; justify-content: center; align-items: center;
+    cursor: grab; touch-action: none;
+  }
+  .map-sheet-handle::before {
+    content: ''; width: 44px; height: 5px; background: #cbcbcb; border-radius: 3px;
+  }
+  .map-sheet-header {
+    padding: 4px 16px 10px; display: flex; justify-content: space-between; align-items: baseline;
+    border-bottom: 1px solid var(--border, #eee);
+  }
+  .map-sheet-header strong { font-size: 15px; }
+  .map-sheet-hint { font-size: 11px; color: var(--text-muted); }
+  .map-sheet-list {
+    flex: 1; overflow-y: auto; padding: 4px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .map-sheet-row {
+    display: flex; gap: 10px; align-items: center;
+    padding: 10px 12px; border-radius: 8px; cursor: pointer;
+    transition: background 0.1s;
+  }
+  .map-sheet-row:active { background: #f0eeea; }
+  .map-sheet-row .ms-icon {
+    width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; color: white;
+  }
+  .map-sheet-row .ms-text { flex: 1; min-width: 0; }
+  .map-sheet-row .ms-name { font-weight: 600; font-size: 14px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .map-sheet-row .ms-addr { font-size: 12px; color: var(--text-muted);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .map-sheet-row.done .ms-name { text-decoration: line-through; color: var(--text-muted); }
   /* Leaflet Zoom-Buttons: größer für Mobile */
   .leaflet-touch .leaflet-bar a,
   .leaflet-control-zoom a {
@@ -1539,13 +1598,24 @@
 
     <section class="view" id="view-map">
       <div id="map"></div>
+      <!-- v0.7.0: Filter-Chips oben — toggelbar, beeinflusst sichtbare Marker + Liste -->
+      <div class="map-chips" id="map-chips">
+        <button class="m-chip active" data-cat="all" type="button">Alle</button>
+        <button class="m-chip" data-cat="sight" type="button">🏛 Sehenswürdigkeit</button>
+        <button class="m-chip" data-cat="food" type="button">🍽 Restaurant</button>
+        <button class="m-chip" data-cat="shop" type="button">🛍 Shopping</button>
+        <button class="m-chip" data-cat="buy" type="button">🛒 Vor Ort kaufen</button>
+        <button class="m-chip" data-cat="hotel" type="button">🏨 Unterkunft</button>
+      </div>
       <button class="map-loc-btn" id="my-location-btn" title="Eigenen Standort anzeigen">📍</button>
-      <div class="map-legend">
-        <div class="lg-row"><span class="lg-dot bg-sight"></span>Sehenswürdigkeit</div>
-        <div class="lg-row"><span class="lg-dot bg-food"></span>Restaurant</div>
-        <div class="lg-row"><span class="lg-dot bg-shop"></span>Shopping</div>
-        <div class="lg-row"><span class="lg-dot bg-buy"></span>Vor Ort kaufen</div>
-        <div class="lg-row"><span class="lg-dot" style="background:#0ea5e9;"></span>🏨 Unterkunft</div>
+      <!-- v0.7.0: Bottom-Sheet mit Marker-Liste, snap zu collapsed/half/full -->
+      <div class="map-sheet" id="map-sheet" data-snap="collapsed">
+        <div class="map-sheet-handle" id="map-sheet-handle"></div>
+        <div class="map-sheet-header">
+          <strong id="map-sheet-count">0 Orte</strong>
+          <span class="map-sheet-hint">Tippe Handle zum Erweitern</span>
+        </div>
+        <div class="map-sheet-list" id="map-sheet-list"></div>
       </div>
     </section>
 
@@ -1648,6 +1718,15 @@
       <input type="password" id="auth-new-password-confirm" placeholder="Passwort wiederholen" autocomplete="new-password" />
       <button type="button" class="auth-btn-primary" id="auth-new-password-save-btn">Passwort speichern</button>
       <div class="auth-err" id="auth-new-password-err"></div>
+    </div>
+
+    <!-- Step 5: Bestätigungs-Email versendet (v0.6.15) -->
+    <div class="auth-step" id="auth-step-confirm-pending" style="display:none;">
+      <div class="auth-icon-big">📬</div>
+      <p class="auth-step-text">Wir haben eine Bestätigungs-Email an <strong id="auth-confirm-pending-email">…</strong> geschickt. Klicke den Link in der Mail, um deinen Account zu aktivieren — du kommst dann automatisch hierher zurück.</p>
+      <button type="button" class="auth-link-btn" id="auth-confirm-resend-btn" style="margin-top:14px;">Email nochmal senden</button>
+      <div class="auth-err" id="auth-confirm-err"></div>
+      <button type="button" class="auth-link-btn" id="auth-confirm-back-btn">← Zurück zum Login</button>
     </div>
   </div>
 </div>
@@ -2123,7 +2202,8 @@ create policy "u" on trips for update using (true);</pre>
       </div>
       <div>
         <label>Bezahlt von</label>
-        <input type="text" id="exp-paidby" placeholder="Name" />
+        <input type="text" id="exp-paidby" placeholder="Name" list="exp-paidby-list" />
+        <datalist id="exp-paidby-list"></datalist>
       </div>
     </div>
 
@@ -2228,7 +2308,7 @@ create policy "u" on trips for update using (true);</pre>
 // ============ App-Version ============
 // Bei Schema-Änderungen SCHEMA_VERSION hochzählen + Migration ergänzen.
 // APP_VERSION ist die User-sichtbare Version.
-const APP_VERSION = '0.6.11';
+const APP_VERSION = '0.7.1';
 const SCHEMA_VERSION = 3;
 
 // ============ Constants & Demo Data ============
@@ -2623,7 +2703,14 @@ function saveState() {
   saveStateLocal();
   // Dirty sofort setzen — falls der Tab geschlossen wird, bevor der Debounce-Timer
   // feuert, holt die nächste Session den Push nach.
-  if (localStorage.getItem('tm_cloud_url')) localStorage.setItem('tm_cloud_dirty', '1');
+  if (localStorage.getItem('tm_cloud_url')) {
+    localStorage.setItem('tm_cloud_dirty', '1');
+    // v0.6.12: Timestamp nur setzen wenn noch nicht gesetzt — sonst würde jeder Edit
+    // die "ich bin seit X dirty"-Anzeige zurücksetzen.
+    if (!localStorage.getItem('tm_cloud_dirty_since')) {
+      localStorage.setItem('tm_cloud_dirty_since', String(Date.now()));
+    }
+  }
   cloudPushDebounced();
 }
 
@@ -2709,13 +2796,20 @@ async function signInWithPassword(email, password) {
 }
 
 // Email + Passwort Registrierung (POST /auth/v1/signup)
+// v0.6.15: email_redirect_to mitsenden, falls Confirm-Email aktiv ist —
+// Supabase nutzt das im Confirm-Email-Template. (Custom-Template überschreibt
+// das auch hardcoded auf /tripmate/, aber wir senden es trotzdem als Fallback.)
 async function signUpWithPassword(email, password) {
   if (!CLOUD.url || !CLOUD.key) throw new Error('Cloud-Backend nicht eingerichtet');
   const url = CLOUD.url.replace(/\/+$/, '') + '/auth/v1/signup';
   const r = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', apikey: CLOUD.key },
-    body: JSON.stringify({ email, password })
+    body: JSON.stringify({
+      email,
+      password,
+      options: { emailRedirectTo: location.origin + location.pathname }
+    })
   });
   const data = await r.json().catch(() => ({}));
   if (!r.ok) {
@@ -2730,7 +2824,13 @@ async function signUpWithPassword(email, password) {
 // Tokens + User → Account speichern (gemeinsamer Pfad für Login + Signup)
 async function persistAuthSession(data) {
   if (!data || !data.access_token || !data.user) {
-    throw new Error('Anmeldung erfolgreich, aber Email-Bestätigung wird verlangt. Bitte in Supabase "Confirm email" deaktivieren.');
+    // v0.6.15: Wenn Confirm-Email AN ist, kommt nach signUp KEIN access_token, nur user.
+    // Wir signalisieren das mit einem markierten Error, den der Submit-Handler zum
+    // Confirm-Pending-Step umleitet (Toast + "schau in deine Mail"-Hinweis).
+    const e = new Error('confirm-required');
+    e.confirmRequired = true;
+    e.confirmEmail = (data && data.user && data.user.email) || '';
+    throw e;
   }
   const acc = {
     email: data.user.email,
@@ -2848,6 +2948,27 @@ async function updatePasswordWithToken(accessToken, newPassword) {
   return data;
 }
 
+// v0.6.15: Bestätigungs-Email erneut senden (für confirm-pending Step).
+// POST /auth/v1/resend mit type=signup. Supabase rate-limited das.
+async function resendEmailConfirm(email) {
+  if (!CLOUD.url || !CLOUD.key) throw new Error('Cloud-Backend nicht eingerichtet');
+  const url = CLOUD.url.replace(/\/+$/, '') + '/auth/v1/resend';
+  const r = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', apikey: CLOUD.key },
+    body: JSON.stringify({
+      type: 'signup',
+      email,
+      options: { emailRedirectTo: location.origin + location.pathname }
+    })
+  });
+  if (!r.ok) {
+    const data = await r.json().catch(() => ({}));
+    throw new Error(data.error_description || data.msg || data.error || 'Erneutes Senden fehlgeschlagen');
+  }
+  return true;
+}
+
 async function handleAuthCallback() {
   const hash = parseAuthHash();
   if (!hash) return false;
@@ -2895,6 +3016,10 @@ async function handleAuthCallback() {
     if (Object.keys(state.trips || {}).length > 0) {
       await cloudPushImmediate();
     }
+    // v0.6.15: Signup-Confirm-Klick → freundliche Begrüßung
+    if (hash.type === 'signup') {
+      setTimeout(function(){ toast('🎉 Account bestätigt — willkommen bei TripMate!'); }, 400);
+    }
     return true;
   } catch (e) {
     console.error('handleAuthCallback error', e);
@@ -2929,7 +3054,7 @@ function hideAuthGate() {
   document.body.classList.add('is-authed');
 }
 function showAuthStep(step) {
-  ['form','loading','reset-request','reset-password'].forEach(s => {
+  ['form','loading','reset-request','reset-password','confirm-pending'].forEach(s => {
     const el = document.getElementById('auth-step-' + s);
     if (el) el.style.display = (s === step ? '' : 'none');
   });
@@ -3008,11 +3133,21 @@ function bindAuthGate() {
       hideAuthGate();
       proceedToApp();
     } catch (e) {
+      // v0.6.15: Confirm-Required Special-Case → Confirm-Pending Step zeigen
+      if (e && e.confirmRequired) {
+        const emailEl = document.getElementById('auth-confirm-pending-email');
+        if (emailEl) emailEl.textContent = e.confirmEmail || email;
+        // Email für Resend zwischenspeichern
+        window._confirmPendingEmail = e.confirmEmail || email;
+        showAuthStep('confirm-pending');
+        return;
+      }
       let msg = e.message || 'Fehler';
       // Häufige Fehler hübsch übersetzen
       if (/invalid login credentials/i.test(msg)) msg = 'Email oder Passwort falsch';
       else if (/user already registered|already exists/i.test(msg)) msg = 'Ein Account mit dieser Email existiert schon — wechsle auf "Anmelden"';
       else if (/password.*should be at least/i.test(msg)) msg = 'Passwort zu kurz (min. 6 Zeichen)';
+      else if (/email not confirmed|email.*not.*confirmed/i.test(msg)) msg = 'Email noch nicht bestätigt — schau in dein Postfach (auch Spam-Ordner)';
       showAuthError(msg);
     } finally {
       submitBtn.disabled = false;
@@ -3043,6 +3178,36 @@ function bindAuthGate() {
   // Zurück-Link auf der Reset-Request-View
   document.getElementById('auth-reset-back-btn')?.addEventListener('click', () => {
     showAuthStep('form');
+  });
+
+  // v0.6.15: Confirm-Pending Step Buttons
+  document.getElementById('auth-confirm-back-btn')?.addEventListener('click', () => {
+    showAuthStep('form');
+  });
+  document.getElementById('auth-confirm-resend-btn')?.addEventListener('click', async () => {
+    const email = window._confirmPendingEmail;
+    const errEl = document.getElementById('auth-confirm-err');
+    if (errEl) errEl.textContent = '';
+    if (!email) {
+      if (errEl) errEl.textContent = 'Keine Email gespeichert — bitte erneut registrieren';
+      return;
+    }
+    const btn = document.getElementById('auth-confirm-resend-btn');
+    if (!btn) return;
+    btn.disabled = true;
+    const old = btn.textContent;
+    btn.textContent = '⏳ Sende…';
+    try {
+      await resendEmailConfirm(email);
+      toast('📧 Bestätigungs-Email erneut gesendet');
+    } catch (err) {
+      let msg = err.message || 'Fehler';
+      if (/rate.?limit/i.test(msg)) msg = 'Zu viele Versuche — warte ein paar Sekunden';
+      if (errEl) errEl.textContent = msg;
+    } finally {
+      btn.disabled = false;
+      btn.textContent = old;
+    }
   });
 
   // Reset-Link versenden
@@ -3169,12 +3334,37 @@ function updateSyncIndicator() {
   }
   const isManual = localStorage.getItem('tm_cloud_room_manual') === '1';
   const modeLabel = isManual ? 'geteilter Raum' : 'privat';
+  // v0.6.12: Stale-Detection. tm_cloud_dirty_since wird beim ersten Dirty-Werden gesetzt
+  // und beim erfolgreichen Push gelöscht. Wenn länger als 60s dirty + nicht gerade
+  // syncing → der letzte Push hat nicht geklappt. Anzeige gelb, > 5 min → rot.
+  const dirtySince = parseInt(localStorage.getItem('tm_cloud_dirty_since') || '0', 10);
+  const isDirty = localStorage.getItem('tm_cloud_dirty') === '1';
+  const staleSec = (isDirty && dirtySince) ? Math.floor((Date.now() - dirtySince) / 1000) : 0;
+  const isStale = staleSec > 60 && !CLOUD.syncing;
+  const isVeryStale = staleSec > 300 && !CLOUD.syncing;
   if (btn) {
     btn.style.display = 'flex';
-    btn.textContent = CLOUD.syncing ? '🔄' : '☁️';
-    btn.title = 'Cloud-Sync aktiv (' + modeLabel + ') – Raum: ' + CLOUD.room;
+    let icon = CLOUD.syncing ? '🔄' : '☁️';
+    if (isVeryStale) icon = '🔴';
+    else if (isStale) icon = '🟡';
+    btn.textContent = icon;
+    if (isStale) {
+      const min = Math.floor(staleSec / 60);
+      const remSec = staleSec % 60;
+      const ago = (min ? min + ' min ' : '') + remSec + ' s';
+      btn.title = '⚠️ Lokale Änderungen warten seit ' + ago + ' auf Sync. Tippe zum erneuten Versuch.';
+    } else {
+      btn.title = 'Cloud-Sync aktiv (' + modeLabel + ') – Raum: ' + CLOUD.room;
+    }
   }
-  if (stat) stat.textContent = '☁️ Sync aktiv · ' + modeLabel + ' · Raum: ' + CLOUD.room;
+  if (stat) {
+    if (isStale) {
+      const min = Math.floor(staleSec / 60);
+      stat.textContent = '⚠️ Sync hängt seit ' + (min ? min + ' min' : staleSec + ' s') + ' – Tipp: ☁️-Symbol oben rechts antippen für erneuten Versuch.';
+    } else {
+      stat.textContent = '☁️ Sync aktiv · ' + modeLabel + ' · Raum: ' + CLOUD.room;
+    }
+  }
 }
 async function cloudPull(silent) {
   if (!cloudEnabled() || CLOUD.syncing) return;
@@ -3249,10 +3439,19 @@ async function cloudPushImmediate() {
       localStorage.setItem('tm_cloud_last_pulled', String(CLOUD.lastPulledAt));
     }
     localStorage.removeItem('tm_cloud_dirty');
+    localStorage.removeItem('tm_cloud_dirty_since');
   } catch (e) {
     console.error('cloudPush error', e);
     localStorage.setItem('tm_cloud_dirty', '1');
-    toast('Sync-Fehler beim Speichern');
+    if (!localStorage.getItem('tm_cloud_dirty_since')) {
+      localStorage.setItem('tm_cloud_dirty_since', String(Date.now()));
+    }
+    // v0.6.12: Toast nur zeigen wenn der User lange genug dirty ist (sonst spamt
+    // jeder kurze Hänger). Sync-Indicator zeigt sowieso visuell den Status.
+    const dirtySince = parseInt(localStorage.getItem('tm_cloud_dirty_since') || '0', 10);
+    if (dirtySince && Date.now() - dirtySince > 60000) {
+      toast('Sync-Fehler beim Speichern – ☁️-Symbol antippen für Retry');
+    }
   } finally {
     CLOUD.syncing = false; updateSyncIndicator();
   }
@@ -3622,6 +3821,9 @@ function startCloudPolling() {
       cloudPull(true);
       pullAllSharedTrips();
     }
+    // v0.6.12: Sync-Indicator alle 15 s neu rendern, damit die "seit X s dirty"-
+    // Anzeige hochzählt auch wenn keine Pull-Änderung kommt.
+    updateSyncIndicator();
   }, 15000);
 }
 document.addEventListener('visibilitychange', function(){
@@ -3997,6 +4199,7 @@ function renderGeld() {
   // Sub-Tabs
   html += `<div class="geld-tabs">
     <button class="gt ${geldSubTab==='expenses'?'active':''}" data-gt="expenses" type="button">Ausgaben</button>
+    <button class="gt ${geldSubTab==='split'?'active':''}" data-gt="split" type="button">Aufteilen</button>
     <button class="gt ${geldSubTab==='fx'?'active':''}" data-gt="fx" type="button">Wechseln</button>
     <button class="gt ${geldSubTab==='visa'?'active':''}" data-gt="visa" type="button">Visum</button>
   </div>`;
@@ -4021,11 +4224,147 @@ function renderGeldSub() {
   // Im Geld-Tab sind die Panels die Hauptinhalte → IMMER expanded (skipCollapse).
   if (geldSubTab === 'expenses') {
     renderExpensePanel(sub, { skipCollapse: true });
+  } else if (geldSubTab === 'split') {
+    renderSplitPanel(sub);
   } else if (geldSubTab === 'fx') {
     renderFxPanel(sub, { skipCollapse: true });
   } else if (geldSubTab === 'visa') {
     renderVisaPanel(sub, { skipCollapse: true });
   }
+}
+
+// v0.6.16: Split-Bill-Berechnung. paidBy in expenses kann Email oder Name sein —
+// wir behandeln das identitäts-agnostisch (jeder einzigartige String = eine Person).
+// splitBetween[]: optional, default = alle bekannten Personen (members + alle paidBy
+// Werte aus expenses). Berechnung: pro Person Bilanz = bezahlt - eigener Anteil.
+function calculateSplitSettlement(trip) {
+  const expenses = trip.expenses || [];
+  // Sammle alle bekannten Personen aus members + paidBy + splitBetween
+  const personSet = new Set();
+  (trip.members || []).forEach(m => m && personSet.add(m));
+  expenses.forEach(e => {
+    if (e.paidBy) personSet.add(e.paidBy);
+    if (Array.isArray(e.splitBetween)) e.splitBetween.forEach(p => p && personSet.add(p));
+  });
+  // Falls keine Members und keine expenses, niemand → leer
+  const persons = Array.from(personSet);
+  if (persons.length === 0) return { persons: [], balances: {}, settlements: [], totalEur: 0 };
+
+  const balances = {};
+  persons.forEach(p => balances[p] = 0);
+  let totalEur = 0;
+
+  expenses.forEach(e => {
+    const eur = convertFx(Number(e.amount) || 0, e.currency || 'EUR', 'EUR');
+    if (!eur || eur <= 0) return;
+    totalEur += eur;
+    const paidBy = e.paidBy || persons[0];
+    let splitWith = (Array.isArray(e.splitBetween) && e.splitBetween.length > 0)
+      ? e.splitBetween.slice()
+      : persons.slice();
+    if (splitWith.length === 0) splitWith = [paidBy];
+    const shareEach = eur / splitWith.length;
+    balances[paidBy] = (balances[paidBy] || 0) + eur;
+    splitWith.forEach(p => { balances[p] = (balances[p] || 0) - shareEach; });
+  });
+
+  // Auf 2 Nachkommastellen runden — Floats sammeln Drift
+  Object.keys(balances).forEach(k => { balances[k] = Math.round(balances[k] * 100) / 100; });
+
+  // Settlement: greedy — größter Schuldner zahlt an größten Forderer
+  const tmpBal = Object.assign({}, balances);
+  const settlements = [];
+  while (true) {
+    let maxDebtor = null, maxDebt = 0;
+    let maxCreditor = null, maxCredit = 0;
+    Object.keys(tmpBal).forEach(p => {
+      if (tmpBal[p] < -0.01 && -tmpBal[p] > maxDebt) { maxDebtor = p; maxDebt = -tmpBal[p]; }
+      if (tmpBal[p] > 0.01 && tmpBal[p] > maxCredit) { maxCreditor = p; maxCredit = tmpBal[p]; }
+    });
+    if (!maxDebtor || !maxCreditor) break;
+    const amt = Math.min(maxDebt, maxCredit);
+    settlements.push({ from: maxDebtor, to: maxCreditor, amount: Math.round(amt * 100) / 100 });
+    tmpBal[maxDebtor] += amt;
+    tmpBal[maxCreditor] -= amt;
+  }
+
+  return { persons, balances, settlements, totalEur: Math.round(totalEur * 100) / 100 };
+}
+
+// Zeige nur den Anteil-vor-@ wenn es eine Email ist (lesbarer)
+function displayPersonName(p) {
+  if (!p) return '?';
+  if (p.indexOf('@') > 0) return p.split('@')[0];
+  return p;
+}
+
+function renderSplitPanel(sub) {
+  const trip = T();
+  const result = calculateSplitSettlement(trip);
+  const expensesCount = (trip.expenses || []).length;
+  const personCount = result.persons.length;
+
+  if (expensesCount === 0) {
+    sub.innerHTML = '<div class="exp-panel" style="padding:24px; text-align:center; color:var(--text-muted);">' +
+      '<div style="font-size:32px; margin-bottom:8px;">🧮</div>' +
+      '<div style="font-weight:600; margin-bottom:6px;">Noch keine Ausgaben</div>' +
+      '<div style="font-size:13px;">Trage erst Ausgaben unter "Ausgaben" ein, dann kann ich sie aufteilen.</div>' +
+      '</div>';
+    return;
+  }
+  if (personCount < 2) {
+    sub.innerHTML = '<div class="exp-panel" style="padding:24px; text-align:center; color:var(--text-muted);">' +
+      '<div style="font-size:32px; margin-bottom:8px;">👥</div>' +
+      '<div style="font-weight:600; margin-bottom:6px;">Aufteilen ab 2 Personen</div>' +
+      '<div style="font-size:13px;">Lade jemanden zur Reise ein (Mehr → Trip bearbeiten → Live teilen) oder trage einen anderen Namen unter "Wer hat bezahlt?" ein.</div>' +
+      '</div>';
+    return;
+  }
+
+  let html = '<div class="exp-panel" style="padding:16px;">';
+  html += '<div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:12px;">';
+  html += '<div style="font-weight:700; font-size:16px;">Wer schuldet wem?</div>';
+  html += '<div style="color:var(--text-muted); font-size:13px;">Gesamt: €' + result.totalEur.toFixed(2) + '</div>';
+  html += '</div>';
+
+  // Bilanzen-Tabelle (eine Zeile pro Person)
+  html += '<div style="display:flex; flex-direction:column; gap:6px; margin-bottom:16px;">';
+  result.persons.forEach(p => {
+    const bal = result.balances[p] || 0;
+    let color = 'var(--text-muted)';
+    let prefix = '';
+    if (bal > 0.01) { color = '#1d8a4f'; prefix = '+'; }
+    else if (bal < -0.01) { color = '#c83a3a'; prefix = ''; }
+    html += '<div style="display:flex; justify-content:space-between; padding:8px 12px; background:var(--card-bg, #f6f5f1); border-radius:8px;">';
+    html += '<span style="font-weight:600;">' + escapeHtml(displayPersonName(p)) + '</span>';
+    html += '<span style="color:' + color + '; font-weight:600;">' + prefix + bal.toFixed(2) + ' €</span>';
+    html += '</div>';
+  });
+  html += '</div>';
+
+  // Settlement-Liste
+  if (result.settlements.length === 0) {
+    html += '<div style="text-align:center; color:#1d8a4f; padding:12px; font-weight:600;">✅ Alles ausgeglichen</div>';
+  } else {
+    html += '<div style="font-weight:700; margin-bottom:8px;">Empfohlene Ausgleichszahlungen</div>';
+    html += '<div style="display:flex; flex-direction:column; gap:6px;">';
+    result.settlements.forEach(s => {
+      html += '<div style="display:flex; align-items:center; padding:10px 12px; background:#fff5f3; border:1px solid #ffd0c8; border-radius:8px;">';
+      html += '<span style="font-weight:600;">' + escapeHtml(displayPersonName(s.from)) + '</span>';
+      html += '<span style="margin:0 8px; color:var(--text-muted);">→</span>';
+      html += '<span style="font-weight:600;">' + escapeHtml(displayPersonName(s.to)) + '</span>';
+      html += '<span style="margin-left:auto; font-weight:700; color:#c83a3a;">€' + s.amount.toFixed(2) + '</span>';
+      html += '</div>';
+    });
+    html += '</div>';
+  }
+
+  html += '<div style="margin-top:14px; font-size:12px; color:var(--text-muted); padding:8px 12px; background:var(--card-bg, #f6f5f1); border-radius:6px;">';
+  html += '💡 Aufteilung erfolgt gleichmäßig zwischen allen erkannten Personen (members + alle in "Wer hat bezahlt?" eingetragenen Namen). Beträge werden nach EUR umgerechnet.';
+  html += '</div>';
+  html += '</div>';
+
+  sub.innerHTML = html;
 }
 
 // ============ Mehr-Tab ============
@@ -4060,6 +4399,8 @@ function renderMehr() {
     <button class="more-row" data-mehr-row="trip-share" type="button"><span class="mr-ic">📤</span><span class="mr-lbl">Trip teilen</span><span class="mr-ch">›</span></button>
     <button class="more-row" data-mehr-row="sync" type="button"><span class="mr-ic">🔄</span><span class="mr-lbl">Sync</span><span class="mr-badge ${cloudEnabled() ? 'success' : 'muted'}">${cloudEnabled() ? 'aktiv' : 'aus'}</span><span class="mr-ch">›</span></button>
     <button class="more-row" data-mehr-row="trip-list" type="button"><span class="mr-ic">🧳</span><span class="mr-lbl">Reisen verwalten</span><span class="mr-ch">›</span></button>
+    <button class="more-row" data-mehr-row="export-trips" type="button"><span class="mr-ic">💾</span><span class="mr-lbl">Backup als JSON exportieren</span><span class="mr-ch">›</span></button>
+    <button class="more-row" data-mehr-row="import-trips" type="button"><span class="mr-ic">📥</span><span class="mr-lbl">Backup importieren</span><span class="mr-ch">›</span></button>
   </div>`;
 
   // ACCOUNT
@@ -4122,6 +4463,8 @@ function handleMehrRow(action) {
     case 'trip-share': document.getElementById('share-btn')?.click(); break;
     case 'sync': document.getElementById('open-sync-setup')?.click(); break;
     case 'trip-list': openTripManager(); break;
+    case 'export-trips': exportAllTrips(); break;
+    case 'import-trips': openImportTripsDialog(); break;
     case 'settings': openSettings(); break;
     case 'help': openHelp(); break;
     case 'logout':
@@ -4130,6 +4473,96 @@ function handleMehrRow(action) {
       }
       break;
   }
+}
+
+// v0.6.13: JSON-Export/Import als Backup-Insurance.
+// Speichert state.trips + state.prefs als JSON-Datei. Beim Import: jeder Trip
+// wird per mergeOneTrip mit lokalem zusammengeführt (Tombstones + Item-IDs
+// stellen sicher dass keine Duplikate entstehen). Neue Trip-IDs werden hinzugefügt.
+function exportAllTrips() {
+  const data = {
+    schemaVersion: 'tripmate-export-v1',
+    appVersion: typeof APP_VERSION !== 'undefined' ? APP_VERSION : 'unknown',
+    exportedAt: new Date().toISOString(),
+    exportedBy: (getAccount() && getAccount().email) || 'unknown',
+    trips: state.trips,
+    prefs: state.prefs || {},
+    _tripTombs: state._tripTombs || []
+  };
+  const json = JSON.stringify(data, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const ts = new Date().toISOString().replace(/[:.]/g, '-').substring(0, 19);
+  a.href = url;
+  a.download = 'tripmate-backup-' + ts + '.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+  const tripCount = Object.keys(data.trips).length;
+  toast('💾 Backup heruntergeladen (' + tripCount + ' Reisen)');
+}
+
+function openImportTripsDialog() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'application/json,.json';
+  input.style.display = 'none';
+  input.addEventListener('change', async function(e) {
+    const file = e.target.files && e.target.files[0];
+    if (!file) { document.body.removeChild(input); return; }
+    try {
+      const txt = await file.text();
+      const data = JSON.parse(txt);
+      if (!data || !data.trips || typeof data.trips !== 'object') {
+        toast('❌ Ungültige Datei – keine trips gefunden');
+        return;
+      }
+      const incomingCount = Object.keys(data.trips).length;
+      if (!confirm('Backup mit ' + incomingCount + ' Reisen importieren?\n\n' +
+                   'Bestehende Reisen mit gleicher ID werden zusammengeführt (Items per ID gemerged). ' +
+                   'Neue Reisen werden hinzugefügt. Lokale Daten gehen NICHT verloren.')) return;
+      let added = 0, merged = 0;
+      Object.keys(data.trips).forEach(function(id) {
+        const remoteT = data.trips[id];
+        if (!remoteT || typeof remoteT !== 'object') return;
+        ensureTripDefaults(remoteT);
+        if (state.trips[id]) {
+          mergeOneTrip(state.trips[id], remoteT);
+          merged++;
+        } else {
+          state.trips[id] = remoteT;
+          added++;
+        }
+      });
+      // Prefs merge (nur fehlende Keys übernehmen — bestehende lokale Werte gewinnen)
+      if (data.prefs && typeof data.prefs === 'object') {
+        if (!state.prefs) state.prefs = {};
+        Object.keys(data.prefs).forEach(function(k){
+          if (state.prefs[k] === undefined) state.prefs[k] = data.prefs[k];
+        });
+      }
+      // Tombstones zusammenführen
+      if (Array.isArray(data._tripTombs)) {
+        if (!Array.isArray(state._tripTombs)) state._tripTombs = [];
+        data._tripTombs.forEach(function(t){
+          if (!state._tripTombs.includes(t)) state._tripTombs.push(t);
+        });
+      }
+      saveState();
+      renderHeader();
+      refreshCurrentView();
+      toast('✅ ' + added + ' neue + ' + merged + ' aktualisiert');
+    } catch (err) {
+      console.error('Import failed', err);
+      toast('❌ Import fehlgeschlagen: ' + (err.message || 'unbekannt'));
+    } finally {
+      try { document.body.removeChild(input); } catch(_) {}
+    }
+  });
+  document.body.appendChild(input);
+  input.click();
 }
 function scrollToPanel(panelClass, fallbackView) {
   if (fallbackView) switchView(fallbackView);
@@ -4152,7 +4585,75 @@ function scrollToPanel(panelClass, fallbackView) {
   }, 160);
 }
 function openHelp() {
-  toast('Hilfe-Seite kommt in v1.1');
+  // v0.7.1: Echte Hilfe-Seite als Modal mit Accordion-Sektionen.
+  // Inhalt deckt die wichtigsten Use-Cases ab. Bei Bedarf erweitern.
+  let modal = document.getElementById('help-modal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'help-modal';
+    modal.className = 'modal-backdrop';
+    modal.innerHTML = '<div class="modal" style="max-width:680px; max-height:85vh; overflow:hidden; display:flex; flex-direction:column;">' +
+      '<div style="display:flex; justify-content:space-between; align-items:baseline; padding:8px 0 14px;">' +
+        '<h3 style="margin:0;">Hilfe &amp; Anleitung</h3>' +
+        '<button id="help-close" class="btn secondary" style="padding:6px 12px;">Schließen</button>' +
+      '</div>' +
+      '<div id="help-body" style="overflow-y:auto; flex:1; padding-right:4px;"></div>' +
+    '</div>';
+    document.body.appendChild(modal);
+    modal.addEventListener('click', (e) => { if (e.target === modal) closeModal('help-modal'); });
+    document.getElementById('help-close').addEventListener('click', () => closeModal('help-modal'));
+  }
+  const sections = [
+    { title: '🚀 Erste Schritte', body:
+      '<p><strong>Account anlegen:</strong> Klicke auf „Registrieren", gib Email + Passwort ein. Wenn Email-Bestätigung aktiv ist, klicke den Bestätigungs-Link in deiner Mail.</p>' +
+      '<p><strong>Reise erstellen:</strong> Mehr-Tab → „Reisen verwalten" → „+ Neue Reise". Land + Stadt eintragen, Reisezeitraum wählen.</p>' +
+      '<p><strong>Heute-Tab:</strong> Zeigt deinen Tagesplan + Schnellaktionen. Während der Reise dein Standard-Bildschirm.</p>'
+    },
+    { title: '☁️ Cloud-Sync', body:
+      '<p>Sync ist standardmäßig aktiv für eingeloggte Nutzer. Status-Symbol oben rechts: ☁️ = aktiv, 🔄 = synct gerade, 🟡/🔴 = lokale Änderungen warten auf Sync. Bei Problemen tippe auf das Symbol — das versucht erneut zu synchronisieren.</p>' +
+      '<p><strong>Offline-Edit funktioniert:</strong> deine Änderungen werden lokal gespeichert und beim nächsten Sync hochgeladen.</p>'
+    },
+    { title: '🤝 Reise mit jemandem teilen', body:
+      '<p>Mehr-Tab → „Trip bearbeiten" → ganz unten „🔗 Reise live teilen". Du bekommst einen Link, den du z.B. per WhatsApp verschickst. Wer den Link öffnet (mit eigenem Account), wird Mitglied — beide sehen dann automatisch die Änderungen des anderen (alle 15 Sekunden).</p>' +
+      '<p><strong>Live-Sharing beenden:</strong> Im Trip-Edit-Modal „Live-Sharing beenden". Andere Mitglieder behalten ihre lokale Kopie, sehen aber keine neuen Änderungen.</p>'
+    },
+    { title: '🗺 Karten-Tab', body:
+      '<p>Filter-Chips oben: Alle, Sehenswürdigkeit, Restaurant usw. — schaltet Marker und Liste um.</p>' +
+      '<p>Bottom-Sheet unten: Tippe das graue Handle zum Erweitern (klein → mittel → groß). Tippe einen Listeneintrag, um zum Marker zu zoomen.</p>' +
+      '<p><strong>Eigenen Standort:</strong> 📍-Knopf (nur sichtbar im Karte-Tab).</p>'
+    },
+    { title: '💰 Geld-Tab', body:
+      '<p><strong>Ausgaben:</strong> + tippen, Betrag + Währung + „Wer hat bezahlt?" eintragen. Beträge werden zur Anzeige in EUR umgerechnet.</p>' +
+      '<p><strong>Aufteilen:</strong> Sub-Tab „Aufteilen" zeigt automatisch wer wem wie viel schuldet (gleichmäßig zwischen allen erkannten Personen). Funktioniert ab 2 Personen.</p>' +
+      '<p><strong>Wechseln:</strong> Live-Wechselkurse (alle 24h aktualisiert), Offline-Fallback.</p>'
+    },
+    { title: '🛂 Visum &amp; 🔒 Dokumenten-Safe', body:
+      '<p><strong>Visum:</strong> Plan-Tab oder Mehr → „Visum". Zeigt für viele Länder den Status (visumfrei / ETA / eVisa / Botschaft) inkl. Foto-Upload.</p>' +
+      '<p><strong>Dokumenten-Safe:</strong> Verschlüsselt mit Passphrase pro Reise. Inhalte verlassen nie unverschlüsselt dein Gerät — nicht mal die Cloud kann sie lesen.</p>'
+    },
+    { title: '💾 Backup &amp; Wiederherstellung', body:
+      '<p>Mehr-Tab → „Backup als JSON exportieren". Speichert alle Reisen + Einstellungen als Datei — lege sie irgendwo ab, wo du sie wiederfindest.</p>' +
+      '<p><strong>Importieren:</strong> Mehr-Tab → „Backup importieren". Bestehende Reisen mit gleicher ID werden zusammengeführt.</p>'
+    },
+    { title: '🚨 SOS &amp; Notfall', body:
+      '<p>Roter SOS-Button unten rechts (im Heute- und Plan-Tab). Tippt er auf, kommen die Notrufnummern für dein Reiseland sowie Apotheke / Krankenhaus / Botschaft.</p>' +
+      '<p>Den Knopf permanent ausblenden: Mehr-Tab → „SOS-Knopf permanent zeigen" → off.</p>'
+    },
+    { title: '❓ Häufige Probleme', body:
+      '<p><strong>„Sync-Fehler beim Speichern" Toast:</strong> Tippe das ☁️-Symbol oben rechts, das versucht den Sync erneut. Wenn das Problem bleibt, melde dich kurz ab + wieder an.</p>' +
+      '<p><strong>Passwort vergessen:</strong> Login-Form → „Passwort vergessen?". Email mit Reset-Link kommt — Klick und neues Passwort setzen.</p>' +
+      '<p><strong>App lädt alte Version:</strong> Wenn ein Update-Banner erscheint, „Jetzt laden" tippen. Falls nicht, Browser-Cache leeren oder Tab schließen + neu öffnen.</p>'
+    }
+  ];
+  const body = document.getElementById('help-body');
+  body.innerHTML = sections.map((s, i) =>
+    '<details ' + (i === 0 ? 'open' : '') + ' style="border-bottom:1px solid var(--border, #eee); padding:10px 4px;">' +
+    '<summary style="font-weight:600; font-size:15px; cursor:pointer; padding:4px 0;">' + s.title + '</summary>' +
+    '<div style="margin-top:8px; font-size:14px; line-height:1.5; color:var(--text);">' + s.body + '</div>' +
+    '</details>'
+  ).join('') +
+  '<div style="text-align:center; padding:14px 0 4px; color:var(--text-muted); font-size:12px;">TripMate v' + (typeof APP_VERSION !== 'undefined' ? APP_VERSION : '?') + '</div>';
+  modal.classList.add('open');
 }
 
 // ============ SOS-FAB (globaler Notruf-Button) ============
@@ -5163,6 +5664,18 @@ function openExpenseModal(id) {
   const paidBy = document.getElementById('exp-paidby');
   const notes = document.getElementById('exp-notes');
   const delBtn = document.getElementById('exp-delete-btn');
+
+  // v0.6.16: Datalist mit bekannten Personen füllen (members + paidBy aus expenses)
+  const dl = document.getElementById('exp-paidby-list');
+  if (dl) {
+    const personSet = new Set();
+    (trip.members || []).forEach(m => m && personSet.add(m));
+    (trip.expenses || []).forEach(e => { if (e.paidBy) personSet.add(e.paidBy); });
+    if (typeof myName !== 'undefined' && myName) personSet.add(myName);
+    dl.innerHTML = Array.from(personSet).map(p =>
+      '<option value="' + escapeHtml(p) + '">'
+    ).join('');
+  }
 
   if (exp) {
     title.value = exp.title || '';
@@ -6663,6 +7176,16 @@ function initMap() {
 let _lastMapTripId = null;
 let _mapForceRecenter = false; // wird auf true gesetzt, wenn die Stadt einer Reise sich ändert
 
+// v0.7.0: Map-Filter — 'all' | 'sight' | 'food' | 'shop' | 'buy' | 'hotel'
+let _mapFilter = 'all';
+function setMapFilter(cat) {
+  _mapFilter = cat || 'all';
+  document.querySelectorAll('.map-chips .m-chip').forEach(c => {
+    c.classList.toggle('active', c.dataset.cat === _mapFilter);
+  });
+  renderMap();
+}
+
 function renderMap() {
   if (!map) return;
   markers.forEach(m => map.removeLayer(m));
@@ -6680,6 +7203,9 @@ function renderMap() {
   const bounds = [];
   T().items.forEach(item => {
     if (!item.lat || !item.lng) return;
+    // v0.7.0: Filter berücksichtigen
+    if (_mapFilter !== 'all' && _mapFilter !== 'hotel' && item.category !== _mapFilter) return;
+    if (_mapFilter === 'hotel') return;
     const color = catColor(item.category);
     const dimmed = item.done ? 'opacity:0.45; filter:grayscale(0.5);' : '';
     const icon = L.divIcon({
@@ -6704,6 +7230,8 @@ function renderMap() {
   // Unterkunft-Marker (größer, unterscheidbar)
   (T().accommodations || []).forEach(a => {
     if (!a.lat || !a.lng) return;
+    // v0.7.0: Filter — nur bei 'all' oder 'hotel' zeigen
+    if (_mapFilter !== 'all' && _mapFilter !== 'hotel') return;
     const icon = L.divIcon({
       className: 'custom-marker accom-marker',
       html: `<div style="background:#0ea5e9; width:30px; height:30px; border-radius:50% 50% 50% 0;
@@ -6731,6 +7259,68 @@ function renderMap() {
   }
   _mapForceRecenter = false; // Flag konsumiert
   setTimeout(() => { if (map) map.invalidateSize(); }, 100);
+  // v0.7.0: Bottom-Sheet-Liste rendern
+  renderMapSheetList();
+}
+
+function renderMapSheetList() {
+  const list = document.getElementById('map-sheet-list');
+  const count = document.getElementById('map-sheet-count');
+  if (!list || !count) return;
+  const trip = T();
+  let entries = [];
+  (trip.items || []).forEach(item => {
+    if (!item.lat || !item.lng) return;
+    if (_mapFilter !== 'all' && _mapFilter !== 'hotel' && item.category !== _mapFilter) return;
+    if (_mapFilter === 'hotel') return;
+    entries.push({
+      id: 'item-' + item.id,
+      lat: item.lat, lng: item.lng,
+      icon: (CATEGORIES[item.category] && CATEGORIES[item.category].icon) || '📍',
+      color: catColor(item.category),
+      name: item.name,
+      addr: item.address || '',
+      done: !!item.done
+    });
+  });
+  (trip.accommodations || []).forEach(a => {
+    if (!a.lat || !a.lng) return;
+    if (_mapFilter !== 'all' && _mapFilter !== 'hotel') return;
+    entries.push({
+      id: 'acc-' + a.id,
+      lat: a.lat, lng: a.lng,
+      icon: '🏨', color: '#0ea5e9',
+      name: a.name || 'Unterkunft',
+      addr: a.address || '',
+      done: false
+    });
+  });
+  count.textContent = entries.length + ' Ort' + (entries.length === 1 ? '' : 'e');
+  if (entries.length === 0) {
+    list.innerHTML = '<div style="padding:20px; text-align:center; color:var(--text-muted); font-size:13px;">Keine Orte für diesen Filter.</div>';
+    return;
+  }
+  list.innerHTML = entries.map(e =>
+    '<div class="map-sheet-row' + (e.done ? ' done' : '') + '" data-lat="' + e.lat + '" data-lng="' + e.lng + '">' +
+    '<span class="ms-icon" style="background:' + e.color + ';">' + e.icon + '</span>' +
+    '<span class="ms-text">' +
+      '<span class="ms-name">' + escapeHtml(e.name) + (e.done ? ' ✓' : '') + '</span>' +
+      (e.addr ? '<span class="ms-addr">' + escapeHtml(e.addr) + '</span>' : '') +
+    '</span>' +
+    '</div>'
+  ).join('');
+  list.querySelectorAll('.map-sheet-row').forEach(row => {
+    row.addEventListener('click', () => {
+      const lat = parseFloat(row.dataset.lat);
+      const lng = parseFloat(row.dataset.lng);
+      if (!isNaN(lat) && !isNaN(lng) && map) {
+        map.setView([lat, lng], 16, { animate: true });
+        // Sheet auf collapsed setzen, damit Map sichtbar ist
+        const sheet = document.getElementById('map-sheet');
+        if (sheet) sheet.dataset.snap = 'collapsed';
+      }
+    });
+  });
 }
 
 // Eigenen Standort auf der Karte anzeigen
@@ -7321,9 +7911,16 @@ document.getElementById('sync-disable').addEventListener('click', () => {
   toast('Cloud-Sync deaktiviert');
 });
 // Tap indicator to force-sync now
-document.getElementById('sync-status').addEventListener('click', () => {
+document.getElementById('sync-status').addEventListener('click', async () => {
   if (!cloudEnabled()) return;
-  cloudPull(false);
+  // v0.6.12: Wenn lokal dirty, ERST pushen (sonst verlierst du lokale Änderungen
+  // beim Pull falls Cloud andere Daten hat). Danach pull für aktuelle Stände.
+  if (localStorage.getItem('tm_cloud_dirty') === '1') {
+    await cloudPushImmediate();
+    await pushAllSharedTrips();
+  }
+  await cloudPull(false);
+  await pullAllSharedTrips();
 });
 
 // ============ Share ============
@@ -7721,6 +8318,39 @@ document.getElementById('email-import-modal').addEventListener('click', (e) => {
 // Standort-Button auf der Karte
 document.getElementById('my-location-btn').addEventListener('click', toggleMyLocation);
 
+// v0.7.0: Map-Filter-Chips
+document.querySelectorAll('.map-chips .m-chip').forEach(chip => {
+  chip.addEventListener('click', () => setMapFilter(chip.dataset.cat));
+});
+
+// v0.7.0: Bottom-Sheet — Tap auf Handle togglt collapsed → half → full → collapsed
+const _mapSheet = document.getElementById('map-sheet');
+const _mapSheetHandle = document.getElementById('map-sheet-handle');
+if (_mapSheet && _mapSheetHandle) {
+  _mapSheetHandle.addEventListener('click', () => {
+    const cur = _mapSheet.dataset.snap || 'collapsed';
+    const next = cur === 'collapsed' ? 'half' : (cur === 'half' ? 'full' : 'collapsed');
+    _mapSheet.dataset.snap = next;
+  });
+  // Touch-Drag für freies Snapping
+  let _dragStartY = 0, _dragStartSnap = 'collapsed';
+  _mapSheetHandle.addEventListener('touchstart', e => {
+    _dragStartY = e.touches[0].clientY;
+    _dragStartSnap = _mapSheet.dataset.snap || 'collapsed';
+  }, { passive: true });
+  _mapSheetHandle.addEventListener('touchend', e => {
+    const dy = e.changedTouches[0].clientY - _dragStartY;
+    if (Math.abs(dy) < 30) return; // kleiner Tap → Click-Handler übernimmt
+    if (dy < -30) {
+      // hochgewischt → expand
+      _mapSheet.dataset.snap = _dragStartSnap === 'collapsed' ? 'half' : 'full';
+    } else {
+      // runtergewischt → collapse
+      _mapSheet.dataset.snap = _dragStartSnap === 'full' ? 'half' : 'collapsed';
+    }
+  });
+}
+
 function importFromHash() {
   if (!location.hash.startsWith('#data=')) return;
   const compressed = location.hash.slice(6);
@@ -7939,7 +8569,54 @@ document.querySelectorAll('.bottom-sheet .sheet-overlay').forEach(o => {
 
 // Register service worker
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').catch(() => {});
+  // v0.6.14: SW-Update-Detection. Wenn neue Version installed waiting, Banner zeigen.
+  // User klickt → SKIP_WAITING → controllerchange → reload.
+  let _swReloadInProgress = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (_swReloadInProgress) return;
+    _swReloadInProgress = true;
+    window.location.reload();
+  });
+  navigator.serviceWorker.register('sw.js').then((reg) => {
+    if (!reg) return;
+    // Wenn beim Boot schon eine waiting-SW existiert (vom letzten Tab), gleich Banner.
+    if (reg.waiting && navigator.serviceWorker.controller) {
+      showSwUpdateBanner(reg.waiting);
+    }
+    reg.addEventListener('updatefound', () => {
+      const newSW = reg.installing;
+      if (!newSW) return;
+      newSW.addEventListener('statechange', () => {
+        if (newSW.state === 'installed' && navigator.serviceWorker.controller) {
+          // Es gibt eine neue Version, alte ist noch aktiv → User entscheiden lassen.
+          showSwUpdateBanner(newSW);
+        }
+      });
+    });
+  }).catch(() => {});
+}
+
+function showSwUpdateBanner(waitingSW) {
+  if (document.getElementById('sw-update-banner')) return;
+  const banner = document.createElement('div');
+  banner.id = 'sw-update-banner';
+  banner.style.cssText = 'position:fixed; left:50%; transform:translateX(-50%); bottom:84px; ' +
+    'z-index:99999; background:var(--accent, #FF385C); color:#fff; ' +
+    'padding:10px 16px; border-radius:999px; box-shadow:0 6px 20px rgba(0,0,0,.18); ' +
+    'display:flex; align-items:center; gap:12px; font-size:14px; max-width:calc(100% - 24px);';
+  banner.innerHTML = '<span style="white-space:nowrap;">✨ Neue Version verfügbar</span>' +
+    '<button id="sw-update-reload" style="background:#fff; color:var(--accent, #FF385C); ' +
+    'border:none; padding:6px 12px; border-radius:999px; font-weight:600; cursor:pointer;">Jetzt laden</button>' +
+    '<button id="sw-update-dismiss" style="background:transparent; color:#fff; ' +
+    'border:1px solid rgba(255,255,255,.5); padding:6px 10px; border-radius:999px; cursor:pointer;">Später</button>';
+  document.body.appendChild(banner);
+  document.getElementById('sw-update-reload').addEventListener('click', () => {
+    if (waitingSW) waitingSW.postMessage({ type: 'SKIP_WAITING' });
+    // controllerchange → window.location.reload() (siehe oben)
+  });
+  document.getElementById('sw-update-dismiss').addEventListener('click', () => {
+    banner.remove();
+  });
 }
 </script>
 </body>
