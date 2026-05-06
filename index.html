@@ -2315,7 +2315,7 @@ create policy "u" on trips for update using (true);</pre>
 // ============ App-Version ============
 // Bei Schema-Änderungen SCHEMA_VERSION hochzählen + Migration ergänzen.
 // APP_VERSION ist die User-sichtbare Version.
-const APP_VERSION = '0.7.2';
+const APP_VERSION = '0.7.3';
 const SCHEMA_VERSION = 3;
 
 // ============ Constants & Demo Data ============
@@ -8649,8 +8649,82 @@ if ('serviceWorker' in navigator) {
         }
       });
     });
+    // v0.7.3: Erzwingt einen Update-Check bei jedem Boot — manche iOS-Browser checken
+    // sw.js sonst nur alle 24h, was alte SW zu lange am Leben lässt.
+    try { reg.update().catch(() => {}); } catch(_) {}
   }).catch(() => {});
 }
+
+// v0.7.3: Live-Version-Fallback. Falls der SW-Update-Mechanismus nicht greift
+// (alte SW mit altem Code, iOS PWA-Cache, etc.), prüfen wir nach 3s die deployte
+// Version vom Server. Bei Mismatch zeigen wir einen Force-Reset-Banner, der
+// SW unregister + Cache-Clear + Reload macht — ein einziger User-Klick statt
+// Browser-Settings durchwühlen.
+async function checkLiveVersionFallback() {
+  try {
+    const url = location.pathname + 'index.html?_v=' + Date.now();
+    const r = await fetch(url, { cache: 'no-store' });
+    if (!r.ok) return;
+    const txt = await r.text();
+    const m = txt.match(/APP_VERSION\s*=\s*'([^']+)'/);
+    if (!m) return;
+    const liveVer = m[1];
+    if (typeof APP_VERSION === 'undefined' || liveVer === APP_VERSION) return;
+    // Numerischer Vergleich: nur Banner zeigen wenn live wirklich NEUER ist
+    const cmp = compareSemver(liveVer, APP_VERSION);
+    if (cmp <= 0) return;
+    showForceUpdateBanner(liveVer);
+  } catch(_) {}
+}
+function compareSemver(a, b) {
+  const pa = String(a).split('.').map(n => parseInt(n, 10) || 0);
+  const pb = String(b).split('.').map(n => parseInt(n, 10) || 0);
+  for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+    const d = (pa[i] || 0) - (pb[i] || 0);
+    if (d !== 0) return d;
+  }
+  return 0;
+}
+function showForceUpdateBanner(newVer) {
+  if (document.getElementById('sw-update-banner')) return;
+  if (document.getElementById('force-update-banner')) return;
+  const banner = document.createElement('div');
+  banner.id = 'force-update-banner';
+  banner.style.cssText = 'position:fixed; left:50%; transform:translateX(-50%); bottom:84px; ' +
+    'z-index:99999; background:var(--accent, #FF385C); color:#fff; ' +
+    'padding:10px 16px; border-radius:999px; box-shadow:0 6px 20px rgba(0,0,0,.18); ' +
+    'display:flex; align-items:center; gap:10px; font-size:14px; max-width:calc(100% - 24px);';
+  banner.innerHTML = '<span style="white-space:nowrap;">✨ Neue Version v' + newVer + '</span>' +
+    '<button id="force-update-reload" style="background:#fff; color:var(--accent, #FF385C); ' +
+    'border:none; padding:6px 12px; border-radius:999px; font-weight:600; cursor:pointer;">Jetzt laden</button>' +
+    '<button id="force-update-dismiss" style="background:transparent; color:#fff; ' +
+    'border:1px solid rgba(255,255,255,.5); padding:6px 10px; border-radius:999px; cursor:pointer;">Später</button>';
+  document.body.appendChild(banner);
+  document.getElementById('force-update-reload').addEventListener('click', async () => {
+    try {
+      if ('serviceWorker' in navigator) {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        for (const r of regs) await r.unregister();
+      }
+      if ('caches' in window) {
+        const keys = await caches.keys();
+        for (const k of keys) await caches.delete(k);
+      }
+    } catch(_) {}
+    window.location.reload();
+  });
+  document.getElementById('force-update-dismiss').addEventListener('click', () => {
+    banner.remove();
+  });
+}
+// Beim Boot mit kleiner Verzögerung — App-Init nicht blockieren
+setTimeout(() => { checkLiveVersionFallback(); }, 3000);
+// Wenn der User den Tab wieder fokussiert, nochmal prüfen
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') {
+    setTimeout(checkLiveVersionFallback, 800);
+  }
+});
 
 function showSwUpdateBanner(waitingSW) {
   if (document.getElementById('sw-update-banner')) return;
