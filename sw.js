@@ -1,5 +1,5 @@
 // TripMate Service Worker — Offline-Caching + Update-Toast (v0.6.14)
-const CACHE = 'tripmate-v0.7.8';
+const CACHE = 'tripmate-v0.7.9';
 const ASSETS = [
   './',
   './index.html',

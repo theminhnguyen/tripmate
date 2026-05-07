@@ -1717,7 +1717,7 @@
       <span class="auth-mark">✦</span>
       <span class="auth-name">TripMate</span>
     </div>
-    <h1 class="auth-title">Plane deine Reisen</h1>
+    <h1 class="auth-title" data-i18n="auth.title">Plane deine Reisen</h1>
     <p class="auth-sub">Erstelle einen Account, damit deine Reisen sicher in der Cloud liegen und auf allen Geräten verfügbar sind.</p>
 
     <!-- Tab-Wechsel zwischen Anmelden / Registrieren -->
@@ -2358,7 +2358,7 @@ create policy "u" on trips for update using (true);</pre>
 // ============ App-Version ============
 // Bei Schema-Änderungen SCHEMA_VERSION hochzählen + Migration ergänzen.
 // APP_VERSION ist die User-sichtbare Version.
-const APP_VERSION = '0.7.8';
+const APP_VERSION = '0.7.9';
 const SCHEMA_VERSION = 3;
 
 // ============ Constants & Demo Data ============
@@ -4589,7 +4589,7 @@ function renderMehr() {
   const t = T();
   let html = buildTripStripHTML();
   html += `<header class="page-header">
-    <h1 class="h-display">Mehr</h1>
+    <h1 class="h-display">${tr('page.mehr')}</h1>
     <div class="page-sub">Werkzeuge, Trip-Settings &amp; Profil</div>
   </header>`;
 
@@ -4598,18 +4598,18 @@ function renderMehr() {
   const packDone = (t.packlist || []).filter(p => p.checked).length;
   const docsCount = (t.documents || []).length;
   const acc = getAccount();
-  html += `<div class="caption">Reise</div>`;
+  html += `<div class="caption">${tr('mehr.cap.reise')}</div>`;
   html += `<div class="more-section">
-    <button class="more-row" data-mehr-row="packlist" type="button"><span class="mr-ic">📋</span><span class="mr-lbl">Packliste</span><span class="mr-badge muted">${packDone}/${packCount}</span><span class="mr-ch">›</span></button>
-    <button class="more-row" data-mehr-row="info" type="button"><span class="mr-ic">🌍</span><span class="mr-lbl">Reiseinfos${t.country ? ' · ' + (findCountry(t.country)?.name || '') : ''}</span><span class="mr-ch">›</span></button>
-    <button class="more-row" data-mehr-row="visa" type="button"><span class="mr-ic">🛂</span><span class="mr-lbl">Visum</span><span class="mr-ch">›</span></button>
-    <button class="more-row" data-mehr-row="docs" type="button"><span class="mr-ic">🔒</span><span class="mr-lbl">Dokumenten-Safe</span>${docsCount > 0 ? `<span class="mr-badge">${docsCount}</span>` : ''}<span class="mr-ch">›</span></button>
-    <button class="more-row" data-mehr-row="sos" type="button"><span class="mr-ic">🚨</span><span class="mr-lbl">Notfall-Details</span><span class="mr-ch">›</span></button>
-    <button class="more-row" data-mehr-row="calendar" type="button"><span class="mr-ic">📅</span><span class="mr-lbl">Kalender-Ansicht</span><span class="mr-ch">›</span></button>
+    <button class="more-row" data-mehr-row="packlist" type="button"><span class="mr-ic">📋</span><span class="mr-lbl">${tr('mehr.packlist')}</span><span class="mr-badge muted">${packDone}/${packCount}</span><span class="mr-ch">›</span></button>
+    <button class="more-row" data-mehr-row="info" type="button"><span class="mr-ic">🌍</span><span class="mr-lbl">${tr('mehr.info')}${t.country ? ' · ' + (findCountry(t.country)?.name || '') : ''}</span><span class="mr-ch">›</span></button>
+    <button class="more-row" data-mehr-row="visa" type="button"><span class="mr-ic">🛂</span><span class="mr-lbl">${tr('mehr.visa')}</span><span class="mr-ch">›</span></button>
+    <button class="more-row" data-mehr-row="docs" type="button"><span class="mr-ic">🔒</span><span class="mr-lbl">${tr('mehr.docs')}</span>${docsCount > 0 ? `<span class="mr-badge">${docsCount}</span>` : ''}<span class="mr-ch">›</span></button>
+    <button class="more-row" data-mehr-row="sos" type="button"><span class="mr-ic">🚨</span><span class="mr-lbl">${tr('mehr.sos')}</span><span class="mr-ch">›</span></button>
+    <button class="more-row" data-mehr-row="calendar" type="button"><span class="mr-ic">📅</span><span class="mr-lbl">${tr('mehr.calendar')}</span><span class="mr-ch">›</span></button>
   </div>`;
 
   // TRIP
-  html += `<div class="caption">Trip</div>`;
+  html += `<div class="caption">${tr('mehr.cap.trip')}</div>`;
   // v0.7.2: Mitglieder-Row zeigt aktuelle Sharing-Situation
   const _isShared = !!t.sharedRoom;
   const _members = t.members || [];
@@ -4629,7 +4629,7 @@ function renderMehr() {
     _membersSub = '';
   }
   html += `<div class="more-section">
-    <button class="more-row" data-mehr-row="trip-edit" type="button"><span class="mr-ic">⚙️</span><span class="mr-lbl">Trip bearbeiten</span><span class="mr-ch">›</span></button>
+    <button class="more-row" data-mehr-row="trip-edit" type="button"><span class="mr-ic">⚙️</span><span class="mr-lbl">${tr('mehr.tripEdit')}</span><span class="mr-ch">›</span></button>
     <button class="more-row" data-mehr-row="members" type="button">
       <span class="mr-ic">${_isShared ? '👥' : '📤'}</span>
       <span class="mr-lbl" style="display:flex; flex-direction:column; align-items:flex-start; gap:2px; line-height:1.2;">
@@ -4639,18 +4639,18 @@ function renderMehr() {
       ${_isShared ? '<span class="mr-badge success">Live</span>' : ''}
       <span class="mr-ch">›</span>
     </button>
-    <button class="more-row" data-mehr-row="trip-share-snapshot" type="button"><span class="mr-ic">🔗</span><span class="mr-lbl">Snapshot-Link teilen</span><span class="mr-ch">›</span></button>
-    <button class="more-row" data-mehr-row="sync" type="button"><span class="mr-ic">🔄</span><span class="mr-lbl">Sync</span><span class="mr-badge ${cloudEnabled() ? 'success' : 'muted'}">${cloudEnabled() ? 'aktiv' : 'aus'}</span><span class="mr-ch">›</span></button>
-    <button class="more-row" data-mehr-row="trip-list" type="button"><span class="mr-ic">🧳</span><span class="mr-lbl">Reisen verwalten</span><span class="mr-ch">›</span></button>
-    <button class="more-row" data-mehr-row="export-pdf" type="button"><span class="mr-ic">📄</span><span class="mr-lbl">Trip als PDF exportieren</span><span class="mr-ch">›</span></button>
-    <button class="more-row" data-mehr-row="export-ical" type="button"><span class="mr-ic">📅</span><span class="mr-lbl">Termine als Kalender exportieren (.ics)</span><span class="mr-ch">›</span></button>
-    <button class="more-row" data-mehr-row="export-trips" type="button"><span class="mr-ic">💾</span><span class="mr-lbl">Backup als JSON exportieren</span><span class="mr-ch">›</span></button>
-    <button class="more-row" data-mehr-row="import-trips" type="button"><span class="mr-ic">📥</span><span class="mr-lbl">Backup importieren</span><span class="mr-ch">›</span></button>
+    <button class="more-row" data-mehr-row="trip-share-snapshot" type="button"><span class="mr-ic">🔗</span><span class="mr-lbl">${tr('mehr.tripShareSnap')}</span><span class="mr-ch">›</span></button>
+    <button class="more-row" data-mehr-row="sync" type="button"><span class="mr-ic">🔄</span><span class="mr-lbl">${tr('mehr.sync')}</span><span class="mr-badge ${cloudEnabled() ? 'success' : 'muted'}">${cloudEnabled() ? 'aktiv' : 'aus'}</span><span class="mr-ch">›</span></button>
+    <button class="more-row" data-mehr-row="trip-list" type="button"><span class="mr-ic">🧳</span><span class="mr-lbl">${tr('mehr.tripList')}</span><span class="mr-ch">›</span></button>
+    <button class="more-row" data-mehr-row="export-pdf" type="button"><span class="mr-ic">📄</span><span class="mr-lbl">${tr('mehr.exportPdf')}</span><span class="mr-ch">›</span></button>
+    <button class="more-row" data-mehr-row="export-ical" type="button"><span class="mr-ic">📅</span><span class="mr-lbl">${tr('mehr.exportIcal')}</span><span class="mr-ch">›</span></button>
+    <button class="more-row" data-mehr-row="export-trips" type="button"><span class="mr-ic">💾</span><span class="mr-lbl">${tr('mehr.exportJson')}</span><span class="mr-ch">›</span></button>
+    <button class="more-row" data-mehr-row="import-trips" type="button"><span class="mr-ic">📥</span><span class="mr-lbl">${tr('mehr.importJson')}</span><span class="mr-ch">›</span></button>
   </div>`;
 
   // ACCOUNT
   if (acc) {
-    html += `<div class="caption">Account</div>`;
+    html += `<div class="caption">${tr('mehr.cap.account')}</div>`;
     html += `<div class="more-section">
       <div class="more-row account-row">
         <span class="mr-ic">👤</span>
@@ -4659,21 +4659,21 @@ function renderMehr() {
           <span class="account-meta">Angemeldet seit ${new Date(acc.createdAt || Date.now()).toLocaleDateString('de-DE')}</span>
         </div>
       </div>
-      <button class="more-row danger-row" data-mehr-row="logout" type="button"><span class="mr-ic">🚪</span><span class="mr-lbl">Abmelden</span><span class="mr-ch">›</span></button>
+      <button class="more-row danger-row" data-mehr-row="logout" type="button"><span class="mr-ic">🚪</span><span class="mr-lbl">${tr('mehr.logout')}</span><span class="mr-ch">›</span></button>
     </div>`;
   }
 
   // APP
   const sosOn = state.prefs && state.prefs.sosFabEnabled !== false;
-  html += `<div class="caption">App</div>`;
+  html += `<div class="caption">${tr('mehr.cap.app')}</div>`;
   html += `<div class="more-section">
     <button class="more-row" data-mehr-row="lang" type="button"><span class="mr-ic">🌐</span><span class="mr-lbl">${tr('mehr.lang')}: ${getLang() === 'de' ? 'Deutsch' : (getLang() === 'en' ? 'English' : 'Tiếng Việt')}</span><span class="mr-ch">›</span></button>
     <button class="more-row" data-mehr-row="settings" type="button"><span class="mr-ic">⚙️</span><span class="mr-lbl">${tr('mehr.settings')}</span><span class="mr-ch">›</span></button>
     <div class="more-row toggle-row">
-      <span class="mr-ic">🚨</span><span class="mr-lbl">SOS-Knopf permanent zeigen</span>
+      <span class="mr-ic">🚨</span><span class="mr-lbl">${tr('mehr.sosFab')}</span>
       <label class="toggle"><input type="checkbox" id="pref-sos-fab" ${sosOn ? 'checked' : ''}><span class="toggle-slider"></span></label>
     </div>
-    <button class="more-row" data-mehr-row="help" type="button"><span class="mr-ic">❓</span><span class="mr-lbl">Hilfe &amp; Anleitung</span><span class="mr-ch">›</span></button>
+    <button class="more-row" data-mehr-row="help" type="button"><span class="mr-ic">❓</span><span class="mr-lbl">${tr('mehr.help')}</span><span class="mr-ch">›</span></button>
     <div class="more-row about-row">
       <span class="mr-ic">ℹ️</span><span class="mr-lbl">TripMate</span><span class="mr-badge muted">v${APP_VERSION || '0.5.4'}</span>
     </div>
@@ -5407,7 +5407,7 @@ function renderList() {
   const evCount = (t0.events || []).length;
   const itCount = (t0.items || []).length;
   const acCount = (t0.accommodations || []).length;
-  header.innerHTML = `<h1 class="h-display">Reiseplan</h1>
+  header.innerHTML = `<h1 class="h-display">${tr('page.plan')}</h1>
     <div class="page-sub">${evCount} Termine · ${itCount} Orte · ${acCount} Hotels</div>`;
   container.appendChild(header);
 
@@ -7310,15 +7310,24 @@ function getLang() {
 function setLang(lang) {
   if (!I18N[lang]) return;
   localStorage.setItem('tm_lang', lang);
+  // Static elements with data-i18n Attribut updaten
+  document.querySelectorAll('[data-i18n]').forEach(function(el){
+    const key = el.getAttribute('data-i18n');
+    if (key) el.textContent = t(key);
+  });
   refreshCurrentView();
   if (typeof renderHeader === 'function') renderHeader();
   // Bottom-Nav neu beschriften
-  document.querySelectorAll('.bottom-nav .nav-btn').forEach(function(b){
+  document.querySelectorAll('.tabs .tab').forEach(function(b){
     const v = b.dataset.view;
     const map = { heute: 'nav.heute', list: 'nav.plan', plan: 'nav.plan', map: 'nav.karte', geld: 'nav.geld', mehr: 'nav.mehr' };
     if (map[v]) {
-      const lbl = b.querySelector('.nav-lbl');
-      if (lbl) lbl.textContent = t(map[v]);
+      // Tab hat Format <span class="ico">🏠</span>Heute  → text-Knoten ersetzen
+      const ico = b.querySelector('.ico');
+      const newText = t(map[v]);
+      // Alle non-element-children entfernen, dann text-Knoten hinten anhängen
+      Array.from(b.childNodes).forEach(function(n){ if (n.nodeType === 3) b.removeChild(n); });
+      b.appendChild(document.createTextNode(newText));
     }
   });
 }
