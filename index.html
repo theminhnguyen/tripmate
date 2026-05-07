@@ -1650,20 +1650,20 @@
       <div id="map"></div>
       <!-- v0.7.0: Filter-Chips oben — toggelbar, beeinflusst sichtbare Marker + Liste -->
       <div class="map-chips" id="map-chips">
-        <button class="m-chip active" data-cat="all" type="button">Alle</button>
-        <button class="m-chip" data-cat="sight" type="button">🏛 Sehenswürdigkeit</button>
-        <button class="m-chip" data-cat="food" type="button">🍽 Restaurant</button>
-        <button class="m-chip" data-cat="shop" type="button">🛍 Shopping</button>
-        <button class="m-chip" data-cat="buy" type="button">🛒 Vor Ort kaufen</button>
-        <button class="m-chip" data-cat="hotel" type="button">🏨 Unterkunft</button>
+        <button class="m-chip active" data-cat="all" type="button" data-i18n="map.chip.all">Alle</button>
+        <button class="m-chip" data-cat="sight" type="button"><span data-i18n-prefix="🏛 ">🏛 </span><span data-i18n="map.chip.sight">Sehenswürdigkeit</span></button>
+        <button class="m-chip" data-cat="food" type="button"><span>🍽 </span><span data-i18n="map.chip.restaurant">Restaurant</span></button>
+        <button class="m-chip" data-cat="shop" type="button"><span>🛍 </span><span data-i18n="map.chip.shopping">Shopping</span></button>
+        <button class="m-chip" data-cat="buy" type="button"><span>🛒 </span><span data-i18n="map.chip.buy">Vor Ort kaufen</span></button>
+        <button class="m-chip" data-cat="hotel" type="button"><span>🏨 </span><span data-i18n="map.chip.accom">Unterkunft</span></button>
       </div>
       <button class="map-loc-btn" id="my-location-btn" title="Eigenen Standort anzeigen">📍</button>
       <!-- v0.7.0: Bottom-Sheet mit Marker-Liste, snap zu collapsed/half/full -->
       <div class="map-sheet" id="map-sheet" data-snap="collapsed">
         <div class="map-sheet-handle" id="map-sheet-handle"></div>
         <div class="map-sheet-header">
-          <strong id="map-sheet-count">0 Orte</strong>
-          <span class="map-sheet-hint">Tippe Handle zum Erweitern</span>
+          <strong id="map-sheet-count" data-i18n-suffix="map.sheet.places">0 Orte</strong>
+          <span class="map-sheet-hint" data-i18n="map.sheet.hint">Tippe Handle zum Erweitern</span>
         </div>
         <div class="map-sheet-list" id="map-sheet-list"></div>
       </div>
@@ -1824,8 +1824,8 @@
     <textarea id="item-notes" placeholder="z.B. Reservierung um 19 Uhr"></textarea>
 
     <div class="modal-actions">
-      <button class="btn secondary" id="cancel-add">Abbrechen</button>
-      <button class="btn primary" id="save-item">Speichern</button>
+      <button class="btn secondary" id="cancel-add" data-i18n="btn.cancel">Abbrechen</button>
+      <button class="btn primary" id="save-item" data-i18n="btn.save">Speichern</button>
     </div>
   </div>
 </div>
@@ -1850,8 +1850,8 @@
     </label>
 
     <div class="modal-actions">
-      <button class="btn secondary" id="close-settings">Schließen</button>
-      <button class="btn primary" id="save-settings">Speichern</button>
+      <button class="btn secondary" id="close-settings" data-i18n="btn.close">Schließen</button>
+      <button class="btn primary" id="save-settings" data-i18n="btn.save">Speichern</button>
     </div>
 
     <div style="font-size:11px; color:var(--text-muted); text-align:center; margin-top:6px;" id="version-label">
@@ -1883,7 +1883,7 @@
     </p>
     <div id="trip-list" class="trip-list"></div>
     <div class="modal-actions">
-      <button class="btn secondary" id="close-trip-manager">Schließen</button>
+      <button class="btn secondary" id="close-trip-manager" data-i18n="btn.close">Schließen</button>
       <button class="btn primary" id="open-new-trip">+ Neue Reise</button>
     </div>
   </div>
@@ -1943,8 +1943,8 @@
     </div>
 
     <div class="modal-actions">
-      <button class="btn secondary" id="trip-edit-cancel">Abbrechen</button>
-      <button class="btn primary" id="trip-edit-save">Speichern</button>
+      <button class="btn secondary" id="trip-edit-cancel" data-i18n="btn.cancel">Abbrechen</button>
+      <button class="btn primary" id="trip-edit-save" data-i18n="btn.save">Speichern</button>
     </div>
     <div class="modal-actions" id="trip-edit-delete-wrap" style="display:none;">
       <button class="btn danger" id="trip-edit-delete">Reise löschen</button>
@@ -2021,7 +2021,7 @@ create policy "u" on trips for update using (true);</pre>
     </div>
 
     <div class="modal-actions">
-      <button class="btn secondary" id="sync-cancel">Schließen</button>
+      <button class="btn secondary" id="sync-cancel" data-i18n="btn.close">Schließen</button>
       <button class="btn primary" id="sync-enable">Aktivieren</button>
     </div>
     <div class="modal-actions" id="sync-disable-wrap" style="display:none;">
@@ -2057,7 +2057,7 @@ create policy "u" on trips for update using (true);</pre>
     </p>
     <textarea id="share-url" readonly style="width:100%; min-height:100px; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:13px; word-break:break-all;"></textarea>
     <div class="modal-actions">
-      <button class="btn secondary" id="close-share">Schließen</button>
+      <button class="btn secondary" id="close-share" data-i18n="btn.close">Schließen</button>
       <button class="btn primary" id="copy-share">Link kopieren</button>
     </div>
   </div>
@@ -2092,11 +2092,11 @@ create policy "u" on trips for update using (true);</pre>
     <label>Notiz (optional)</label>
     <textarea id="pack-notes" placeholder="z.B. nur 2 bei Gepäck-Limit"></textarea>
     <div class="modal-actions">
-      <button class="btn secondary" id="pack-cancel">Abbrechen</button>
-      <button class="btn primary" id="pack-save">Speichern</button>
+      <button class="btn secondary" id="pack-cancel" data-i18n="btn.cancel">Abbrechen</button>
+      <button class="btn primary" id="pack-save" data-i18n="btn.save">Speichern</button>
     </div>
     <div class="modal-actions" id="pack-delete-wrap" style="display:none;">
-      <button class="btn danger" id="pack-delete">Löschen</button>
+      <button class="btn danger" id="pack-delete" data-i18n="btn.delete">Löschen</button>
     </div>
   </div>
 </div>
@@ -2143,11 +2143,11 @@ create policy "u" on trips for update using (true);</pre>
     <textarea id="event-notes" placeholder="z.B. Sitzplatz 12A, Gate wird noch bekanntgegeben"></textarea>
 
     <div class="modal-actions">
-      <button class="btn secondary" id="event-cancel">Abbrechen</button>
-      <button class="btn primary" id="event-save">Speichern</button>
+      <button class="btn secondary" id="event-cancel" data-i18n="btn.cancel">Abbrechen</button>
+      <button class="btn primary" id="event-save" data-i18n="btn.save">Speichern</button>
     </div>
     <div class="modal-actions" id="event-delete-wrap" style="display:none;">
-      <button class="btn danger" id="event-delete">Löschen</button>
+      <button class="btn danger" id="event-delete" data-i18n="btn.delete">Löschen</button>
     </div>
   </div>
 </div>
@@ -2182,11 +2182,11 @@ create policy "u" on trips for update using (true);</pre>
     <textarea id="accom-notes" placeholder="z.B. Buchungsnummer, WLAN-Code, Check-in-Zeit"></textarea>
 
     <div class="modal-actions">
-      <button class="btn secondary" id="accom-cancel">Abbrechen</button>
-      <button class="btn primary" id="accom-save">Speichern</button>
+      <button class="btn secondary" id="accom-cancel" data-i18n="btn.cancel">Abbrechen</button>
+      <button class="btn primary" id="accom-save" data-i18n="btn.save">Speichern</button>
     </div>
     <div class="modal-actions" id="accom-delete-wrap" style="display:none;">
-      <button class="btn danger" id="accom-delete">Löschen</button>
+      <button class="btn danger" id="accom-delete" data-i18n="btn.delete">Löschen</button>
     </div>
   </div>
 </div>
@@ -2261,11 +2261,11 @@ create policy "u" on trips for update using (true);</pre>
     <textarea id="exp-notes" placeholder="z.B. Beleg-Nr., Aufteilung"></textarea>
 
     <div class="modal-actions">
-      <button class="btn secondary" id="exp-cancel">Abbrechen</button>
-      <button class="btn primary" id="exp-save">Speichern</button>
+      <button class="btn secondary" id="exp-cancel" data-i18n="btn.cancel">Abbrechen</button>
+      <button class="btn primary" id="exp-save" data-i18n="btn.save">Speichern</button>
     </div>
     <div class="modal-actions" id="exp-delete-wrap">
-      <button class="btn danger" id="exp-delete-btn" style="width:100%;">Löschen</button>
+      <button class="btn danger" id="exp-delete-btn" style="width:100%;" data-i18n="btn.delete">Löschen</button>
     </div>
   </div>
 </div>
@@ -2276,7 +2276,7 @@ create policy "u" on trips for update using (true);</pre>
     <h3>💶 Alle Ausgaben</h3>
     <div id="exp-list-body" style="max-height:60vh; overflow:auto; margin:10px 0;"></div>
     <div class="modal-actions">
-      <button class="btn secondary" id="exp-list-close">Schließen</button>
+      <button class="btn secondary" id="exp-list-close" data-i18n="btn.close">Schließen</button>
     </div>
   </div>
 </div>
@@ -2294,7 +2294,7 @@ create policy "u" on trips for update using (true);</pre>
     </div>
     <div id="doc-pp-err" class="modal-err"></div>
     <div class="modal-actions">
-      <button class="btn secondary" id="doc-pp-cancel">Abbrechen</button>
+      <button class="btn secondary" id="doc-pp-cancel" data-i18n="btn.cancel">Abbrechen</button>
       <button class="btn primary" id="doc-pp-submit">Entsperren</button>
     </div>
   </div>
@@ -2310,8 +2310,8 @@ create policy "u" on trips for update using (true);</pre>
     <div id="email-import-preview" style="margin-top:10px;"></div>
     <div id="email-import-err" class="modal-err"></div>
     <div class="modal-actions">
-      <button class="btn secondary" id="email-import-cancel">Abbrechen</button>
-      <button class="btn primary" id="email-import-add-btn" disabled>Hinzufügen</button>
+      <button class="btn secondary" id="email-import-cancel" data-i18n="btn.cancel">Abbrechen</button>
+      <button class="btn primary" id="email-import-add-btn" disabled data-i18n="btn.add">Hinzufügen</button>
     </div>
   </div>
 </div>
@@ -2327,8 +2327,8 @@ create policy "u" on trips for update using (true);</pre>
     <input type="text" id="doc-add-notes" placeholder="z.B. „Reisepass" oder „Auslandskrankenversicherung"" />
     <div id="doc-add-err" class="modal-err"></div>
     <div class="modal-actions">
-      <button class="btn secondary" id="doc-add-cancel">Abbrechen</button>
-      <button class="btn primary" id="doc-add-submit">Hinzufügen</button>
+      <button class="btn secondary" id="doc-add-cancel" data-i18n="btn.cancel">Abbrechen</button>
+      <button class="btn primary" id="doc-add-submit" data-i18n="btn.add">Hinzufügen</button>
     </div>
   </div>
 </div>
@@ -2358,7 +2358,7 @@ create policy "u" on trips for update using (true);</pre>
 // ============ App-Version ============
 // Bei Schema-Änderungen SCHEMA_VERSION hochzählen + Migration ergänzen.
 // APP_VERSION ist die User-sichtbare Version.
-const APP_VERSION = '0.7.9';
+const APP_VERSION = '0.8.0';
 const SCHEMA_VERSION = 3;
 
 // ============ Constants & Demo Data ============
@@ -3739,7 +3739,7 @@ function showSharedChangesDetail(allChanges) {
   let html = '<div class="modal" style="max-width:520px;">';
   html += '<div style="display:flex; justify-content:space-between; align-items:baseline; padding:8px 0 14px;">';
   html += '<h3 style="margin:0;">✨ Mitreisende-Änderungen</h3>';
-  html += '<button id="shared-changes-close" class="btn secondary" style="padding:6px 12px;">Schließen</button>';
+  html += '<button id="shared-changes-close" class="btn secondary" style="padding:6px 12px;" data-i18n="btn.close">Schließen</button>';
   html += '</div>';
   html += '<div style="max-height:60vh; overflow-y:auto;">';
   allChanges.forEach(function(c){
@@ -4295,28 +4295,28 @@ function renderHeute() {
   } else {
     html += `<div class="empty-card">
       <div class="ec-icon">🌤</div>
-      <div class="ec-title">Heute ist ungeplant</div>
-      <div class="ec-text">Keine Termine, keine Items für ${dateLong}.</div>
+      <div class="ec-title">${tr('heute.empty.title')}</div>
+      <div class="ec-text">${tr('heute.empty.text').replace('{date}', dateLong)}</div>
       <div class="empty-btn-row">
-        <button class="btn-primary" id="empty-add-plan-btn" type="button">📅 Termin</button>
-        <button class="btn-secondary" id="empty-add-hotel-btn" type="button">🏨 Hotel</button>
+        <button class="btn-primary" id="empty-add-plan-btn" type="button">${tr('heute.btn.event')}</button>
+        <button class="btn-secondary" id="empty-add-hotel-btn" type="button">${tr('heute.btn.hotel')}</button>
       </div>
     </div>`;
   }
 
   // Schnellaktionen
-  html += `<div class="caption">Schnellaktionen</div>`;
+  html += `<div class="caption">${tr('heute.qa.title')}</div>`;
   html += `<div class="quick-actions">
-    <button class="qa-btn" data-qa="hotel" type="button"><span class="qa-icon">🏨</span><span class="qa-label">Hotel</span></button>
-    <button class="qa-btn" data-qa="expense" type="button"><span class="qa-icon">＋</span><span class="qa-label">Ausgabe</span></button>
-    <button class="qa-btn" data-qa="fx" type="button"><span class="qa-icon">€€</span><span class="qa-label">Wechseln</span></button>
-    <button class="qa-btn" data-qa="safe" type="button"><span class="qa-icon">🔒</span><span class="qa-label">Safe</span></button>
-    <button class="qa-btn" data-qa="email" type="button"><span class="qa-icon">📧</span><span class="qa-label">Email-Import</span></button>
+    <button class="qa-btn" data-qa="hotel" type="button"><span class="qa-icon">🏨</span><span class="qa-label">${tr('heute.qa.hotel')}</span></button>
+    <button class="qa-btn" data-qa="expense" type="button"><span class="qa-icon">＋</span><span class="qa-label">${tr('heute.qa.expense')}</span></button>
+    <button class="qa-btn" data-qa="fx" type="button"><span class="qa-icon">€€</span><span class="qa-label">${tr('heute.qa.fx')}</span></button>
+    <button class="qa-btn" data-qa="safe" type="button"><span class="qa-icon">🔒</span><span class="qa-label">${tr('heute.qa.safe')}</span></button>
+    <button class="qa-btn" data-qa="email" type="button"><span class="qa-icon">📧</span><span class="qa-label">${tr('heute.qa.email')}</span></button>
   </div>`;
 
   // Nächste Tage
   if (nextDays.length > 0) {
-    html += `<div class="caption">Nächste Tage</div>`;
+    html += `<div class="caption">${tr('heute.next')}</div>`;
     nextDays.forEach(d => {
       html += `<button class="day-row" data-day="${d.iso}" type="button">
         <span class="dr-date">${escapeHtml(d.dayShort)} · ${escapeHtml(d.dateShort)}</span>
@@ -4327,12 +4327,12 @@ function renderHeute() {
   }
 
   // Trip-Übersicht
-  html += `<div class="caption">Deine Reise</div>
+  html += `<div class="caption">${tr('heute.stats.title')}</div>
     <div class="trip-overview">
-      <div class="to-stat"><div class="to-num">${stats.accoms}</div><div class="to-lbl">Hotels</div></div>
-      <div class="to-stat"><div class="to-num">${stats.items}</div><div class="to-lbl">Orte</div></div>
-      <div class="to-stat"><div class="to-num">${stats.events}</div><div class="to-lbl">Termine</div></div>
-      <div class="to-stat"><div class="to-num">€${stats.expensesEur}</div><div class="to-lbl">Ausgaben</div></div>
+      <div class="to-stat"><div class="to-num">${stats.accoms}</div><div class="to-lbl">${tr('heute.stats.hotels')}</div></div>
+      <div class="to-stat"><div class="to-num">${stats.items}</div><div class="to-lbl">${tr('heute.stats.places')}</div></div>
+      <div class="to-stat"><div class="to-num">${stats.events}</div><div class="to-lbl">${tr('heute.stats.events')}</div></div>
+      <div class="to-stat"><div class="to-num">€${stats.expensesEur}</div><div class="to-lbl">${tr('heute.stats.expenses')}</div></div>
     </div>`;
 
   html += `<div style="height:32px;"></div>`;
@@ -4590,7 +4590,7 @@ function renderMehr() {
   let html = buildTripStripHTML();
   html += `<header class="page-header">
     <h1 class="h-display">${tr('page.mehr')}</h1>
-    <div class="page-sub">Werkzeuge, Trip-Settings &amp; Profil</div>
+    <div class="page-sub">${tr('mehr.sub')}</div>
   </header>`;
 
   // REISE
@@ -4640,7 +4640,7 @@ function renderMehr() {
       <span class="mr-ch">›</span>
     </button>
     <button class="more-row" data-mehr-row="trip-share-snapshot" type="button"><span class="mr-ic">🔗</span><span class="mr-lbl">${tr('mehr.tripShareSnap')}</span><span class="mr-ch">›</span></button>
-    <button class="more-row" data-mehr-row="sync" type="button"><span class="mr-ic">🔄</span><span class="mr-lbl">${tr('mehr.sync')}</span><span class="mr-badge ${cloudEnabled() ? 'success' : 'muted'}">${cloudEnabled() ? 'aktiv' : 'aus'}</span><span class="mr-ch">›</span></button>
+    <button class="more-row" data-mehr-row="sync" type="button"><span class="mr-ic">🔄</span><span class="mr-lbl">${tr('mehr.sync')}</span><span class="mr-badge ${cloudEnabled() ? 'success' : 'muted'}">${cloudEnabled() ? tr('mehr.sync.active') : tr('mehr.sync.off')}</span><span class="mr-ch">›</span></button>
     <button class="more-row" data-mehr-row="trip-list" type="button"><span class="mr-ic">🧳</span><span class="mr-lbl">${tr('mehr.tripList')}</span><span class="mr-ch">›</span></button>
     <button class="more-row" data-mehr-row="export-pdf" type="button"><span class="mr-ic">📄</span><span class="mr-lbl">${tr('mehr.exportPdf')}</span><span class="mr-ch">›</span></button>
     <button class="more-row" data-mehr-row="export-ical" type="button"><span class="mr-ic">📅</span><span class="mr-lbl">${tr('mehr.exportIcal')}</span><span class="mr-ch">›</span></button>
@@ -4656,7 +4656,7 @@ function renderMehr() {
         <span class="mr-ic">👤</span>
         <div class="account-info">
           <span class="account-email">${escapeHtml(acc.email)}</span>
-          <span class="account-meta">Angemeldet seit ${new Date(acc.createdAt || Date.now()).toLocaleDateString('de-DE')}</span>
+          <span class="account-meta">${tr('mehr.account.since')} ${new Date(acc.createdAt || Date.now()).toLocaleDateString(getLang() === 'de' ? 'de-DE' : getLang() === 'vi' ? 'vi-VN' : 'en-US')}</span>
         </div>
       </div>
       <button class="more-row danger-row" data-mehr-row="logout" type="button"><span class="mr-ic">🚪</span><span class="mr-lbl">${tr('mehr.logout')}</span><span class="mr-ch">›</span></button>
@@ -5249,7 +5249,7 @@ function openHelp() {
     modal.innerHTML = '<div class="modal" style="max-width:680px; max-height:85vh; overflow:hidden; display:flex; flex-direction:column;">' +
       '<div style="display:flex; justify-content:space-between; align-items:baseline; padding:8px 0 14px;">' +
         '<h3 style="margin:0;">Hilfe &amp; Anleitung</h3>' +
-        '<button id="help-close" class="btn secondary" style="padding:6px 12px;">Schließen</button>' +
+        '<button id="help-close" class="btn secondary" style="padding:6px 12px;" data-i18n="btn.close">Schließen</button>' +
       '</div>' +
       '<div id="help-body" style="overflow-y:auto; flex:1; padding-right:4px;"></div>' +
     '</div>';
@@ -5337,7 +5337,7 @@ function openSosSheet() {
       <a class="sos-item" href="https://www.google.com/search?q=${encodeURIComponent('Deutsch sprachiger Arzt ' + city)}" target="_blank" rel="noopener">👨‍⚕️ Arzt (DE)</a>
       <a class="sos-item" href="https://www.auswaertiges-amt.de/de/ReiseUndSicherheit/vertretungen/${encodeURIComponent((t.country || '').toLowerCase())}" target="_blank" rel="noopener">🇩🇪 Botschaft</a>
     </div>
-    <button class="btn-cancel" id="sos-sheet-close" type="button">Schließen</button>
+    <button class="btn-cancel" id="sos-sheet-close" type="button" data-i18n="btn.close">Schließen</button>
   `;
   sheet.classList.add('show');
   body.querySelector('#sos-sheet-close').addEventListener('click', () => sheet.classList.remove('show'));
@@ -5364,7 +5364,7 @@ function openTripSwitcher() {
     </button>`;
   });
   html += `<button class="trip-new-btn" id="ts-new-trip" type="button">＋ Neue Reise</button>`;
-  html += `<button class="btn-cancel" id="ts-close" type="button">Schließen</button>`;
+  html += `<button class="btn-cancel" id="ts-close" type="button" data-i18n="btn.close">Schließen</button>`;
   body.innerHTML = html;
   sheet.classList.add('show');
   body.querySelectorAll('[data-trip-id]').forEach(btn => {
@@ -5408,7 +5408,7 @@ function renderList() {
   const itCount = (t0.items || []).length;
   const acCount = (t0.accommodations || []).length;
   header.innerHTML = `<h1 class="h-display">${tr('page.plan')}</h1>
-    <div class="page-sub">${evCount} Termine · ${itCount} Orte · ${acCount} Hotels</div>`;
+    <div class="page-sub">${evCount} ${tr('plan.events')} · ${itCount} ${tr('plan.places')} · ${acCount} ${tr('plan.hotels')}</div>`;
   container.appendChild(header);
 
   // Länder-Tipps-Panel wenn Land gesetzt (Mehr → Reiseinfos scrollt hier hin)
@@ -5464,7 +5464,7 @@ function renderList() {
         const starsInline = [1,2,3,4,5].map(n =>
           `<span class="star star-inline ${n <= r ? 'active' : ''}" data-quickrate="${n}" data-itemid="${item.id}">★</span>`
         ).join('');
-        const starLabel = r ? `${r}.0` : 'Bewerten';
+        const starLabel = r ? `${r}.0` : tr('plan.rate');
         const stars = `<div class="stars rating-mini" data-item-rate="${item.id}" title="Jetzt bewerten">${starsInline}<span class="rating-mini-label">${starLabel}</span></div>`;
         const commentSnip = item.comment ? `<div class="comment-snippet">"${escapeHtml(String(item.comment).slice(0, 60))}${item.comment.length > 60 ? '…' : ''}"</div>` : '';
         const addressHtml = item.address
@@ -5624,7 +5624,7 @@ function renderCountryPanel(container) {
     ? `<div class="cp-row"><strong>Zeitzone</strong><span>${escapeHtml(tzInfo.local + ' Uhr · ' + tzInfo.offsetLabel)}</span></div>`
     : '';
   panel.innerHTML = `
-    <div class="cp-head"><h3>🌍 Reiseinfos ${escapeHtml(info.name)}</h3></div>
+    <div class="cp-head"><h3>${tr('plan.info.head')} ${escapeHtml(info.name)}</h3></div>
     <div class="cp-body">
       ${tzRow}
       <div class="cp-row"><strong>Steckdose</strong><span>${escapeHtml(info.plug)} · ${escapeHtml(info.volt)}</span></div>
@@ -5704,7 +5704,7 @@ function renderItineraryPanel(container) {
   panel.className = 'itin-panel';
   if (entries.length === 0) {
     panel.innerHTML = `
-      <div class="itin-head"><h3>🗺️ Reiseplan</h3></div>
+      <div class="itin-head"><h3>${tr('plan.itin.head')}</h3></div>
       <div class="itin-body">
         ${emptyStateHTML({ icon: '📅', title: 'Noch keine Termine geplant', hint: 'Termine werden automatisch aus Events, Unterkünften und Orten mit Datum zusammengestellt. Trage in einem Item ein Datum + Uhrzeit ein.' })}
         <button class="btn-itin-import" id="itin-email-import-btn">📧 Bestätigungs-Email einfügen</button>
@@ -6095,7 +6095,7 @@ function renderFxPanel(container, opts) {
   const panel = document.createElement('div');
   panel.className = 'fx-panel';
   panel.innerHTML = `
-    <div class="fx-head"><h3>💱 Währungsrechner</h3></div>
+    <div class="fx-head"><h3>${tr('fx.head')}</h3></div>
     <div class="fx-body">
       <div class="fx-row">
         <input type="text" inputmode="decimal" class="fx-input" id="fx-from-val" value="10" autocomplete="off" />
@@ -6174,7 +6174,7 @@ function renderFxPanel(container, opts) {
     const ageH = Math.round(age / 3600000);
     if (fxState.ts === 0) { info.textContent = '⚠️ Offline – ungefähre Kurse'; info.classList.add('offline'); }
     else if (age > FX_TTL_MS) { info.textContent = `⚠️ Offline – Kurse ${ageH}h alt`; info.classList.add('offline'); }
-    else { info.textContent = `Kurs aktualisiert · ${ageH < 1 ? 'eben' : ageH + 'h'}`; info.classList.remove('offline'); }
+    else { info.textContent = `${tr('fx.rate.updated')} · ${ageH < 1 ? tr('fx.rate.fresh') : ageH + 'h'}`; info.classList.remove('offline'); }
   };
 
   // Kurse laden (async), dann Dropdowns + Umrechnung refreshen
@@ -7233,7 +7233,33 @@ const I18N = {
     // Toasts (häufige)
     'toast.saved': '💾 Gespeichert', 'toast.synced': '☁️ Aktualisiert',
     // Empty-Hints (Default)
-    'empty.fallback': 'Nichts hier'
+    'empty.fallback': 'Nichts hier',
+    // Heute-Tab
+    'heute.empty.title': 'Heute ist ungeplant',
+    'heute.empty.text': 'Keine Termine, keine Items für {date}.',
+    'heute.btn.event': '📅 Termin', 'heute.btn.hotel': '🏨 Hotel',
+    'heute.qa.title': 'SCHNELLAKTIONEN',
+    'heute.qa.hotel': 'Hotel', 'heute.qa.expense': 'Ausgabe',
+    'heute.qa.fx': 'Wechseln', 'heute.qa.safe': 'Safe', 'heute.qa.email': 'Email-Import',
+    'heute.next': 'Nächste Tage', 'heute.stats.title': 'DEINE REISE',
+    'heute.stats.hotels': 'Hotels', 'heute.stats.places': 'Orte',
+    'heute.stats.events': 'Termine', 'heute.stats.expenses': 'Ausgaben',
+    // Plan-Tab Counter & Sektionen
+    'plan.events': 'Termine', 'plan.places': 'Orte', 'plan.hotels': 'Hotels',
+    'plan.itin.head': '🗺️ Reiseplan', 'plan.info.head': '🌍 Reiseinfos',
+    'plan.rate': 'Bewerten', 'plan.by': 'von',
+    // Map-Tab
+    'map.sheet.places': 'Orte', 'map.sheet.hint': 'Tippe Handle zum Erweitern',
+    'map.chip.all': 'Alle', 'map.chip.sight': 'Sehenswürdigkeit',
+    'map.chip.restaurant': 'Restaurant', 'map.chip.shopping': 'Shopping',
+    'map.chip.buy': 'Vor Ort kaufen', 'map.chip.accom': 'Unterkunft',
+    // Mehr-Tab
+    'mehr.sub': 'Werkzeuge, Trip-Settings & Profil',
+    'mehr.sync.active': 'aktiv', 'mehr.sync.off': 'aus',
+    'mehr.account.since': 'Angemeldet seit',
+    // FX
+    'fx.head': '💱 Währungsrechner',
+    'fx.rate.updated': 'Kurs aktualisiert', 'fx.rate.fresh': 'eben'
   },
   en: {
     'nav.heute': 'Today', 'nav.plan': 'Plan', 'nav.karte': 'Map', 'nav.geld': 'Money', 'nav.mehr': 'More',
@@ -7264,7 +7290,28 @@ const I18N = {
     'auth.email': 'Email', 'auth.password': 'Password',
     'auth.forgot': 'Forgot password?',
     'toast.saved': '💾 Saved', 'toast.synced': '☁️ Updated',
-    'empty.fallback': 'Nothing here'
+    'empty.fallback': 'Nothing here',
+    'heute.empty.title': 'Nothing planned today',
+    'heute.empty.text': 'No events, no items for {date}.',
+    'heute.btn.event': '📅 Event', 'heute.btn.hotel': '🏨 Hotel',
+    'heute.qa.title': 'QUICK ACTIONS',
+    'heute.qa.hotel': 'Hotel', 'heute.qa.expense': 'Expense',
+    'heute.qa.fx': 'Exchange', 'heute.qa.safe': 'Safe', 'heute.qa.email': 'Email import',
+    'heute.next': 'Coming up', 'heute.stats.title': 'YOUR TRIP',
+    'heute.stats.hotels': 'Hotels', 'heute.stats.places': 'Places',
+    'heute.stats.events': 'Events', 'heute.stats.expenses': 'Expenses',
+    'plan.events': 'Events', 'plan.places': 'Places', 'plan.hotels': 'Hotels',
+    'plan.itin.head': '🗺️ Itinerary', 'plan.info.head': '🌍 Country info',
+    'plan.rate': 'Rate', 'plan.by': 'by',
+    'map.sheet.places': 'Places', 'map.sheet.hint': 'Tap handle to expand',
+    'map.chip.all': 'All', 'map.chip.sight': 'Attraction',
+    'map.chip.restaurant': 'Restaurant', 'map.chip.shopping': 'Shopping',
+    'map.chip.buy': 'Buy on site', 'map.chip.accom': 'Accommodation',
+    'mehr.sub': 'Tools, trip settings & profile',
+    'mehr.sync.active': 'active', 'mehr.sync.off': 'off',
+    'mehr.account.since': 'Member since',
+    'fx.head': '💱 Currency converter',
+    'fx.rate.updated': 'Rate updated', 'fx.rate.fresh': 'just now'
   },
   vi: {
     'nav.heute': 'Hôm nay', 'nav.plan': 'Lịch trình', 'nav.karte': 'Bản đồ', 'nav.geld': 'Tiền', 'nav.mehr': 'Thêm',
@@ -7295,7 +7342,28 @@ const I18N = {
     'auth.email': 'Email', 'auth.password': 'Mật khẩu',
     'auth.forgot': 'Quên mật khẩu?',
     'toast.saved': '💾 Đã lưu', 'toast.synced': '☁️ Đã cập nhật',
-    'empty.fallback': 'Không có gì ở đây'
+    'empty.fallback': 'Không có gì ở đây',
+    'heute.empty.title': 'Hôm nay chưa có kế hoạch',
+    'heute.empty.text': 'Không có sự kiện, không có mục cho {date}.',
+    'heute.btn.event': '📅 Sự kiện', 'heute.btn.hotel': '🏨 Khách sạn',
+    'heute.qa.title': 'HÀNH ĐỘNG NHANH',
+    'heute.qa.hotel': 'Khách sạn', 'heute.qa.expense': 'Chi tiêu',
+    'heute.qa.fx': 'Đổi tiền', 'heute.qa.safe': 'Két', 'heute.qa.email': 'Nhập email',
+    'heute.next': 'Sắp tới', 'heute.stats.title': 'CHUYẾN ĐI CỦA BẠN',
+    'heute.stats.hotels': 'Khách sạn', 'heute.stats.places': 'Địa điểm',
+    'heute.stats.events': 'Sự kiện', 'heute.stats.expenses': 'Chi tiêu',
+    'plan.events': 'Sự kiện', 'plan.places': 'Địa điểm', 'plan.hotels': 'Khách sạn',
+    'plan.itin.head': '🗺️ Lịch trình', 'plan.info.head': '🌍 Thông tin nước',
+    'plan.rate': 'Đánh giá', 'plan.by': 'bởi',
+    'map.sheet.places': 'Địa điểm', 'map.sheet.hint': 'Chạm để mở rộng',
+    'map.chip.all': 'Tất cả', 'map.chip.sight': 'Tham quan',
+    'map.chip.restaurant': 'Nhà hàng', 'map.chip.shopping': 'Mua sắm',
+    'map.chip.buy': 'Mua tại chỗ', 'map.chip.accom': 'Chỗ ở',
+    'mehr.sub': 'Công cụ, cài đặt & hồ sơ',
+    'mehr.sync.active': 'đang bật', 'mehr.sync.off': 'tắt',
+    'mehr.account.since': 'Tham gia từ',
+    'fx.head': '💱 Chuyển đổi tiền tệ',
+    'fx.rate.updated': 'Tỷ giá cập nhật', 'fx.rate.fresh': 'vừa xong'
   }
 };
 
@@ -7457,11 +7525,11 @@ function showDetail(id, scrollToRating) {
       <button class="btn secondary" id="d-toggle-done">${item.done ? '○ Als nicht erledigt markieren' : '✓ Als erledigt markieren'}</button>
     </div>
     <div class="modal-actions">
-      <button class="btn secondary" id="d-close">Schließen</button>
+      <button class="btn secondary" id="d-close" data-i18n="btn.close">Schließen</button>
       <button class="btn secondary" id="d-edit">Bearbeiten</button>
     </div>
     <div class="modal-actions">
-      <button class="btn danger" id="d-delete">Löschen</button>
+      <button class="btn danger" id="d-delete" data-i18n="btn.delete">Löschen</button>
     </div>
   `;
   document.getElementById('detail-modal').classList.add('open');
@@ -8118,7 +8186,7 @@ function renderMapSheetList() {
       done: false
     });
   });
-  count.textContent = entries.length + ' Ort' + (entries.length === 1 ? '' : 'e');
+  count.textContent = entries.length + ' ' + tr('map.sheet.places');
   if (entries.length === 0) {
     list.innerHTML = '<div style="padding:20px; text-align:center; color:var(--text-muted); font-size:13px;">Keine Orte für diesen Filter.</div>';
     return;
