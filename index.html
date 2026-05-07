@@ -2358,7 +2358,7 @@ create policy "u" on trips for update using (true);</pre>
 // ============ App-Version ============
 // Bei Schema-Änderungen SCHEMA_VERSION hochzählen + Migration ergänzen.
 // APP_VERSION ist die User-sichtbare Version.
-const APP_VERSION = '0.7.7';
+const APP_VERSION = '0.7.8';
 const SCHEMA_VERSION = 3;
 
 // ============ Constants & Demo Data ============
@@ -4408,15 +4408,15 @@ function renderGeld() {
   const t = T();
   let html = buildTripStripHTML();
   html += `<header class="page-header">
-    <h1 class="h-display">Geld</h1>
-    <div class="page-sub">${escapeHtml(t.country ? findCountry(t.country)?.name || '' : 'Budget & Wechsel')}</div>
+    <h1 class="h-display">${tr('page.geld')}</h1>
+    <div class="page-sub">${escapeHtml(t.country ? findCountry(t.country)?.name || '' : tr('page.geld.sub'))}</div>
   </header>`;
   // Sub-Tabs
   html += `<div class="geld-tabs">
-    <button class="gt ${geldSubTab==='expenses'?'active':''}" data-gt="expenses" type="button">Ausgaben</button>
-    <button class="gt ${geldSubTab==='split'?'active':''}" data-gt="split" type="button">Aufteilen</button>
-    <button class="gt ${geldSubTab==='fx'?'active':''}" data-gt="fx" type="button">Wechseln</button>
-    <button class="gt ${geldSubTab==='visa'?'active':''}" data-gt="visa" type="button">Visum</button>
+    <button class="gt ${geldSubTab==='expenses'?'active':''}" data-gt="expenses" type="button">${tr('geld.tab.expenses')}</button>
+    <button class="gt ${geldSubTab==='split'?'active':''}" data-gt="split" type="button">${tr('geld.tab.split')}</button>
+    <button class="gt ${geldSubTab==='fx'?'active':''}" data-gt="fx" type="button">${tr('geld.tab.fx')}</button>
+    <button class="gt ${geldSubTab==='visa'?'active':''}" data-gt="visa" type="button">${tr('geld.tab.visa')}</button>
   </div>`;
   html += `<div id="geld-sub-container"></div>`;
   html += `<div style="height:32px;"></div>`;
@@ -4667,7 +4667,8 @@ function renderMehr() {
   const sosOn = state.prefs && state.prefs.sosFabEnabled !== false;
   html += `<div class="caption">App</div>`;
   html += `<div class="more-section">
-    <button class="more-row" data-mehr-row="settings" type="button"><span class="mr-ic">⚙️</span><span class="mr-lbl">Einstellungen</span><span class="mr-ch">›</span></button>
+    <button class="more-row" data-mehr-row="lang" type="button"><span class="mr-ic">🌐</span><span class="mr-lbl">${tr('mehr.lang')}: ${getLang() === 'de' ? 'Deutsch' : (getLang() === 'en' ? 'English' : 'Tiếng Việt')}</span><span class="mr-ch">›</span></button>
+    <button class="more-row" data-mehr-row="settings" type="button"><span class="mr-ic">⚙️</span><span class="mr-lbl">${tr('mehr.settings')}</span><span class="mr-ch">›</span></button>
     <div class="more-row toggle-row">
       <span class="mr-ic">🚨</span><span class="mr-lbl">SOS-Knopf permanent zeigen</span>
       <label class="toggle"><input type="checkbox" id="pref-sos-fab" ${sosOn ? 'checked' : ''}><span class="toggle-slider"></span></label>
@@ -4711,6 +4712,7 @@ function handleMehrRow(action) {
     case 'trip-share-snapshot': document.getElementById('share-btn')?.click(); break;
     case 'export-trips': exportAllTrips(); break;
     case 'export-pdf': exportTripPdf(); break;
+    case 'lang': openLangPicker(); break;
     case 'export-ical': exportTripIcal(); break;
     case 'import-trips': openImportTripsDialog(); break;
     case 'settings': openSettings(); break;
@@ -5194,6 +5196,48 @@ function scrollToPanel(panelClass, fallbackView) {
     el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, 160);
 }
+function openLangPicker() {
+  let modal = document.getElementById('lang-modal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'lang-modal';
+    modal.className = 'modal-backdrop';
+    document.body.appendChild(modal);
+    modal.addEventListener('click', function(e){ if (e.target === modal) modal.classList.remove('open'); });
+  }
+  const cur = getLang();
+  const langs = [
+    { code: 'de', label: 'Deutsch', emoji: '🇩🇪' },
+    { code: 'en', label: 'English', emoji: '🇬🇧' },
+    { code: 'vi', label: 'Tiếng Việt', emoji: '🇻🇳' }
+  ];
+  let html = '<div class="modal" style="max-width:420px;">';
+  html += '<div style="display:flex; justify-content:space-between; align-items:baseline; padding:8px 0 14px;">';
+  html += '<h3 style="margin:0;">' + t('mehr.lang') + '</h3>';
+  html += '<button id="lang-close" class="btn secondary" style="padding:6px 12px;">' + t('btn.close') + '</button>';
+  html += '</div>';
+  html += '<div style="display:flex; flex-direction:column; gap:6px;">';
+  langs.forEach(function(l){
+    const active = l.code === cur;
+    html += '<button class="lang-row" data-lang="' + l.code + '" style="display:flex; align-items:center; gap:12px; padding:14px 16px; background:' + (active ? 'var(--accent-soft, #FFE5DE)' : 'var(--card-bg, #f5f5f0)') + '; border:' + (active ? '2px solid var(--accent, #FF385C)' : '1px solid var(--border, #eee)') + '; border-radius:10px; cursor:pointer; font-size:15px; text-align:left; width:100%;">' +
+      '<span style="font-size:24px;">' + l.emoji + '</span>' +
+      '<span style="flex:1; font-weight:600;">' + l.label + '</span>' +
+      (active ? '<span style="color:var(--accent, #FF385C);">✓</span>' : '') +
+      '</button>';
+  });
+  html += '</div></div>';
+  modal.innerHTML = html;
+  modal.classList.add('open');
+  document.getElementById('lang-close').addEventListener('click', function(){ modal.classList.remove('open'); });
+  modal.querySelectorAll('.lang-row').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      setLang(btn.dataset.lang);
+      modal.classList.remove('open');
+      toast('🌐 ' + btn.querySelector('span:nth-child(2)').textContent);
+    });
+  });
+}
+
 function openHelp() {
   // v0.7.1: Echte Hilfe-Seite als Modal mit Accordion-Sektionen.
   // Inhalt deckt die wichtigsten Use-Cases ab. Bei Bedarf erweitern.
@@ -7147,6 +7191,146 @@ function emptyStateHTML(opts) {
     '</div>';
 }
 
+// v0.7.8: i18n-System (DE/EN/VI). Pragmatisch — die wichtigsten Strings via
+// t('key'). Was nicht im Wörterbuch ist, fällt auf Deutsch zurück. Sprache
+// wird in localStorage 'tm_lang' gespeichert; Default = Browser oder DE.
+const I18N = {
+  de: {
+    // Bottom-Nav
+    'nav.heute': 'Heute', 'nav.plan': 'Plan', 'nav.karte': 'Karte', 'nav.geld': 'Geld', 'nav.mehr': 'Mehr',
+    // Page-Headers
+    'page.heute': 'Heute', 'page.plan': 'Reiseplan', 'page.karte': 'Karte',
+    'page.geld': 'Geld', 'page.mehr': 'Mehr',
+    'page.geld.sub': 'Budget & Wechsel',
+    // Geld-Tabs
+    'geld.tab.expenses': 'Ausgaben', 'geld.tab.split': 'Aufteilen',
+    'geld.tab.fx': 'Wechseln', 'geld.tab.visa': 'Visum',
+    // Mehr-Tab Captions
+    'mehr.cap.reise': 'Reise', 'mehr.cap.trip': 'Trip', 'mehr.cap.account': 'Account', 'mehr.cap.app': 'App',
+    // Mehr-Tab Rows
+    'mehr.packlist': 'Packliste', 'mehr.info': 'Reiseinfos', 'mehr.visa': 'Visum',
+    'mehr.docs': 'Dokumenten-Safe', 'mehr.sos': 'Notfall-Details', 'mehr.calendar': 'Kalender-Ansicht',
+    'mehr.tripEdit': 'Trip bearbeiten', 'mehr.tripShareSnap': 'Snapshot-Link teilen',
+    'mehr.sync': 'Sync', 'mehr.tripList': 'Reisen verwalten',
+    'mehr.exportPdf': 'Trip als PDF exportieren', 'mehr.exportIcal': 'Termine als Kalender exportieren (.ics)',
+    'mehr.exportJson': 'Backup als JSON exportieren', 'mehr.importJson': 'Backup importieren',
+    'mehr.logout': 'Abmelden', 'mehr.settings': 'Einstellungen',
+    'mehr.sosFab': 'SOS-Knopf permanent zeigen',
+    'mehr.help': 'Hilfe & Anleitung',
+    'mehr.lang': 'Sprache', 'mehr.langDe': 'Deutsch', 'mehr.langEn': 'English', 'mehr.langVi': 'Tiếng Việt',
+    'mehr.members.label': 'Mitglieder', 'mehr.members.tripShare': 'Trip teilen',
+    'mehr.members.shared': 'Geteilt mit', 'mehr.members.onlyYou': 'Nur du — teile den Invite-Link',
+    'mehr.live': 'Live',
+    // Common buttons
+    'btn.save': 'Speichern', 'btn.cancel': 'Abbrechen', 'btn.delete': 'Löschen',
+    'btn.add': 'Hinzufügen', 'btn.close': 'Schließen', 'btn.back': 'Zurück',
+    // Auth
+    'auth.title': 'Plane deine Reisen',
+    'auth.subtitle': 'Erstelle einen Account, damit deine Reisen sicher in der Cloud liegen und auf allen Geräten verfügbar sind.',
+    'auth.signin': 'Anmelden', 'auth.signup': 'Registrieren',
+    'auth.email': 'Email', 'auth.password': 'Passwort',
+    'auth.forgot': 'Passwort vergessen?',
+    // Toasts (häufige)
+    'toast.saved': '💾 Gespeichert', 'toast.synced': '☁️ Aktualisiert',
+    // Empty-Hints (Default)
+    'empty.fallback': 'Nichts hier'
+  },
+  en: {
+    'nav.heute': 'Today', 'nav.plan': 'Plan', 'nav.karte': 'Map', 'nav.geld': 'Money', 'nav.mehr': 'More',
+    'page.heute': 'Today', 'page.plan': 'Itinerary', 'page.karte': 'Map',
+    'page.geld': 'Money', 'page.mehr': 'More',
+    'page.geld.sub': 'Budget & Exchange',
+    'geld.tab.expenses': 'Expenses', 'geld.tab.split': 'Split',
+    'geld.tab.fx': 'Exchange', 'geld.tab.visa': 'Visa',
+    'mehr.cap.reise': 'Trip', 'mehr.cap.trip': 'Trip', 'mehr.cap.account': 'Account', 'mehr.cap.app': 'App',
+    'mehr.packlist': 'Packing list', 'mehr.info': 'Country info', 'mehr.visa': 'Visa',
+    'mehr.docs': 'Document safe', 'mehr.sos': 'Emergency info', 'mehr.calendar': 'Calendar view',
+    'mehr.tripEdit': 'Edit trip', 'mehr.tripShareSnap': 'Share snapshot link',
+    'mehr.sync': 'Sync', 'mehr.tripList': 'Manage trips',
+    'mehr.exportPdf': 'Export trip as PDF', 'mehr.exportIcal': 'Export dates as calendar (.ics)',
+    'mehr.exportJson': 'Export backup as JSON', 'mehr.importJson': 'Import backup',
+    'mehr.logout': 'Sign out', 'mehr.settings': 'Settings',
+    'mehr.sosFab': 'Always show SOS button',
+    'mehr.help': 'Help & guide',
+    'mehr.lang': 'Language', 'mehr.langDe': 'Deutsch', 'mehr.langEn': 'English', 'mehr.langVi': 'Tiếng Việt',
+    'mehr.members.label': 'Members', 'mehr.members.tripShare': 'Share trip',
+    'mehr.members.shared': 'Shared with', 'mehr.members.onlyYou': 'Just you — share the invite link',
+    'mehr.live': 'Live',
+    'btn.save': 'Save', 'btn.cancel': 'Cancel', 'btn.delete': 'Delete',
+    'btn.add': 'Add', 'btn.close': 'Close', 'btn.back': 'Back',
+    'auth.title': 'Plan your trips',
+    'auth.subtitle': 'Create an account to keep your trips safe in the cloud and available on all your devices.',
+    'auth.signin': 'Sign in', 'auth.signup': 'Sign up',
+    'auth.email': 'Email', 'auth.password': 'Password',
+    'auth.forgot': 'Forgot password?',
+    'toast.saved': '💾 Saved', 'toast.synced': '☁️ Updated',
+    'empty.fallback': 'Nothing here'
+  },
+  vi: {
+    'nav.heute': 'Hôm nay', 'nav.plan': 'Lịch trình', 'nav.karte': 'Bản đồ', 'nav.geld': 'Tiền', 'nav.mehr': 'Thêm',
+    'page.heute': 'Hôm nay', 'page.plan': 'Lịch trình', 'page.karte': 'Bản đồ',
+    'page.geld': 'Tiền', 'page.mehr': 'Thêm',
+    'page.geld.sub': 'Ngân sách & Tỷ giá',
+    'geld.tab.expenses': 'Chi tiêu', 'geld.tab.split': 'Chia tiền',
+    'geld.tab.fx': 'Đổi tiền', 'geld.tab.visa': 'Visa',
+    'mehr.cap.reise': 'Chuyến đi', 'mehr.cap.trip': 'Chuyến đi', 'mehr.cap.account': 'Tài khoản', 'mehr.cap.app': 'Ứng dụng',
+    'mehr.packlist': 'Danh sách đóng gói', 'mehr.info': 'Thông tin nước', 'mehr.visa': 'Visa',
+    'mehr.docs': 'Két tài liệu', 'mehr.sos': 'Thông tin khẩn cấp', 'mehr.calendar': 'Lịch',
+    'mehr.tripEdit': 'Chỉnh sửa chuyến đi', 'mehr.tripShareSnap': 'Chia sẻ liên kết tạm',
+    'mehr.sync': 'Đồng bộ', 'mehr.tripList': 'Quản lý chuyến đi',
+    'mehr.exportPdf': 'Xuất chuyến đi PDF', 'mehr.exportIcal': 'Xuất lịch (.ics)',
+    'mehr.exportJson': 'Sao lưu JSON', 'mehr.importJson': 'Nhập sao lưu',
+    'mehr.logout': 'Đăng xuất', 'mehr.settings': 'Cài đặt',
+    'mehr.sosFab': 'Luôn hiện nút SOS',
+    'mehr.help': 'Trợ giúp',
+    'mehr.lang': 'Ngôn ngữ', 'mehr.langDe': 'Deutsch', 'mehr.langEn': 'English', 'mehr.langVi': 'Tiếng Việt',
+    'mehr.members.label': 'Thành viên', 'mehr.members.tripShare': 'Chia sẻ chuyến đi',
+    'mehr.members.shared': 'Chia sẻ với', 'mehr.members.onlyYou': 'Chỉ bạn — gửi link mời',
+    'mehr.live': 'Live',
+    'btn.save': 'Lưu', 'btn.cancel': 'Hủy', 'btn.delete': 'Xóa',
+    'btn.add': 'Thêm', 'btn.close': 'Đóng', 'btn.back': 'Quay lại',
+    'auth.title': 'Lên kế hoạch chuyến đi',
+    'auth.subtitle': 'Tạo tài khoản để lưu chuyến đi trên đám mây và truy cập từ mọi thiết bị.',
+    'auth.signin': 'Đăng nhập', 'auth.signup': 'Đăng ký',
+    'auth.email': 'Email', 'auth.password': 'Mật khẩu',
+    'auth.forgot': 'Quên mật khẩu?',
+    'toast.saved': '💾 Đã lưu', 'toast.synced': '☁️ Đã cập nhật',
+    'empty.fallback': 'Không có gì ở đây'
+  }
+};
+
+function getLang() {
+  const stored = localStorage.getItem('tm_lang');
+  if (stored && I18N[stored]) return stored;
+  const nav = (navigator.language || 'de').toLowerCase();
+  if (nav.startsWith('vi')) return 'vi';
+  if (nav.startsWith('en')) return 'en';
+  return 'de';
+}
+function setLang(lang) {
+  if (!I18N[lang]) return;
+  localStorage.setItem('tm_lang', lang);
+  refreshCurrentView();
+  if (typeof renderHeader === 'function') renderHeader();
+  // Bottom-Nav neu beschriften
+  document.querySelectorAll('.bottom-nav .nav-btn').forEach(function(b){
+    const v = b.dataset.view;
+    const map = { heute: 'nav.heute', list: 'nav.plan', plan: 'nav.plan', map: 'nav.karte', geld: 'nav.geld', mehr: 'nav.mehr' };
+    if (map[v]) {
+      const lbl = b.querySelector('.nav-lbl');
+      if (lbl) lbl.textContent = t(map[v]);
+    }
+  });
+}
+function tr(key, fallback) { return t(key, fallback); }
+function t(key, fallback) {
+  const lang = getLang();
+  const dict = I18N[lang] || I18N.de;
+  if (dict[key] !== undefined) return dict[key];
+  if (I18N.de[key] !== undefined) return I18N.de[key];
+  return fallback != null ? fallback : key;
+}
+
 // ============ Collapsible Sections ============
 // Per-Device UI-State: wird nicht gesynct. Key-Schema: collapsed.<tripId>.<section>
 function getCollapseKey(section) {
@@ -7793,7 +7977,9 @@ document.getElementById('event-delete').addEventListener('click', () => {
 // ============ Map view ============
 function initMap() {
   if (map) return;
-  map = L.map('map', { zoomControl: true }).setView(T().center, 13);
+  map = L.map('map', { zoomControl: false }).setView(T().center, 13);
+  // v0.7.8: Zoom-Buttons auf topright, damit Filter-Chips oben links nicht verdeckt werden
+  L.control.zoom({ position: 'topright' }).addTo(map);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© OpenStreetMap',
     maxZoom: 19
@@ -9164,6 +9350,9 @@ document.body.setAttribute('data-view', 'heute');
 bindAuthGate();
 
 // Boot-Auth: Magic-Link Callback ODER existierende Session ODER Login-Gate zeigen
+// v0.7.8: Sprache initial anwenden
+try { if (typeof setLang === 'function') setLang(getLang()); } catch(_) {}
+
 (async function bootAuth() {
   // 1. Kommen wir gerade von einem Magic-Link zurück? (#access_token=... im URL-Hash)
   const cb = parseAuthHash();
@@ -9329,13 +9518,10 @@ function showForceUpdateBanner(newVer) {
     banner.remove();
   });
 }
-// v0.7.4: Pull-to-Refresh auf Heute/Plan-Views aktivieren (sobald DOM bereit)
-setTimeout(function() {
-  const heuteEl = document.getElementById('view-heute');
-  const planEl = document.getElementById('view-plan') || document.getElementById('view-list');
-  if (heuteEl) { heuteEl.style.position = heuteEl.style.position || 'relative'; attachPullToRefresh(heuteEl); }
-  if (planEl) { planEl.style.position = planEl.style.position || 'relative'; attachPullToRefresh(planEl); }
-}, 1500);
+// v0.7.8: Pull-to-Refresh-Boot-Attach DEAKTIVIERT — blockt natives Scrolling auf
+// Mobile (touchstart bei scrollTop=0 fängt das touch ab, normales runterziehen
+// wird als 'Pull' interpretiert). User kann via ☁️-Indicator manuell syncen.
+// attachPullToRefresh-Funktion bleibt im Code für eventuelle spätere Reaktivierung.
 // Beim Boot mit kleiner Verzögerung — App-Init nicht blockieren
 setTimeout(() => { checkLiveVersionFallback(); }, 3000);
 // Wenn der User den Tab wieder fokussiert, nochmal prüfen
