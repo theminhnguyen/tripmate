@@ -2358,7 +2358,7 @@ create policy "u" on trips for update using (true);</pre>
 // ============ App-Version ============
 // Bei Schema-Änderungen SCHEMA_VERSION hochzählen + Migration ergänzen.
 // APP_VERSION ist die User-sichtbare Version.
-const APP_VERSION = '0.8.0';
+const APP_VERSION = '0.8.1';
 const SCHEMA_VERSION = 3;
 
 // ============ Constants & Demo Data ============
@@ -3542,13 +3542,40 @@ async function pushSharedTrip(tripId) {
   if (!t || !t.sharedRoom) return;
   try {
     const acc = getAccount();
-    // Owner-Email setzen falls noch leer
-    if (!t.ownerEmail && acc) t.ownerEmail = acc.email;
-    // Eigene Email zu members hinzufügen falls noch nicht drin
-    if (acc && !t.members.includes(acc.email)) t.members.push(acc.email);
+    // v0.8.1-Fix: Vor jedem Push den aktuellen Cloud-Stand pullen, um Owner/Members
+    // zu MERGEN statt zu überschreiben. Vorher hat ein Joiner mit leerem ownerEmail
+    // sich selbst als Owner eingetragen + members verloren → Sync-Bug für andere Member.
+    let cloudMembers = [];
+    let cloudOwner = '';
+    try {
+      const pr = await cloudFetch(
+        cloudFullUrl('/rest/v1/trips?room_code=eq.' + encodeURIComponent(t.sharedRoom) + '&select=state')
+      );
+      if (pr.ok) {
+        const prRows = await pr.json();
+        if (prRows && prRows[0] && prRows[0].state) {
+          cloudMembers = prRows[0].state.members || [];
+          cloudOwner = prRows[0].state.ownerEmail || '';
+          // Fallback: aus inner trip übernehmen falls outer leer ist
+          if (!cloudOwner && prRows[0].state.trip) {
+            cloudOwner = prRows[0].state.trip.ownerEmail || '';
+          }
+        }
+      }
+    } catch(_e) { /* silent — fallback auf reinen Push ohne Merge */ }
+    // Owner: Cloud-Wert hat Priorität (das verhindert dass ein Joiner sich selbst zum Owner macht).
+    // Nur wenn Cloud noch keinen Owner kennt UND lokal auch keiner ist, eigenen Account einsetzen.
+    const effectiveOwner = cloudOwner || t.ownerEmail || (acc ? acc.email : '');
+    t.ownerEmail = effectiveOwner; // lokal konsistent halten
+    // Members: Union aus Cloud + lokal + ich. Niemand wird je entfernt durch einen Push.
+    const memberSet = new Set();
+    (t.members || []).forEach(m => { if (m) memberSet.add(m); });
+    cloudMembers.forEach(m => { if (m) memberSet.add(m); });
+    if (acc) memberSet.add(acc.email);
+    t.members = Array.from(memberSet);
     const body = [{
       room_code: t.sharedRoom,
-      state: { trip: t, members: t.members, ownerEmail: t.ownerEmail },
+      state: { trip: t, members: t.members, ownerEmail: effectiveOwner },
       updated_at: new Date().toISOString()
     }];
     const r = await cloudFetch(
@@ -3830,16 +3857,34 @@ async function joinTripFromInvite(roomCode, fromEmail, tripName) {
       toast('Reise konnte nicht geladen werden');
       return false;
     }
-    // Falls Trip schon lokal existiert: nur members ergänzen
+    // Falls Trip schon lokal mit gleicher ID existiert: voll mergen (items/hotels/events
+    // aus Remote ZIEHEN, nicht nur sharedRoom anhängen). Vorher hat der Joiner sonst
+    // seinen leeren lokalen Trip behalten und beim ersten pushSharedTrip die Owner-
+    // /Members-Felder der Cloud zerschossen → klassischer v0.7.x Sync-Verlust.
     let localTrip = state.trips[remoteTrip.id];
     if (localTrip) {
+      ensureTripDefaults(localTrip);
+      mergeOneTrip(localTrip, remoteTrip);
       if (!localTrip.sharedRoom) localTrip.sharedRoom = roomCode;
+      // Wir sind der Joiner — Owner ist jemand anderes. Remote-Owner übernehmen.
+      const remoteOwner = (sharedState.ownerEmail) || (remoteTrip.ownerEmail) || '';
+      if (remoteOwner) localTrip.ownerEmail = remoteOwner;
+      // Alle Remote-Members übernehmen + mich hinzufügen
+      const remoteMembers = (sharedState.members) || (remoteTrip.members) || [];
+      remoteMembers.forEach(m => { if (m && !localTrip.members.includes(m)) localTrip.members.push(m); });
       if (!localTrip.members.includes(acc.email)) localTrip.members.push(acc.email);
     } else {
       // Neu importieren
       localTrip = structuredClone(remoteTrip);
       ensureTripDefaults(localTrip);
       localTrip.sharedRoom = roomCode;
+      // ownerEmail explizit aus dem äußeren sharedState — falls inner trip keine hatte
+      if (!localTrip.ownerEmail) {
+        localTrip.ownerEmail = sharedState.ownerEmail || '';
+      }
+      // Members aus dem äußeren sharedState mergen (manche alte Records hatten members nur außen)
+      const outerMembers = sharedState.members || [];
+      outerMembers.forEach(m => { if (m && !localTrip.members.includes(m)) localTrip.members.push(m); });
       if (!localTrip.members.includes(acc.email)) localTrip.members.push(acc.email);
       state.trips[localTrip.id] = localTrip;
     }
