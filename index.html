@@ -1957,72 +1957,18 @@
   <div class="modal">
     <div class="auth-wrap" style="padding:12px 0 16px;">
       <div class="brand">☁️</div>
-      <h2>Mit Jane synchronisieren</h2>
-      <p>Alles automatisch zusammenführen – egal wer wo etwas hinzufügt. Einmal einrichten, dann läuft's.</p>
+      <h2>Cloud-Sync</h2>
+      <p>Deine Trips synchronisieren automatisch zwischen all deinen Geräten.</p>
     </div>
-
-    <!-- Connected-Status-Panel, wenn bereits verknüpft -->
     <div id="sync-connected-panel" style="display:none;">
       <div class="login-status connected" style="margin-bottom:12px;">
         <span class="dot-sync"></span>
         <span>Verbunden mit Raum <strong id="sync-conn-room-label"></strong></span>
       </div>
-      <div class="auth-card">
-        <h4>Partner einladen</h4>
-        <p class="sub">Sende Jane diesen Link – sie tippt drauf und ist automatisch verbunden. Kein manuelles Eingeben.</p>
-        <button class="btn primary" id="sync-share-invite">🔗 Einladungs-Link teilen</button>
-        <div style="margin-top:10px;">
-          <button class="btn secondary" id="sync-copy-invite" style="font-size:13px; padding:10px 14px;">📋 Link kopieren</button>
-        </div>
-      </div>
-      <div class="auth-divider">Oder</div>
-      <button class="btn ghost" id="sync-show-advanced" style="width:100%; padding:10px; color:var(--text-muted);">⚙ Technische Einstellungen anzeigen</button>
+      <p class="sub" style="margin:8px 0 14px;">Reisen mit anderen teilen: öffne den Trip → „Trip teilen" → Link verschicken. Der Empfänger meldet sich einmal an, danach läuft Sync auf allen seinen Geräten von alleine.</p>
     </div>
-
-    <!-- Neu-Einrichten-Panel -->
-    <div id="sync-setup-panel">
-      <div class="auth-card">
-        <h4>Einladung erhalten?</h4>
-        <p class="sub">Wenn Minh dir einen Einladungs-Link geschickt hat, einfach drauf tippen – dann bist du direkt verbunden.</p>
-      </div>
-      <div class="auth-divider">Oder manuell einrichten</div>
-
-      <details style="margin-bottom:14px; background:var(--bg-soft); border-radius:var(--radius-md); padding:10px 14px;">
-        <summary style="cursor:pointer; padding:4px 0; color:var(--primary); font-weight:600; font-size:13px;">📖 Anleitung (5 Min, kostenlos)</summary>
-        <ol style="font-size:12.5px; line-height:1.55; padding-left:18px; margin:10px 0 2px;">
-          <li>Öffne <strong>supabase.com</strong> → "Start your project".</li>
-          <li>Mit GitHub oder E-Mail einloggen (kostenlos, keine Karte).</li>
-          <li>"New Project" → Name: <code>tripmate</code> → DB-Passwort setzen → Region Europa → "Create".</li>
-          <li>~1 Min warten bis bereit.</li>
-          <li>"SQL Editor" → "+ New query" → folgendes einfügen, dann "Run":
-            <pre style="background:var(--surface); padding:8px; font-size:11px; overflow:auto; border-radius:8px; white-space:pre; margin-top:6px;">create table trips (
-  room_code text primary key,
-  state jsonb,
-  updated_at timestamptz default now()
-);
-alter table trips enable row level security;
-create policy "r" on trips for select using (true);
-create policy "i" on trips for insert with check (true);
-create policy "u" on trips for update using (true);</pre>
-          </li>
-          <li>"Project Settings" (⚙) → "API" → <strong>Project URL</strong> und <strong>anon public</strong> Key kopieren.</li>
-          <li>Unten ausfüllen, "Aktivieren". Fertig – schick Jane den Einladungs-Link!</li>
-        </ol>
-      </details>
-
-      <label>Supabase Project URL</label>
-      <input type="text" id="sync-url" placeholder="https://xxxx.supabase.co" autocomplete="off" autocapitalize="off" spellcheck="false" />
-
-      <label>anon public key</label>
-      <input type="text" id="sync-key" placeholder="eyJhbGci..." autocomplete="off" autocapitalize="off" spellcheck="false" />
-
-      <label>Raum-Code <span style="font-weight:400; color:var(--text-muted);">(beide gleich!)</span></label>
-      <input type="text" id="sync-room" placeholder="z.B. minh-jane-2026" autocomplete="off" autocapitalize="off" spellcheck="false" />
-    </div>
-
     <div class="modal-actions">
       <button class="btn secondary" id="sync-cancel" data-i18n="btn.close">Schließen</button>
-      <button class="btn primary" id="sync-enable">Aktivieren</button>
     </div>
     <div class="modal-actions" id="sync-disable-wrap" style="display:none;">
       <button class="btn danger" id="sync-disable">Sync deaktivieren</button>
@@ -2030,23 +1976,7 @@ create policy "u" on trips for update using (true);</pre>
   </div>
 </div>
 
-<!-- Einladungs-Bestätigungs-Modal (erscheint wenn ?connect=... in URL) -->
-<div class="modal-backdrop" id="invite-modal">
-  <div class="modal">
-    <div class="auth-wrap">
-      <div class="brand">🎉</div>
-      <h2>Einladung erhalten</h2>
-      <p><strong id="invite-from">Jemand</strong> möchte TripMate-Daten mit dir synchronisieren. Durch Bestätigung seht ihr automatisch die Einträge des anderen.</p>
-    </div>
-    <div class="login-status" style="margin-bottom:12px;">
-      <span>📍 Raum: <strong id="invite-room-label">…</strong></span>
-    </div>
-    <div class="modal-actions">
-      <button class="btn secondary" id="invite-decline">Ablehnen</button>
-      <button class="btn primary" id="invite-accept">✓ Verbinden</button>
-    </div>
-  </div>
-</div>
+
 
 <!-- Share modal -->
 <div class="modal-backdrop" id="share-modal">
@@ -2811,9 +2741,8 @@ function setAccount(acc) {
 }
 function clearAccount() {
   localStorage.removeItem(ACCOUNT_KEY);
-  // ABSICHTLICH: tm_cloud_room und tm_cloud_room_manual werden NICHT gelöscht.
-  // So überlebt ein manuell gesetzter Partner-Raum-Code einen Logout → Login.
-  // Wer den Raum komplett zurücksetzen will, nutzt sync-disable in der Sync-Modal.
+  // ABSICHTLICH: tm_cloud_room bleibt erhalten — beim nächsten Login wird
+  // der Raum auf die user.id gesetzt, geteilte Räume per Auto-Discover wiederhergestellt.
 }
 function isAuthenticated() {
   const acc = getAccount();
@@ -2891,13 +2820,10 @@ async function persistAuthSession(data) {
     createdAt: Date.now()
   };
   setAccount(acc);
-  // Room-Code: Wenn der User MANUELL einen Raum gesetzt hat (z.B. um mit Partner zu syncen),
-  // den respektieren. Ansonsten user.id als private Sandbox.
-  const isManualRoom = localStorage.getItem('tm_cloud_room_manual') === '1';
-  if (!isManualRoom) {
-    CLOUD.room = data.user.id;
-    localStorage.setItem('tm_cloud_room', data.user.id);
-  }
+  // Room-Code = user.id (privater Backup-Raum). Geteilte Trips laufen über
+  // sr-*-Räume + discoverSharedRoomsForCurrentUser, kein manueller Override mehr.
+  CLOUD.room = data.user.id;
+  localStorage.setItem('tm_cloud_room', data.user.id);
   await cloudPull(true);
   if (Object.keys(state.trips || {}).length > 0) {
     await cloudPushImmediate();
@@ -3058,11 +2984,9 @@ async function handleAuthCallback() {
       createdAt: Date.now()
     };
     setAccount(acc);
-    // Room: nur überschreiben wenn nicht manuell gesetzt (für Partner-Sharing)
-    if (localStorage.getItem('tm_cloud_room_manual') !== '1') {
-      CLOUD.room = user.id;
-      localStorage.setItem('tm_cloud_room', user.id);
-    }
+    // Room = user.id (privater Backup). Geteilte Räume kommen über Auto-Discover.
+    CLOUD.room = user.id;
+    localStorage.setItem('tm_cloud_room', user.id);
     // Lokale Trips automatisch in Cloud merge'n (cloudPull holt dann ggf. existierenden Stand)
     await cloudPull(true);
     if (Object.keys(state.trips || {}).length > 0) {
@@ -3384,8 +3308,8 @@ function updateSyncIndicator() {
     if (stat) stat.textContent = '☁️ Cloud-Sync: deaktiviert – Listen sind nur auf diesem Gerät.';
     return;
   }
-  const isManual = localStorage.getItem('tm_cloud_room_manual') === '1';
-  const modeLabel = isManual ? 'geteilter Raum' : 'privat';
+  const acc = getAccount();
+  const modeLabel = (acc && acc.email) ? acc.email : 'privat';
   // v0.6.12: Stale-Detection. tm_cloud_dirty_since wird beim ersten Dirty-Werden gesetzt
   // und beim erfolgreichen Push gelöscht. Wenn länger als 60s dirty + nicht gerade
   // syncing → der letzte Push hat nicht geklappt. Anzeige gelb, > 5 min → rot.
@@ -3406,7 +3330,7 @@ function updateSyncIndicator() {
       const ago = (min ? min + ' min ' : '') + remSec + ' s';
       btn.title = '⚠️ Lokale Änderungen warten seit ' + ago + ' auf Sync. Tippe zum erneuten Versuch.';
     } else {
-      btn.title = 'Cloud-Sync aktiv (' + modeLabel + ') – Raum: ' + CLOUD.room;
+      btn.title = 'Cloud-Sync aktiv als ' + modeLabel;
     }
   }
   if (stat) {
@@ -3414,7 +3338,7 @@ function updateSyncIndicator() {
       const min = Math.floor(staleSec / 60);
       stat.textContent = '⚠️ Sync hängt seit ' + (min ? min + ' min' : staleSec + ' s') + ' – Tipp: ☁️-Symbol oben rechts antippen für erneuten Versuch.';
     } else {
-      stat.textContent = '☁️ Sync aktiv · ' + modeLabel + ' · Raum: ' + CLOUD.room;
+      stat.textContent = '☁️ Sync aktiv als ' + modeLabel;
     }
   }
 }
@@ -8805,148 +8729,25 @@ document.getElementById('trip-edit-delete').addEventListener('click', () => {
   editingTripId = null;
 });
 
-// ============ Sync Setup Modal ============
+// ============ Sync Status Modal ============
 function renderSyncModalState() {
   const connected = cloudEnabled();
   document.getElementById('sync-connected-panel').style.display = connected ? 'block' : 'none';
-  document.getElementById('sync-setup-panel').style.display = connected ? 'none' : 'block';
   document.getElementById('sync-disable-wrap').style.display = connected ? 'flex' : 'none';
-  // Verbinden-Button nur zeigen, wenn Setup-Panel sichtbar ist
-  const enableBtn = document.getElementById('sync-enable');
-  if (enableBtn) enableBtn.style.display = connected ? 'none' : 'block';
   if (connected) {
-    document.getElementById('sync-conn-room-label').textContent = CLOUD.room;
+    const acc = getAccount();
+    const label = (acc && acc.email) ? acc.email : 'privater Raum';
+    document.getElementById('sync-conn-room-label').textContent = label;
   }
 }
 
-function buildInviteLink() {
-  if (!cloudEnabled()) return '';
-  try {
-    const payload = { u: CLOUD.url, k: CLOUD.key, r: CLOUD.room, by: myName || '' };
-    const json = JSON.stringify(payload);
-    const compressed = LZString.compressToEncodedURIComponent(json);
-    const base = location.origin + location.pathname.replace(/[^/]*$/, '');
-    return base + '?connect=' + compressed;
-  } catch(e) { return ''; }
-}
-
 document.getElementById('open-sync-setup').addEventListener('click', () => {
-  document.getElementById('sync-url').value = CLOUD.url;
-  document.getElementById('sync-key').value = CLOUD.key;
-  document.getElementById('sync-room').value = CLOUD.room;
   renderSyncModalState();
   closeModal('settings-modal');
   document.getElementById('sync-modal').classList.add('open');
 });
-// Erweiterte Einstellungen zeigen (wenn bereits verbunden): Credentials-Felder wieder sichtbar machen
-document.getElementById('sync-show-advanced').addEventListener('click', () => {
-  document.getElementById('sync-connected-panel').style.display = 'none';
-  document.getElementById('sync-setup-panel').style.display = 'block';
-  document.getElementById('sync-enable').style.display = 'block';
-});
-// Einladungs-Link teilen (Web Share API oder Fallback)
-document.getElementById('sync-share-invite').addEventListener('click', async () => {
-  const url = buildInviteLink();
-  if (!url) { toast('Bitte zuerst Sync aktivieren'); return; }
-  const title = 'TripMate-Einladung';
-  const text = `${myName || 'Jemand'} möchte TripMate mit dir teilen 🧳`;
-  if (navigator.share) {
-    try { await navigator.share({ title, text, url }); } catch(e) { /* abgebrochen */ }
-  } else {
-    await copyToClipboard(url);
-    toast('🔗 Link kopiert – schick ihn Jane!');
-  }
-});
-document.getElementById('sync-copy-invite').addEventListener('click', async () => {
-  const url = buildInviteLink();
-  if (!url) { toast('Bitte zuerst Sync aktivieren'); return; }
-  await copyToClipboard(url);
-  toast('🔗 Einladungs-Link kopiert');
-});
 
-// Beim Laden der App: Einladung in URL erkennen (?connect=...)
-function checkInviteInURL() {
-  try {
-    const params = new URLSearchParams(location.search);
-    const c = params.get('connect');
-    if (!c) return;
-    const decompressed = LZString.decompressFromEncodedURIComponent(c);
-    if (!decompressed) return;
-    const payload = JSON.parse(decompressed);
-    if (!payload.u || !payload.k || !payload.r) return;
-    // Modal anzeigen
-    document.getElementById('invite-from').textContent = payload.by || 'Jemand';
-    document.getElementById('invite-room-label').textContent = payload.r;
-    document.getElementById('invite-modal').classList.add('open');
-    // URL säubern (damit Reload nicht immer wieder fragt)
-    const cleanUrl = location.origin + location.pathname + location.hash;
-    history.replaceState(null, '', cleanUrl);
-
-    document.getElementById('invite-accept').onclick = async () => {
-      CLOUD.url = payload.u; CLOUD.key = payload.k; CLOUD.room = payload.r;
-      CLOUD.lastPulledAt = 0; CLOUD.syncing = false;
-      localStorage.setItem('tm_cloud_url', payload.u);
-      localStorage.setItem('tm_cloud_key', payload.k);
-      localStorage.setItem('tm_cloud_room', payload.r);
-      // Wichtig: Invite-Annahme ist eine explizite Auswahl des Users —
-      // Login-Flow soll diesen Wert nicht später mit user.id überschreiben.
-      localStorage.setItem('tm_cloud_room_manual', '1');
-      localStorage.setItem('tm_cloud_last_pulled', '0');
-      closeModal('invite-modal');
-      toast('🔄 Verbinde...');
-      updateSyncIndicator();
-      await cloudPull(false);
-      await cloudPushImmediate();
-      startCloudPolling();
-      toast('☁️ Verbunden!');
-    };
-    document.getElementById('invite-decline').onclick = () => {
-      closeModal('invite-modal');
-      toast('Einladung abgelehnt');
-    };
-  } catch(e) { /* silent */ }
-}
 document.getElementById('sync-cancel').addEventListener('click', () => closeModal('sync-modal'));
-document.getElementById('sync-enable').addEventListener('click', async () => {
-  // URL normalisieren: proto + host (kein Pfad/Query)
-  let urlRaw = document.getElementById('sync-url').value.trim();
-  let url = '';
-  if (urlRaw) {
-    try {
-      const u = new URL(urlRaw.startsWith('http') ? urlRaw : 'https://' + urlRaw);
-      url = u.protocol + '//' + u.host;
-    } catch(e) { url = urlRaw.replace(/\/+$/, ''); }
-  }
-  const key = document.getElementById('sync-key').value.trim();
-  // Room: nur a-z 0-9 _ und -, keine führenden/trailing Dashes, nicht leer
-  let room = document.getElementById('sync-room').value.trim().toLowerCase().replace(/[^a-z0-9_-]+/g, '-').replace(/^-+|-+$/g, '');
-  if (!url || !key || !room) { toast('Bitte alle Felder füllen (und Room darf nicht nur aus Zeichen bestehen)'); return; }
-  if (!/^https:\/\/.+\.supabase\.(co|in)$/i.test(url)) {
-    if (!confirm('URL sieht ungewöhnlich aus. Trotzdem speichern?')) return;
-  }
-  CLOUD.url = url; CLOUD.key = key; CLOUD.room = room;
-  CLOUD.lastPulledAt = 0;
-  CLOUD.syncing = false; // force-reset, falls hängend
-  clearTimeout(CLOUD.pushDebounceTimer);
-  localStorage.setItem('tm_cloud_url', url);
-  localStorage.setItem('tm_cloud_key', key);
-  localStorage.setItem('tm_cloud_room', room);
-  // Wichtig: User hat den Raum-Code MANUELL gesetzt (z.B. um mit jemandem zu teilen).
-  // Login-Flow soll diesen Wert NICHT mit user.id überschreiben.
-  localStorage.setItem('tm_cloud_room_manual', '1');
-  localStorage.setItem('tm_cloud_last_pulled', '0');
-  toast('🔄 Verbinde mit Cloud...');
-  updateSyncIndicator();
-  // Sequenziell: erst Pull (der pusht intern, falls Cloud leer war), dann ggf. ein zusätzlicher Push
-  // um lokale Additionen, die im Pull-Merge dazugekommen sind, hochzuladen
-  await cloudPull(false);
-  // nur extra-pushen, wenn unsere lokalen Daten von der Cloud abweichen könnten
-  // (Pull setzt skipNextPush=true wenn er remote reinmerged, also einmal direkt pushen ist OK)
-  await cloudPushImmediate();
-  startCloudPolling();
-  toast('☁️ Verbunden! Jetzt Jane einladen 👇');
-  renderSyncModalState();
-});
 document.getElementById('sync-disable').addEventListener('click', () => {
   if (!confirm('Cloud-Sync deaktivieren? Deine lokalen Daten bleiben erhalten.')) return;
   clearInterval(CLOUD.pollTimer);
@@ -8955,7 +8756,6 @@ document.getElementById('sync-disable').addEventListener('click', () => {
   localStorage.removeItem('tm_cloud_url');
   localStorage.removeItem('tm_cloud_key');
   localStorage.removeItem('tm_cloud_room');
-  localStorage.removeItem('tm_cloud_room_manual');
   localStorage.removeItem('tm_cloud_last_pulled');
   updateSyncIndicator();
   closeModal('sync-modal');
@@ -9583,9 +9383,8 @@ try { if (typeof setLang === 'function') setLang(getLang()); } catch(_) {}
   // 2. Schon eingeloggt?
   if (isAuthenticated()) {
     const acc = getAccount();
-    // Room sicherstellen — aber NICHT überschreiben falls manuell gesetzt (Partner-Sync)
-    const isManualRoom = localStorage.getItem('tm_cloud_room_manual') === '1';
-    if (!isManualRoom && acc && acc.userId && CLOUD.room !== acc.userId) {
+    // Room sicherstellen — Auto-Discover findet geteilte Räume in proceedToApp
+    if (acc && acc.userId && CLOUD.room !== acc.userId) {
       CLOUD.room = acc.userId;
       localStorage.setItem('tm_cloud_room', acc.userId);
     }
@@ -9599,7 +9398,6 @@ try { if (typeof setLang === 'function') setLang(getLang()); } catch(_) {}
 
 function proceedToApp() {
   importFromHash();
-  checkInviteInURL();
   checkJoinInviteInURL();   // v0.6.1: Live-Collab Einladungs-Link
   preloadFx();
   renderHeader();
