@@ -2310,7 +2310,7 @@
 // ============ App-Version ============
 // Bei Schema-Änderungen SCHEMA_VERSION hochzählen + Migration ergänzen.
 // APP_VERSION ist die User-sichtbare Version.
-const APP_VERSION = '0.9.0';
+const APP_VERSION = '0.9.1';
 const SCHEMA_VERSION = 3;
 
 // ============ Constants & Demo Data ============
@@ -5170,6 +5170,65 @@ function weatherCodeToIcon(code) {
   return '🌡️';
 }
 
+// v0.9.1: Open-Meteo daily Forecast — 16 Tage Vorhersage pro Trip-Koordinate.
+// Cache: 30 min pro (lat,lng), Result als Map { 'YYYY-MM-DD': { min, max, code, icon, precip } }
+const _forecastCache = {};
+async function fetchTripForecast(trip) {
+  if (!trip || !trip.center || !Array.isArray(trip.center) || trip.center.length !== 2) return null;
+  const lat = Number(trip.center[0]), lng = Number(trip.center[1]);
+  if (isNaN(lat) || isNaN(lng)) return null;
+  const key = lat.toFixed(2) + ',' + lng.toFixed(2);
+  const now = Date.now();
+  const cached = _forecastCache[key];
+  if (cached && now - cached.ts < 30 * 60 * 1000) return cached.data;
+  try {
+    const url = 'https://api.open-meteo.com/v1/forecast?latitude=' + lat
+      + '&longitude=' + lng
+      + '&daily=temperature_2m_max,temperature_2m_min,weather_code,precipitation_probability_max'
+      + '&timezone=auto&forecast_days=16';
+    const r = await fetch(url, { cache: 'no-store' });
+    if (!r.ok) return null;
+    const data = await r.json();
+    if (!data.daily || !Array.isArray(data.daily.time)) return null;
+    const map = {};
+    for (let i = 0; i < data.daily.time.length; i++) {
+      const date = data.daily.time[i];
+      const code = data.daily.weather_code[i];
+      map[date] = {
+        min: Math.round(data.daily.temperature_2m_min[i]),
+        max: Math.round(data.daily.temperature_2m_max[i]),
+        code: code,
+        icon: weatherCodeToIcon(code),
+        precip: data.daily.precipitation_probability_max ? data.daily.precipitation_probability_max[i] : null
+      };
+    }
+    _forecastCache[key] = { ts: now, data: map };
+    return map;
+  } catch(_) { return null; }
+}
+
+// v0.9.1: Forecast für Itinerary-Day-Head rendern. Async — wird nach renderItineraryPanel
+// aufgerufen, lädt Daten und füllt die data-forecast-Spans.
+async function hydrateItineraryForecast(panel, trip) {
+  if (!panel) return;
+  const spans = panel.querySelectorAll('[data-forecast-date]');
+  if (spans.length === 0) return;
+  const fc = await fetchTripForecast(trip);
+  if (!fc) {
+    spans.forEach(function(s){ s.style.display = 'none'; });
+    return;
+  }
+  spans.forEach(function(s){
+    const date = s.getAttribute('data-forecast-date');
+    const day = fc[date];
+    if (!day) { s.style.display = 'none'; return; }
+    const precipBadge = (day.precip != null && day.precip >= 50) ? ' 💧' + day.precip + '%' : '';
+    s.innerHTML = day.icon + ' ' + day.max + '°/' + day.min + '°' + precipBadge;
+    s.title = 'Vorhersage · max ' + day.max + '°C / min ' + day.min + '°C'
+            + (day.precip != null ? ' · Regen ' + day.precip + '%' : '');
+  });
+}
+
 // v0.7.6: PDF-Export pro Trip via jsPDF (lazy via CDN). Eckdaten + Itinerary + Hotels + Notrufnummern.
 function loadScriptOnce(src) {
   return new Promise(function(resolve, reject) {
@@ -6039,7 +6098,7 @@ function renderItineraryPanel(container) {
   for (const [date, items] of byDay) {
     const prettyDate = fmtDate(date);
     const weekday = new Date(date).toLocaleDateString('de-DE', { weekday: 'long' });
-    let dayHtml = `<div class="itin-day"><div class="itin-day-head"><span>${escapeHtml(weekday)} · ${escapeHtml(prettyDate)}</span><span class="count">${items.length} Termin${items.length === 1 ? '' : 'e'}</span></div>`;
+    let dayHtml = `<div class="itin-day"><div class="itin-day-head"><span>${escapeHtml(weekday)} · ${escapeHtml(prettyDate)}</span><span class="itin-day-forecast" data-forecast-date="${escapeHtml(date)}" title="Lade Wetter..." style="font-size:11.5px; color:var(--text-muted); font-weight:500; padding:0 8px;">⏳</span><span class="count">${items.length} ${tr('plan.events')}</span></div>`;
     items.forEach(e => {
       dayHtml += `<div class="itin-entry" data-itin-kind="${e.kind}" data-itin-id="${escapeHtml(e.id || '')}">
         <span class="ico">${e.icon}</span>
@@ -6059,12 +6118,14 @@ function renderItineraryPanel(container) {
   }
 
   panel.innerHTML = `
-    <div class="itin-head"><h3>🗺️ Reiseplan <span class="count" style="margin-left:auto; font-size:12px; font-weight:500; color:#7E22CE;">${entries.length} Einträge</span></h3></div>
+    <div class="itin-head"><h3>${tr('plan.itin.head')} <span class="count" style="margin-left:auto; font-size:12px; font-weight:500; color:#7E22CE;">${entries.length} Einträge</span></h3></div>
     <div class="itin-body">${bodyHtml}<button class="btn-itin-import" id="itin-email-import-btn">📧 Bestätigungs-Email einfügen</button></div>
   `;
   container.appendChild(panel);
   makeCollapsible(panel, 'itinerary', panel.querySelector('.itin-head'), panel.querySelector('.itin-body'));
   panel.querySelector('#itin-email-import-btn').addEventListener('click', (e) => { e.stopPropagation(); openEmailImportModal(); });
+  // v0.9.1: Wetter-Forecast async laden + in die day-heads injizieren
+  hydrateItineraryForecast(panel, trip);
   // Edit-Buttons → richtigen Modal öffnen
   panel.querySelectorAll('[data-itin-edit]').forEach(btn => {
     btn.addEventListener('click', (ev) => {
