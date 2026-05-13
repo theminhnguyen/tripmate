@@ -1611,6 +1611,25 @@
   body[data-view="packlist"] .sos-fab,
   body[data-view="calendar"] .sos-fab { display: none !important; }
 </style>
+<style>
+/* v0.9.0: Activity-Bubble */
+.tm-activity-bubble {
+  position: fixed; bottom: 90px; right: 16px; max-width: 320px;
+  background: var(--surface, #fff); border: 1px solid var(--border, #e5e7eb);
+  border-radius: 14px; box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  padding: 12px 38px 12px 14px; z-index: 9999; display: flex; gap: 10px; align-items: flex-start;
+  font-size: 13px; line-height: 1.5; animation: tmAbIn 0.25s ease-out;
+}
+.tm-activity-bubble .tm-ab-ic { font-size: 18px; }
+.tm-activity-bubble .tm-ab-text { color: var(--text, #1f2937); flex: 1; }
+.tm-activity-bubble .tm-ab-close {
+  position: absolute; top: 6px; right: 8px; background: none; border: none;
+  font-size: 18px; cursor: pointer; color: var(--text-muted, #6b7280); padding: 2px 6px;
+}
+.tm-activity-bubble.out { opacity: 0; transform: translateY(10px); transition: 0.25s; }
+@keyframes tmAbIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@media (max-width: 480px) { .tm-activity-bubble { left: 12px; right: 12px; max-width: none; } }
+</style>
 </head>
 <body>
 <div id="app">
@@ -1784,9 +1803,9 @@
 <!-- Add item modal -->
 <div class="modal-backdrop" id="add-modal">
   <div class="modal">
-    <h3>Neuer Eintrag</h3>
-    <label>Suchen (Name des Ortes)</label>
-    <input type="text" id="search-input" placeholder="z.B. Natural History Museum" autocomplete="off" />
+    <h3 id="item-modal-title" data-i18n="item.modalTitle">Neuer Eintrag</h3>
+    <label data-i18n="item.search">Suchen (Name des Ortes)</label>
+    <input type="text" id="search-input" placeholder="z.B. Natural History Museum" data-i18n-ph="item.searchPh" autocomplete="off" />
     <div class="search-results" id="search-results"></div>
 
     <label>Name</label>
@@ -1794,9 +1813,9 @@
 
     <label>Kategorie</label>
     <select id="item-category">
-      <option value="sight">Sehenswürdigkeit</option>
+      <option value="sight" data-i18n="cat.sight">Sehenswürdigkeit</option>
       <option value="food">Restaurant / Essen</option>
-      <option value="shop">Shopping</option>
+      <option value="shop" data-i18n="cat.shop">Shopping</option>
       <option value="buy">🛒 Vor Ort kaufen</option>
       <option value="other">Sonstiges</option>
     </select>
@@ -1806,22 +1825,22 @@
       <option value="">— Kein Laden —</option>
     </select>
 
-    <label>Adresse</label>
-    <input type="text" id="item-address" placeholder="Wird automatisch gefüllt" />
+    <label data-i18n="item.address">Adresse</label>
+    <input type="text" id="item-address" placeholder="Wird automatisch gefüllt" data-i18n-ph="item.addressPh" />
 
     <div class="row">
       <div>
-        <label>Datum (optional)</label>
+        <label data-i18n="item.dateOpt">Datum (optional)</label>
         <input type="date" id="item-date" />
       </div>
       <div>
-        <label>Uhrzeit</label>
+        <label data-i18n="item.time">Uhrzeit</label>
         <input type="time" id="item-time" />
       </div>
     </div>
 
-    <label>Notiz (optional)</label>
-    <textarea id="item-notes" placeholder="z.B. Reservierung um 19 Uhr"></textarea>
+    <label data-i18n="item.noteOpt">Notiz (optional)</label>
+    <textarea id="item-notes" placeholder="z.B. Reservierung um 19 Uhr" data-i18n-ph="item.notePh"></textarea>
 
     <div class="modal-actions">
       <button class="btn secondary" id="cancel-add" data-i18n="btn.cancel">Abbrechen</button>
@@ -1945,6 +1964,9 @@
     <div class="modal-actions">
       <button class="btn secondary" id="trip-edit-cancel" data-i18n="btn.cancel">Abbrechen</button>
       <button class="btn primary" id="trip-edit-save" data-i18n="btn.save">Speichern</button>
+    </div>
+    <div class="modal-actions" id="trip-edit-duplicate-wrap" style="display:none;">
+      <button class="btn ghost" id="trip-edit-duplicate" type="button" style="width:100%;">📋 Reise duplizieren (neuer Trip mit gleichem Plan)</button>
     </div>
     <div class="modal-actions" id="trip-edit-delete-wrap" style="display:none;">
       <button class="btn danger" id="trip-edit-delete">Reise löschen</button>
@@ -2288,7 +2310,7 @@
 // ============ App-Version ============
 // Bei Schema-Änderungen SCHEMA_VERSION hochzählen + Migration ergänzen.
 // APP_VERSION ist die User-sichtbare Version.
-const APP_VERSION = '0.8.2';
+const APP_VERSION = '0.9.0';
 const SCHEMA_VERSION = 3;
 
 // ============ Constants & Demo Data ============
@@ -2591,6 +2613,121 @@ function renameTrip(id, newName) {
   t._metaUpdatedAt = Date.now();
   saveState();
 }
+// v0.9.0: Trip duplizieren — neue ID, Daten leer, keine Members/Sharing.
+// Items, Hotels, Events, Packliste, Notizen werden übernommen.
+function duplicateTrip(srcId, newName) {
+  const src = state.trips[srcId];
+  if (!src) return null;
+  const nt = structuredClone(src);
+  // Neue ID
+  nt.id = 't' + Math.random().toString(36).slice(2, 10);
+  while (state.trips[nt.id]) nt.id = 't' + Math.random().toString(36).slice(2, 10);
+  nt.name = (newName || (src.name + ' (Kopie)')).trim() || 'Reise';
+  // Daten zurücksetzen
+  nt.start = ''; nt.end = '';
+  // Sharing nicht übernehmen
+  nt.sharedRoom = '';
+  nt.members = [];
+  nt.ownerEmail = '';
+  nt.publicView = '';
+  // Tombstones auf null (frischer Lebenszyklus)
+  nt._tombs = [];
+  // Datum-Felder in Events/Hotels leeren (User legt für neuen Trip neu fest)
+  (nt.events || []).forEach(function(e){ e.date = ''; e.time = ''; e.updatedAt = Date.now(); });
+  (nt.accommodations || []).forEach(function(a){ a.start = ''; a.end = ''; a.updatedAt = Date.now(); });
+  // Expenses NICHT übernehmen (ein neuer Trip hat eigene Ausgaben)
+  nt.expenses = [];
+  // Dokumente NICHT übernehmen (sensitiv, pro Reise eigene)
+  nt.documents = [];
+  // Pack-Items: Status (packed) zurücksetzen
+  (nt.packlist || []).forEach(function(p){ p.done = false; p.updatedAt = Date.now(); });
+  // Metadaten frisch
+  nt._metaUpdatedAt = Date.now();
+  nt.coverImage = ''; // wird beim Land-Setzen neu geholt
+  state.trips[nt.id] = nt;
+  state.currentTripId = nt.id;
+  saveState();
+  return nt;
+}
+
+// v0.9.0: Packlisten-Templates für gängige Reise-Typen.
+const PACK_TEMPLATES = {
+  'beach': {
+    label: { de: 'Strand', en: 'Beach', vi: 'Bãi biển' },
+    icon: '🏖',
+    items: [
+      { name: 'Badehose / Bikini', cat: 'clothing' },
+      { name: 'Strandtuch', cat: 'clothing' },
+      { name: 'Sonnenbrille', cat: 'clothing' },
+      { name: 'Sonnencreme SPF 50+', cat: 'toiletries' },
+      { name: 'After-Sun', cat: 'toiletries' },
+      { name: 'Sandalen / Flip-Flops', cat: 'clothing' },
+      { name: 'Hut / Cap', cat: 'clothing' },
+      { name: 'Schnorchel-Set', cat: 'gear' },
+      { name: 'Wasserdichte Tasche', cat: 'gear' },
+      { name: 'Insektenspray', cat: 'toiletries' }
+    ]
+  },
+  'ski': {
+    label: { de: 'Skifahren', en: 'Skiing', vi: 'Trượt tuyết' },
+    icon: '⛷',
+    items: [
+      { name: 'Skihose', cat: 'clothing' },
+      { name: 'Skijacke', cat: 'clothing' },
+      { name: 'Thermo-Unterwäsche', cat: 'clothing' },
+      { name: 'Skihandschuhe', cat: 'clothing' },
+      { name: 'Skibrille', cat: 'gear' },
+      { name: 'Skihelm', cat: 'gear' },
+      { name: 'Skisocken (warm)', cat: 'clothing' },
+      { name: 'Mütze / Stirnband', cat: 'clothing' },
+      { name: 'Lippenpflege LSF', cat: 'toiletries' },
+      { name: 'Sonnencreme Gesicht', cat: 'toiletries' },
+      { name: 'Skipass-Halter', cat: 'gear' }
+    ]
+  },
+  'city': {
+    label: { de: 'Städtetrip', en: 'City trip', vi: 'Du lịch thành phố' },
+    icon: '🏙',
+    items: [
+      { name: 'Bequeme Schuhe', cat: 'clothing' },
+      { name: 'Stadtplan / App', cat: 'gear' },
+      { name: 'Tagesrucksack', cat: 'gear' },
+      { name: 'Powerbank', cat: 'electronics' },
+      { name: 'Regenjacke kompakt', cat: 'clothing' },
+      { name: 'Wasserflasche', cat: 'gear' },
+      { name: 'Adapter', cat: 'electronics' },
+      { name: 'Kreditkarte + Bargeld', cat: 'docs' },
+      { name: 'ÖPNV-Karte / Ticket-App', cat: 'docs' }
+    ]
+  }
+};
+
+function applyPackTemplate(tripId, templateKey) {
+  const t = state.trips[tripId];
+  const tpl = PACK_TEMPLATES[templateKey];
+  if (!t || !tpl) return 0;
+  if (!Array.isArray(t.packlist)) t.packlist = [];
+  const existingNames = new Set(t.packlist.map(function(p){ return (p.name || '').toLowerCase(); }));
+  let added = 0;
+  tpl.items.forEach(function(item){
+    if (existingNames.has(item.name.toLowerCase())) return; // skip duplicates
+    t.packlist.push({
+      id: 'p' + Math.random().toString(36).slice(2, 10),
+      name: item.name,
+      category: item.cat,
+      done: false,
+      createdAt: Date.now(),
+      updatedAt: Date.now()
+    });
+    added++;
+  });
+  if (added > 0) {
+    t._metaUpdatedAt = Date.now();
+    saveState();
+  }
+  return added;
+}
+
 function deleteTrip(id) {
   if (!state.trips[id]) return;
   // Tombstone für Sync + lokal entfernen
@@ -2681,6 +2818,7 @@ function saveStateLocal() {
 }
 function saveState() {
   saveStateLocal();
+  if (typeof broadcastLocal === 'function') broadcastLocal('state-changed');
   // Dirty sofort setzen — falls der Tab geschlossen wird, bevor der Debounce-Timer
   // feuert, holt die nächste Session den Push nach.
   if (localStorage.getItem('tm_cloud_url')) {
@@ -3008,7 +3146,7 @@ function logout() {
   clearAccount();
   // State NICHT löschen — bleibt lokal verfügbar, falls User wieder einloggt.
   // Aber Cloud-Sync stoppen.
-  clearInterval(CLOUD.pollTimer);
+  clearInterval(CLOUD.pollTimer); clearTimeout(CLOUD.pollTimer);
   CLOUD.pollTimer = null;
   showAuthGate();
   toast('Abgemeldet');
@@ -3416,6 +3554,8 @@ async function cloudPushImmediate() {
     }
     localStorage.removeItem('tm_cloud_dirty');
     localStorage.removeItem('tm_cloud_dirty_since');
+    // v0.9.0: andere Tabs (same browser) informieren, dass es einen frischen Cloud-Push gab.
+    if (typeof broadcastLocal === 'function') broadcastLocal('cloud-pull-please');
   } catch (e) {
     console.error('cloudPush error', e);
     localStorage.setItem('tm_cloud_dirty', '1');
@@ -3583,7 +3723,13 @@ async function pullAllSharedTrips() {
       if (diff.totalCount > 0) allChanges.push({ tripName: fresh.name, diff: diff });
     });
     if (allChanges.length > 0) {
-      showSharedTripChanges(allChanges);
+      // v0.9.0: kleine Bubble für 1-2 Updates, Modal für mehr
+      const totalEvents = allChanges.reduce(function(s,c){ return s + (c.diff.totalCount || 0); }, 0);
+      if (totalEvents <= 3) {
+        showActivityBubble(allChanges);
+      } else {
+        showSharedTripChanges(allChanges);
+      }
     } else {
       toast('☁️ Geteilte Reise aktualisiert');
     }
@@ -3639,6 +3785,38 @@ function diffSharedTripState(before, after, myEmail) {
 }
 
 // v0.7.7: Sichtbarer Banner für Mitreisenden-Updates. Klickbar → Detail-Liste.
+// v0.9.0: Activity-Bubble — kleines schwebendes Notification-Card unten rechts.
+// Nutzt allChanges-Format von showSharedTripChanges.
+function showActivityBubble(allChanges) {
+  if (!allChanges || allChanges.length === 0) return;
+  // Aggregate auf eine "Wer hat was zuletzt gemacht" Zeile
+  const lines = [];
+  allChanges.forEach(function(c){
+    const tripName = c.tripName || 'Reise';
+    (c.diff.added || []).slice(0, 2).forEach(function(a){
+      const by = a.by || 'jemand';
+      lines.push(by + ' hat ' + (a.kindLabel || 'Item') + ' \u00BB' + a.name + '\u00AB hinzugefügt');
+    });
+    (c.diff.updated || []).slice(0, 2).forEach(function(u){
+      const by = u.by || 'jemand';
+      lines.push(by + ' hat ' + (u.kindLabel || 'Item') + ' \u00BB' + u.name + '\u00AB geändert');
+    });
+    (c.diff.newMembers || []).slice(0, 2).forEach(function(m){
+      lines.push(m + ' ist beigetreten');
+    });
+  });
+  if (lines.length === 0) return;
+  // Stack-up: alte Bubbles raus
+  document.querySelectorAll('.tm-activity-bubble').forEach(function(b){ b.remove(); });
+  const bubble = document.createElement('div');
+  bubble.className = 'tm-activity-bubble';
+  bubble.innerHTML = '<div class="tm-ab-ic">\u2728</div><div class="tm-ab-text">' + lines.map(escapeHtml).join('<br/>') + '</div><button class="tm-ab-close" aria-label="Schließen">\u00d7</button>';
+  document.body.appendChild(bubble);
+  bubble.querySelector('.tm-ab-close').addEventListener('click', function(){ bubble.classList.add('out'); setTimeout(function(){ bubble.remove(); }, 250); });
+  // Auto-dismiss nach 8 s
+  setTimeout(function(){ if (bubble.parentNode) { bubble.classList.add('out'); setTimeout(function(){ bubble.remove(); }, 250); } }, 8000);
+}
+
 function showSharedTripChanges(allChanges) {
   // Aggregat über alle Trips
   let totalAdded = 0, totalUpdated = 0, newMembers = [];
@@ -4052,8 +4230,9 @@ function refreshCurrentView() {
 }
 function startCloudPolling() {
   clearInterval(CLOUD.pollTimer);
+  clearTimeout(CLOUD.pollTimer);
   if (!cloudEnabled()) return;
-  // Initialer Pull — wenn wir dirty sind (z.B. Offline-Edit, Hash-Import), danach pushen
+  // Initialer Pull
   (async function initialSync() {
     await cloudPull(true);
     await pullAllSharedTrips();
@@ -4062,15 +4241,59 @@ function startCloudPolling() {
       await pushAllSharedTrips();
     }
   })();
-  CLOUD.pollTimer = setInterval(function(){
-    if (document.visibilityState === 'visible') {
-      cloudPull(true);
-      pullAllSharedTrips();
-    }
-    // v0.6.12: Sync-Indicator alle 15 s neu rendern, damit die "seit X s dirty"-
-    // Anzeige hochzählt auch wenn keine Pull-Änderung kommt.
-    updateSyncIndicator();
-  }, 15000);
+  // v0.9.0: Adaptives Polling
+  // - 4s wenn Tab im Fokus UND geteilte Trips existieren → fast-Realtime-Feel
+  // - 30s wenn Tab im Hintergrund → schont Akku
+  // - Bei Pause: gar kein Poll
+  function tickInterval() {
+    if (!cloudEnabled()) return 0;
+    if (document.visibilityState !== 'visible') return 30000;
+    const hasShared = getSharedTrips().length > 0;
+    return hasShared ? 4000 : 15000;
+  }
+  function loop() {
+    const ms = tickInterval();
+    if (ms === 0) { CLOUD.pollTimer = null; return; }
+    CLOUD.pollTimer = setTimeout(async function(){
+      if (document.visibilityState === 'visible') {
+        await cloudPull(true);
+        await pullAllSharedTrips();
+      }
+      updateSyncIndicator();
+      loop();
+    }, ms);
+  }
+  loop();
+  // v0.9.0: BroadcastChannel — same-browser cross-tab Sync (zero latency)
+  setupBroadcastChannel();
+}
+
+// v0.9.0: BroadcastChannel — wenn der User in einem anderen Tab/Window die App
+// offen hat und dort etwas ändert, bekommt dieser Tab das sofort mit.
+let _tmBroadcast = null;
+function setupBroadcastChannel() {
+  if (_tmBroadcast || typeof BroadcastChannel === 'undefined') return;
+  try {
+    _tmBroadcast = new BroadcastChannel('tripmate-sync');
+    _tmBroadcast.addEventListener('message', function(e){
+      if (!e.data) return;
+      if (e.data.type === 'state-changed') {
+        // Anderer Tab hat lokal etwas geändert. Wir laden lokalen State neu.
+        try {
+          const stored = loadState();
+          if (stored) { state = stored; refreshCurrentView(); renderHeader(); }
+        } catch(_e) {}
+      } else if (e.data.type === 'cloud-pull-please') {
+        // Anderer Tab signalisiert: bitte Cloud-Pull triggern (z.B. nach Push)
+        cloudPull(true);
+        pullAllSharedTrips();
+      }
+    });
+  } catch(_e) { /* private mode / unsupported */ }
+}
+function broadcastLocal(type) {
+  if (!_tmBroadcast) return;
+  try { _tmBroadcast.postMessage({ type: type, ts: Date.now() }); } catch(_e) {}
 }
 document.addEventListener('visibilitychange', function(){
   if (document.visibilityState === 'visible' && cloudEnabled()) {
@@ -5373,8 +5596,8 @@ function openSosSheet() {
   const body = sheet.querySelector('.sheet-body');
   body.innerHTML = `
     <h3 class="sheet-title">Notfall</h3>
-    <p class="sheet-sub">${info ? escapeHtml(info.name) : 'Notrufnummern unbekannt — Standard 112'}</p>
-    <a class="sos-call-big" href="tel:${escapeHtml(emergency)}">📞 Notruf ${escapeHtml(emergency)}</a>
+    <p class="sheet-sub">${info ? escapeHtml(info.name) : (tr('sos.title') + ' · 112')}</p>
+    <a class="sos-call-big" href="tel:${escapeHtml(emergency)}">📞 ${tr('sos.title')} ${escapeHtml(emergency)}</a>
     <div class="sos-grid-sheet">
       <a class="sos-item" href="https://www.google.com/maps/search/${encodeURIComponent('Krankenhaus ' + city)}" target="_blank" rel="noopener">🏥 Krankenhaus</a>
       <a class="sos-item" href="https://www.google.com/maps/search/${encodeURIComponent('Apotheke ' + city)}" target="_blank" rel="noopener">💊 Apotheke</a>
@@ -5665,24 +5888,70 @@ function renderCountryPanel(container) {
   const driveClass = /links/i.test(info.drive) ? 'cp-drive-left' : '';
   const tzInfo = getCountryTimezoneInfo(trip.country);
   const tzRow = tzInfo
-    ? `<div class="cp-row"><strong>Zeitzone</strong><span>${escapeHtml(tzInfo.local + ' Uhr · ' + tzInfo.offsetLabel)}</span></div>`
+    ? `<div class="cp-row"><strong>${tr('info.timezone')}</strong><span>${escapeHtml(tzInfo.local + (tr('info.timeSuffix') ? ' ' + tr('info.timeSuffix') : '') + ' · ' + tzInfo.offsetLabel)}</span></div>`
     : '';
+  const driveLabel = translateDriveSide(info.drive);
   panel.innerHTML = `
     <div class="cp-head"><h3>${tr('plan.info.head')} ${escapeHtml(info.name)}</h3></div>
     <div class="cp-body">
       ${tzRow}
-      <div class="cp-row"><strong>Steckdose</strong><span>${escapeHtml(info.plug)} · ${escapeHtml(info.volt)}</span></div>
-      <div class="cp-row"><strong>Verkehr</strong><span class="${driveClass}">Fährt ${escapeHtml(info.drive)}</span></div>
-      <div class="cp-row"><strong>Währung</strong><span>${escapeHtml(info.curr)}</span></div>
-      <div class="cp-row"><strong>Sprache</strong><span>${escapeHtml(info.lang)}</span></div>
-      <div class="cp-row"><strong>Trinkgeld</strong><span>${escapeHtml(info.tip)}</span></div>
-      <div class="cp-row"><strong>Reservierung</strong><span>${escapeHtml(info.reserv)}</span></div>
-      <div class="cp-row"><strong>Notruf</strong><span>${escapeHtml(info.emergency)}</span></div>
+      <div class="cp-row"><strong>${tr('info.plug')}</strong><span>${escapeHtml(info.plug)} · ${escapeHtml(info.volt)}</span></div>
+      <div class="cp-row"><strong>${tr('info.traffic')}</strong><span class="${driveClass}">${tr('info.driveSuffix')} ${escapeHtml(driveLabel)}</span></div>
+      <div class="cp-row"><strong>${tr('info.currency')}</strong><span>${escapeHtml(info.curr)}</span></div>
+      <div class="cp-row"><strong>${tr('info.language')}</strong><span>${escapeHtml(translateLang(info.lang))}</span></div>
+      <div class="cp-row"><strong>${tr('info.tipping')}</strong><span>${escapeHtml(info.tip)}</span></div>
+      <div class="cp-row"><strong>${tr('info.reservation')}</strong><span>${escapeHtml(info.reserv)}</span></div>
+      <div class="cp-row"><strong>${tr('info.emergency')}</strong><span>${escapeHtml(info.emergency)}</span></div>
       ${info.extra ? `<div class="cp-extra">💡 ${escapeHtml(info.extra)}</div>` : ''}
     </div>
   `;
   container.appendChild(panel);
   makeCollapsible(panel, 'country', panel.querySelector('.cp-head'), panel.querySelector('.cp-body'));
+}
+
+// v0.9.0: Werte-Translator für COUNTRY_INFO (kompakt — nur die häufigsten Strings)
+const DRIVE_MAP = {
+  'rechts': { de:'rechts', en:'right', vi:'phải' },
+  'LINKS (!)': { de:'LINKS (!)', en:'LEFT (!)', vi:'TRÁI (!)' }
+};
+function translateDriveSide(val) {
+  const lang = getLang();
+  const m = DRIVE_MAP[val];
+  if (m && m[lang]) return m[lang];
+  return val; // Fallback: Original-Wert
+}
+const LANG_MAP = {
+  'Deutsch': { en:'German', vi:'Tiếng Đức' },
+  'Englisch': { en:'English', vi:'Tiếng Anh' },
+  'Französisch': { en:'French', vi:'Tiếng Pháp' },
+  'Italienisch': { en:'Italian', vi:'Tiếng Ý' },
+  'Spanisch': { en:'Spanish', vi:'Tiếng Tây Ban Nha' },
+  'Niederländisch': { en:'Dutch', vi:'Tiếng Hà Lan' },
+  'Dänisch': { en:'Danish', vi:'Tiếng Đan Mạch' },
+  'Schwedisch': { en:'Swedish', vi:'Tiếng Thụy Điển' },
+  'Norwegisch': { en:'Norwegian', vi:'Tiếng Na Uy' },
+  'Isländisch': { en:'Icelandic', vi:'Tiếng Iceland' },
+  'Polnisch': { en:'Polish', vi:'Tiếng Ba Lan' },
+  'Griechisch': { en:'Greek', vi:'Tiếng Hy Lạp' },
+  'Japanisch': { en:'Japanese', vi:'Tiếng Nhật' },
+  'Koreanisch': { en:'Korean', vi:'Tiếng Hàn' },
+  'Chinesisch': { en:'Chinese', vi:'Tiếng Trung' },
+  'Thai': { en:'Thai', vi:'Tiếng Thái' },
+  'Arabisch': { en:'Arabic', vi:'Tiếng Ả Rập' },
+  'Hindi': { en:'Hindi', vi:'Tiếng Hindi' },
+  'Vietnamesisch': { en:'Vietnamese', vi:'Tiếng Việt' }
+};
+function translateLang(val) {
+  if (!val) return val;
+  const lang = getLang();
+  if (lang === 'de') return val; // Original ist DE
+  // Mehrere Sprachen separated by /
+  return val.split('/').map(function(part){
+    const trimmed = part.trim();
+    const m = LANG_MAP[trimmed];
+    if (m && m[lang]) return m[lang];
+    return trimmed;
+  }).join(' / ');
 }
 
 // ============ Zentraler Itinerary ============
@@ -5882,7 +6151,7 @@ function renderSosPanel(container) {
       ${num ? `
         <a class="sos-call-btn" href="tel:${encodeURIComponent(num)}">
           <div>
-            <div class="lbl">Allgemeiner Notruf ${escapeHtml(info.name)}</div>
+            <div class="lbl">${tr('sos.general')} ${escapeHtml(info.name)}</div>
             <div class="num">${escapeHtml(info.emergency)}</div>
           </div>
           <span class="ico">📞</span>
@@ -5891,13 +6160,13 @@ function renderSosPanel(container) {
       <div class="sos-grid">
         <a class="sos-btn" href="${hospitalUrl}" target="_blank" rel="noopener noreferrer">
           <span class="ico">🏥</span>
-          <span>Krankenhaus</span>
+          <span>${tr('sos.hospital')}</span>
           <span class="sub">in ${escapeHtml(city || info.name)} finden</span>
         </a>
         <a class="sos-btn" href="${pharmacyUrl}" target="_blank" rel="noopener noreferrer">
           <span class="ico">💊</span>
-          <span>Apotheke</span>
-          <span class="sub">in der Nähe finden</span>
+          <span>${tr('sos.pharmacy')}</span>
+          <span class="sub">${tr('sos.findNearby')}</span>
         </a>
         <a class="sos-btn" href="${germanDocUrl}" target="_blank" rel="noopener noreferrer">
           <span class="ico">🇩🇪</span>
@@ -5906,7 +6175,7 @@ function renderSosPanel(container) {
         </a>
         <a class="sos-btn" href="${embassyUrl}" target="_blank" rel="noopener noreferrer">
           <span class="ico">🏛️</span>
-          <span>Botschaft</span>
+          <span>${tr('sos.embassy')}</span>
           <span class="sub">Dt. Vertretung</span>
         </a>
       </div>
@@ -5918,17 +6187,17 @@ function renderSosPanel(container) {
 
 // ============ Visa & Einreise ============
 function visaStatusMeta(v) {
-  // Rückgabe: { label, badge } wobei badge 'green' | 'yellow' | 'red'
-  if (!v) return { label: 'Unbekannt', badge: 'yellow' };
+  // v0.9.0: Labels gehen jetzt durch tr() — Code-Werte bleiben gleich.
+  if (!v) return { label: tr('visa.badge.unknown', 'Unbekannt'), badge: 'yellow' };
   switch (v.visa) {
-    case 'none':     return { label: 'Kein Visum nötig', badge: 'green' };
-    case 'esta':     return { label: 'ESTA erforderlich', badge: 'yellow' };
-    case 'eta':      return { label: 'eTA erforderlich', badge: 'yellow' };
-    case 'keta':     return { label: 'K-ETA erforderlich', badge: 'yellow' };
-    case 'evisa':    return { label: 'e-Visa erforderlich', badge: 'yellow' };
-    case 'voa':      return { label: 'Visa on Arrival', badge: 'yellow' };
-    case 'required': return { label: 'Visum vorab nötig', badge: 'red' };
-    default:         return { label: 'Prüfen', badge: 'yellow' };
+    case 'none':     return { label: tr('visa.badge.none'), badge: 'green' };
+    case 'esta':     return { label: tr('visa.badge.esta', 'ESTA erforderlich'), badge: 'yellow' };
+    case 'eta':      return { label: tr('visa.badge.eta'), badge: 'yellow' };
+    case 'keta':     return { label: tr('visa.badge.keta', 'K-ETA erforderlich'), badge: 'yellow' };
+    case 'evisa':    return { label: tr('visa.badge.evisa') + ' ' + tr('visa.badge.required', 'erforderlich'), badge: 'yellow' };
+    case 'voa':      return { label: tr('visa.badge.voa', 'Visa on Arrival'), badge: 'yellow' };
+    case 'required': return { label: tr('visa.badge.req', 'Visum vorab nötig'), badge: 'red' };
+    default:         return { label: tr('visa.badge.check', 'Prüfen'), badge: 'yellow' };
   }
 }
 
@@ -5952,7 +6221,8 @@ function renderVisaPanel(container, opts) {
       const note = document.createElement('div');
       note.className = 'empty-card';
       note.style.boxShadow = 'var(--shadow-xs)';
-      note.innerHTML = `<div class="ec-icon">🛂</div><div class="ec-title">Keine Visa-Daten</div><div class="ec-text">Für ${escapeHtml(country?.name || trip.country)} liegen aktuell keine Visa-Infos in der TripMate-DB vor. Bitte direkt bei der Botschaft oder dem Auswärtigen Amt prüfen.</div>`;
+      const _countryLabel = escapeHtml(country?.name || trip.country);
+      note.innerHTML = `<div class="ec-icon">🛂</div><div class="ec-title">${tr('visa.emptyTitle')}</div><div class="ec-text">${tr('visa.emptyText')}</div>`;
       container.appendChild(note);
     }
     return;
@@ -5964,10 +6234,14 @@ function renderVisaPanel(container, opts) {
   panel.className = 'visa-panel';
   // Pass-Gültigkeit prüfen gegen Trip-Ende, falls bekannt
   let passHint = '';
-  if (visa.passportMonths > 0) {
-    passHint = `Pass ≥ ${visa.passportMonths} Monate gültig (nach Rückreise).`;
+  if (visa.passportMonths >= 6) {
+    passHint = tr('visa.docHint.6');
+  } else if (visa.passportMonths >= 3) {
+    passHint = tr('visa.docHint.3');
+  } else if (visa.passportMonths > 0) {
+    passHint = `Pass ≥ ${visa.passportMonths} ${getLang() === 'de' ? 'Monate' : getLang() === 'vi' ? 'tháng' : 'months'}.`;
   } else {
-    passHint = 'Pass während der Reise gültig.';
+    passHint = tr('visa.docHint.trip');
   }
 
   // Foto/Screenshot des Visums oder ETA-Bestätigung (base64 in trip.visaPhoto)
@@ -5978,15 +6252,15 @@ function renderVisaPanel(container, opts) {
        </div>`
     : '';
   panel.innerHTML = `
-    <div class="v-head"><h3>🛂 Einreise ${country ? escapeHtml(country.name) : ''}</h3></div>
+    <div class="v-head"><h3>🛂 ${tr('visa.entry')} ${country ? escapeHtml(country.name) : ''}</h3></div>
     <div class="v-body">
-      <span class="visa-badge ${meta.badge}">${meta.label}</span>
-      <div class="v-row"><strong>Aufenthalt</strong><span>${escapeHtml(visa.stay)}</span></div>
-      <div class="v-row"><strong>Reisedokument</strong><span>${escapeHtml(passHint)}</span></div>
+      <span class="visa-badge ${meta.badge}">${escapeHtml(meta.label)}</span>
+      <div class="v-row"><strong>${tr('visa.stay')}</strong><span>${escapeHtml(visa.stay)}</span></div>
+      <div class="v-row"><strong>${tr('visa.doc')}</strong><span>${escapeHtml(passHint)}</span></div>
       ${visa.note ? `<div class="v-note">${escapeHtml(visa.note)}</div>` : ''}
-      <a class="v-link" href="${visa.url}" target="_blank" rel="noopener noreferrer">🔗 Details & Antrag</a>
+      <a class="v-link" href="${visa.url}" target="_blank" rel="noopener noreferrer">${tr('visa.detailLink')}</a>
       ${photoHtml}
-      <label class="v-photo-add" for="v-photo-input">${trip.visaPhoto ? '🖼 Foto ersetzen' : '📷 Foto/Screenshot anhängen'}</label>
+      <label class="v-photo-add" for="v-photo-input">${trip.visaPhoto ? tr('visa.photoReplace') : tr('visa.photoAdd')}</label>
       <input type="file" id="v-photo-input" accept="image/*" style="display:none" />
     </div>
   `;
@@ -7303,7 +7577,40 @@ const I18N = {
     'mehr.account.since': 'Angemeldet seit',
     // FX
     'fx.head': '💱 Währungsrechner',
-    'fx.rate.updated': 'Kurs aktualisiert', 'fx.rate.fresh': 'eben'
+    'fx.rate.updated': 'Kurs aktualisiert', 'fx.rate.fresh': 'eben',
+    // === v0.9.0 Phase B Keys (Render-Strings) ===
+    // Reiseinfos-Card
+    'info.timezone': 'Zeitzone', 'info.plug': 'Steckdose', 'info.traffic': 'Verkehr',
+    'info.currency': 'Währung', 'info.language': 'Sprache', 'info.tipping': 'Trinkgeld',
+    'info.reservation': 'Reservierung', 'info.emergency': 'Notruf', 'info.driveSuffix': 'Fährt',
+    'info.timeSuffix': 'Uhr',
+    // Visa-Card
+    'visa.stay': 'Aufenthalt', 'visa.doc': 'Reisedokument',
+    'visa.docHint.6': 'Pass mind. 6 Monate über die Reise hinaus gültig.',
+    'visa.docHint.3': 'Pass mind. 3 Monate über die Reise hinaus gültig.',
+    'visa.docHint.trip': 'Pass während der Reise gültig.',
+    'visa.entry': 'Einreise',
+    'visa.badge.eta': 'eTA erforderlich', 'visa.badge.evisa': 'eVisa', 'visa.badge.embassy': 'Botschaft',
+    'visa.badge.none': 'kein Visum nötig', 'visa.detailLink': '🔗 Details & Antrag',
+    'visa.photoAdd': '📷 Foto/Screenshot anhängen', 'visa.photoReplace': '🖼 Foto ersetzen',
+    'visa.emptyTitle': 'Keine Visa-Daten',
+    'visa.emptyText': 'Für dieses Land liegen aktuell keine Visa-Infos in der TripMate-DB vor. Bitte direkt bei der Botschaft oder dem Auswärtigen Amt prüfen.',
+    // Item-Modal
+    'item.modalTitle': 'Neuer Eintrag', 'item.editTitle': 'Eintrag bearbeiten',
+    'item.search': 'Suchen (Name des Ortes)', 'item.searchPh': 'z.B. Natural History Museum',
+    'item.name': 'Name', 'item.category': 'Kategorie',
+    'item.address': 'Adresse', 'item.addressPh': 'Wird automatisch gefüllt',
+    'item.dateOpt': 'Datum (optional)', 'item.time': 'Uhrzeit',
+    'item.noteOpt': 'Notiz (optional)', 'item.notePh': 'z.B. Reservierung um 19 Uhr',
+    // Categories
+    'cat.sight': 'Sehenswürdigkeit', 'cat.food': 'Restaurant', 'cat.shop': 'Shopping',
+    'cat.buy': 'Vor Ort kaufen', 'cat.hotel': 'Unterkunft', 'cat.other': 'Sonstiges',
+    // SOS-Sheet
+    'sos.title': 'Notruf', 'sos.general': 'Allgemeiner Notruf',
+    'sos.hospital': 'Krankenhaus', 'sos.pharmacy': 'Apotheke', 'sos.embassy': 'Botschaft',
+    'sos.findNearby': 'in der Nähe finden', 'sos.findInCity': 'in {city} finden',
+    // Drive-Sides
+    'drive.right': 'rechts', 'drive.left': 'LINKS (!)',
   },
   en: {
     'nav.heute': 'Today', 'nav.plan': 'Plan', 'nav.karte': 'Map', 'nav.geld': 'Money', 'nav.mehr': 'More',
@@ -7355,7 +7662,34 @@ const I18N = {
     'mehr.sync.active': 'active', 'mehr.sync.off': 'off',
     'mehr.account.since': 'Member since',
     'fx.head': '💱 Currency converter',
-    'fx.rate.updated': 'Rate updated', 'fx.rate.fresh': 'just now'
+    'fx.rate.updated': 'Rate updated', 'fx.rate.fresh': 'just now',
+    // === v0.9.0 Phase B Keys ===
+    'info.timezone': 'Time zone', 'info.plug': 'Power outlet', 'info.traffic': 'Traffic',
+    'info.currency': 'Currency', 'info.language': 'Language', 'info.tipping': 'Tipping',
+    'info.reservation': 'Reservations', 'info.emergency': 'Emergency', 'info.driveSuffix': 'Drives on the',
+    'info.timeSuffix': '',
+    'visa.stay': 'Stay', 'visa.doc': 'Travel document',
+    'visa.docHint.6': 'Passport valid for at least 6 months beyond travel.',
+    'visa.docHint.3': 'Passport valid for at least 3 months beyond travel.',
+    'visa.docHint.trip': 'Passport valid for duration of trip.',
+    'visa.entry': 'Entry',
+    'visa.badge.eta': 'eTA required', 'visa.badge.evisa': 'eVisa', 'visa.badge.embassy': 'Embassy',
+    'visa.badge.none': 'no visa needed', 'visa.detailLink': '🔗 Details & apply',
+    'visa.photoAdd': '📷 Attach photo/screenshot', 'visa.photoReplace': '🖼 Replace photo',
+    'visa.emptyTitle': 'No visa data',
+    'visa.emptyText': 'No visa info for this country in TripMate-DB. Please check directly with the embassy or your foreign office.',
+    'item.modalTitle': 'New entry', 'item.editTitle': 'Edit entry',
+    'item.search': 'Search (place name)', 'item.searchPh': 'e.g. Natural History Museum',
+    'item.name': 'Name', 'item.category': 'Category',
+    'item.address': 'Address', 'item.addressPh': 'Auto-filled',
+    'item.dateOpt': 'Date (optional)', 'item.time': 'Time',
+    'item.noteOpt': 'Note (optional)', 'item.notePh': 'e.g. Reservation at 7pm',
+    'cat.sight': 'Attraction', 'cat.food': 'Restaurant', 'cat.shop': 'Shopping',
+    'cat.buy': 'Buy on site', 'cat.hotel': 'Accommodation', 'cat.other': 'Other',
+    'sos.title': 'Emergency', 'sos.general': 'General emergency',
+    'sos.hospital': 'Hospital', 'sos.pharmacy': 'Pharmacy', 'sos.embassy': 'Embassy',
+    'sos.findNearby': 'find nearby', 'sos.findInCity': 'find in {city}',
+    'drive.right': 'right', 'drive.left': 'LEFT (!)',
   },
   vi: {
     'nav.heute': 'Hôm nay', 'nav.plan': 'Lịch trình', 'nav.karte': 'Bản đồ', 'nav.geld': 'Tiền', 'nav.mehr': 'Thêm',
@@ -7407,7 +7741,34 @@ const I18N = {
     'mehr.sync.active': 'đang bật', 'mehr.sync.off': 'tắt',
     'mehr.account.since': 'Tham gia từ',
     'fx.head': '💱 Chuyển đổi tiền tệ',
-    'fx.rate.updated': 'Tỷ giá cập nhật', 'fx.rate.fresh': 'vừa xong'
+    'fx.rate.updated': 'Tỷ giá cập nhật', 'fx.rate.fresh': 'vừa xong',
+    // === v0.9.0 Phase B Keys ===
+    'info.timezone': 'Múi giờ', 'info.plug': 'Ổ cắm điện', 'info.traffic': 'Giao thông',
+    'info.currency': 'Tiền tệ', 'info.language': 'Ngôn ngữ', 'info.tipping': 'Tiền boa',
+    'info.reservation': 'Đặt chỗ', 'info.emergency': 'Cấp cứu', 'info.driveSuffix': 'Lái xe bên',
+    'info.timeSuffix': '',
+    'visa.stay': 'Lưu trú', 'visa.doc': 'Giấy tờ',
+    'visa.docHint.6': 'Hộ chiếu còn hạn ít nhất 6 tháng sau chuyến đi.',
+    'visa.docHint.3': 'Hộ chiếu còn hạn ít nhất 3 tháng sau chuyến đi.',
+    'visa.docHint.trip': 'Hộ chiếu còn hạn trong suốt chuyến đi.',
+    'visa.entry': 'Nhập cảnh',
+    'visa.badge.eta': 'cần eTA', 'visa.badge.evisa': 'eVisa', 'visa.badge.embassy': 'Đại sứ quán',
+    'visa.badge.none': 'không cần visa', 'visa.detailLink': '🔗 Chi tiết & xin',
+    'visa.photoAdd': '📷 Đính kèm ảnh/màn hình', 'visa.photoReplace': '🖼 Thay ảnh',
+    'visa.emptyTitle': 'Chưa có thông tin visa',
+    'visa.emptyText': 'Hiện chưa có thông tin visa cho nước này trong TripMate. Vui lòng liên hệ trực tiếp đại sứ quán.',
+    'item.modalTitle': 'Mục mới', 'item.editTitle': 'Sửa mục',
+    'item.search': 'Tìm (tên địa điểm)', 'item.searchPh': 'VD: Natural History Museum',
+    'item.name': 'Tên', 'item.category': 'Loại',
+    'item.address': 'Địa chỉ', 'item.addressPh': 'Tự động điền',
+    'item.dateOpt': 'Ngày (tùy chọn)', 'item.time': 'Giờ',
+    'item.noteOpt': 'Ghi chú (tùy chọn)', 'item.notePh': 'VD: Đặt bàn 19h',
+    'cat.sight': 'Tham quan', 'cat.food': 'Nhà hàng', 'cat.shop': 'Mua sắm',
+    'cat.buy': 'Mua tại chỗ', 'cat.hotel': 'Chỗ ở', 'cat.other': 'Khác',
+    'sos.title': 'Cấp cứu', 'sos.general': 'Số khẩn cấp chung',
+    'sos.hospital': 'Bệnh viện', 'sos.pharmacy': 'Hiệu thuốc', 'sos.embassy': 'Đại sứ quán',
+    'sos.findNearby': 'tìm gần đây', 'sos.findInCity': 'tìm tại {city}',
+    'drive.right': 'phải', 'drive.left': 'TRÁI (!)',
   }
 };
 
@@ -7426,6 +7787,11 @@ function setLang(lang) {
   document.querySelectorAll('[data-i18n]').forEach(function(el){
     const key = el.getAttribute('data-i18n');
     if (key) el.textContent = t(key);
+  });
+  // v0.9.0: Placeholder-Attribut auch übersetzen
+  document.querySelectorAll('[data-i18n-ph]').forEach(function(el){
+    const key = el.getAttribute('data-i18n-ph');
+    if (key) el.setAttribute('placeholder', t(key));
   });
   refreshCurrentView();
   if (typeof renderHeader === 'function') renderHeader();
@@ -8454,6 +8820,9 @@ function openTripEdit(tripId) {
   // Löschen nur anzeigen, wenn editieren + mehr als 1 Reise existiert (letzte Reise nicht löschbar)
   const canDelete = !!tripId && Object.keys(state.trips).length > 1;
   document.getElementById('trip-edit-delete-wrap').style.display = canDelete ? 'flex' : 'none';
+  // v0.9.0: Duplicate-Button zeigen wenn ein Trip geöffnet ist (egal ob Owner/Member).
+  const dupWrap = document.getElementById('trip-edit-duplicate-wrap');
+  if (dupWrap) dupWrap.style.display = editingTripId ? 'flex' : 'none';
   // Share-Sektion (nur bei existierenden Trips, nicht beim Anlegen)
   renderTripEditShareSection(t);
   document.getElementById('trip-edit-modal').classList.add('open');
@@ -8716,6 +9085,22 @@ document.getElementById('trip-edit-save').addEventListener('click', async () => 
   toast('Reise gespeichert ✓');
   editingTripId = null;
 });
+document.getElementById('trip-edit-duplicate')?.addEventListener('click', () => {
+  if (!editingTripId) return;
+  const src = state.trips[editingTripId];
+  if (!src) return;
+  const baseName = src.name || 'Reise';
+  const proposed = baseName + ' (Kopie)';
+  const newName = prompt('Name der neuen Reise:', proposed);
+  if (newName === null) return;
+  const nt = duplicateTrip(editingTripId, newName);
+  if (!nt) { toast('Duplizieren fehlgeschlagen'); return; }
+  closeModal('trip-edit-modal');
+  editingTripId = null;
+  refreshCurrentView();
+  renderHeader();
+  toast('📋 Neue Reise "' + nt.name + '" erstellt');
+});
 document.getElementById('trip-edit-delete').addEventListener('click', () => {
   if (!editingTripId) return;
   const t = state.trips[editingTripId];
@@ -8818,6 +9203,29 @@ function renderPacklist() {
     <div class="pack-bar"><div style="width:${pct}%;"></div></div>
   `;
   container.appendChild(progress);
+
+  // v0.9.0: Template-Picker — bei leerer Packliste oder kleiner Liste anzeigen
+  if (total < 5 && typeof PACK_TEMPLATES === 'object') {
+    const tplBox = document.createElement('div');
+    tplBox.className = 'pack-template-picker';
+    tplBox.style.cssText = 'background:var(--bg-soft); border-radius:var(--radius-md); padding:12px 14px; margin:10px 0; border:1px solid var(--border-soft);';
+    const lang = getLang();
+    const tplBtns = Object.keys(PACK_TEMPLATES).map(function(key){
+      const tpl = PACK_TEMPLATES[key];
+      const lbl = (tpl.label && tpl.label[lang]) || tpl.label.de;
+      return '<button type="button" class="pack-template-btn" data-tpl="' + key + '" style="background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:6px 12px; font-size:13px; cursor:pointer; margin:2px;">' + tpl.icon + ' ' + lbl + '</button>';
+    }).join('');
+    tplBox.innerHTML = '<div style="font-size:12px; color:var(--text-muted); margin-bottom:6px;">✨ Vorlage übernehmen (' + Object.keys(PACK_TEMPLATES).length + ' Reise-Typen):</div><div>' + tplBtns + '</div>';
+    container.appendChild(tplBox);
+    tplBox.querySelectorAll('.pack-template-btn').forEach(function(b){
+      b.addEventListener('click', function(){
+        const key = b.dataset.tpl;
+        const added = applyPackTemplate(state.currentTripId, key);
+        if (added > 0) { toast('✨ ' + added + ' Items hinzugefügt'); renderPacklist(); }
+        else toast('Alle Template-Items sind schon in deiner Liste');
+      });
+    });
+  }
 
   // Filter-Tabs (alle / Erwachsene / Kind)
   const hasKidItems = list.some(p => p.forKid);
@@ -9311,6 +9719,142 @@ function importFromHash() {
   }
 }
 
+// ============ Public Read-Only View (v0.9.0) ============
+// URL: ?view=<lz-compressed-payload>
+function checkPublicViewInURL() {
+  try {
+    const params = new URLSearchParams(location.search);
+    const compressed = params.get('view');
+    if (!compressed) return false;
+    const json = LZString.decompressFromEncodedURIComponent(compressed);
+    if (!json) return false;
+    const payload = JSON.parse(json);
+    if (!payload || !payload.trip) return false;
+    renderPublicView(payload);
+    return true;
+  } catch (e) { console.error('checkPublicViewInURL', e); return false; }
+}
+
+function renderPublicView(payload) {
+  const t = payload.trip || {};
+  const by = payload.sharedBy || 'jemand';
+  document.body.classList.add('is-public-view');
+  document.body.classList.add('is-authed');
+  const gate = document.getElementById('auth-gate');
+  if (gate) { gate.setAttribute('aria-hidden', 'true'); gate.style.display = 'none'; }
+  const app = document.getElementById('app');
+  if (!app) return;
+  const titleHtml = escapeHtml(t.name || 'Reise');
+  const cityHtml = escapeHtml(t.city || '');
+  const sharedByHtml = escapeHtml(by);
+  const dateRange = (t.start && t.end) ? (formatDateShort(t.start) + ' \u2013 ' + formatDateShort(t.end))
+                  : (t.start ? formatDateShort(t.start) : '');
+  const itemsByCat = {};
+  (t.items || []).forEach(function(it){
+    const cat = it.category || 'sight';
+    if (!itemsByCat[cat]) itemsByCat[cat] = [];
+    itemsByCat[cat].push(it);
+  });
+  const catIcons = { sight:'\ud83c\udfdb', food:'\ud83c\udf7d', shop:'\ud83d\udecd', buy:'\ud83d\uded2', hotel:'\ud83c\udfe8', other:'\ud83d\udccd' };
+  const catLabels = { sight:'Sehenswürdigkeiten', food:'Restaurants', shop:'Shopping', buy:'Einkaufen vor Ort', hotel:'Unterkünfte', other:'Sonstige' };
+  let itemsHtml = '';
+  Object.keys(itemsByCat).forEach(function(cat){
+    itemsHtml += '<div class="pv-section"><h3>' + (catIcons[cat]||'') + ' ' + (catLabels[cat]||cat) + '</h3>';
+    itemsByCat[cat].forEach(function(it){
+      itemsHtml += '<div class="pv-item">';
+      itemsHtml += '<div class="pv-name">' + escapeHtml(it.name || '') + '</div>';
+      if (it.address) itemsHtml += '<div class="pv-addr">' + escapeHtml(it.address) + '</div>';
+      if (it.notes) itemsHtml += '<div class="pv-notes">' + escapeHtml(it.notes) + '</div>';
+      itemsHtml += '</div>';
+    });
+    itemsHtml += '</div>';
+  });
+  let hotelsHtml = '';
+  if ((t.accommodations || []).length > 0) {
+    hotelsHtml += '<div class="pv-section"><h3>\ud83c\udfe8 Unterkünfte</h3>';
+    (t.accommodations || []).forEach(function(a){
+      hotelsHtml += '<div class="pv-item">';
+      hotelsHtml += '<div class="pv-name">' + escapeHtml(a.name || '') + '</div>';
+      if (a.address) hotelsHtml += '<div class="pv-addr">' + escapeHtml(a.address) + '</div>';
+      if (a.start || a.end) {
+        const dr = (a.start ? formatDateShort(a.start) : '') + (a.end ? ' \u2013 ' + formatDateShort(a.end) : '');
+        hotelsHtml += '<div class="pv-meta">' + escapeHtml(dr) + '</div>';
+      }
+      hotelsHtml += '</div>';
+    });
+    hotelsHtml += '</div>';
+  }
+  let eventsHtml = '';
+  if ((t.events || []).length > 0) {
+    eventsHtml += '<div class="pv-section"><h3>\ud83d\udcc5 Termine</h3>';
+    (t.events || []).slice().sort(function(a,b){ return (a.date||'').localeCompare(b.date||''); }).forEach(function(e){
+      eventsHtml += '<div class="pv-item">';
+      eventsHtml += '<div class="pv-name">' + escapeHtml(e.title || 'Termin') + '</div>';
+      const meta = [e.date && formatDateShort(e.date), e.time, e.location].filter(Boolean).join(' \u00b7 ');
+      if (meta) eventsHtml += '<div class="pv-meta">' + escapeHtml(meta) + '</div>';
+      if (e.notes) eventsHtml += '<div class="pv-notes">' + escapeHtml(e.notes) + '</div>';
+      eventsHtml += '</div>';
+    });
+    eventsHtml += '</div>';
+  }
+  app.innerHTML = '<style>'
+    + '.public-view-wrap { max-width: 720px; margin: 0 auto; padding: 24px 18px 80px; }'
+    + '.pv-banner { background: var(--accent, #FF385C); color: white; padding: 14px 18px; border-radius: 12px; margin-bottom: 18px; font-size: 14px; }'
+    + '.pv-header { margin-bottom: 22px; }'
+    + '.pv-header h1 { font-size: 28px; margin: 0 0 6px; }'
+    + '.pv-header .sub { color: var(--text-muted); font-size: 14px; }'
+    + '.pv-section { margin-bottom: 28px; }'
+    + '.pv-section h3 { font-size: 16px; margin: 0 0 12px; color: var(--text); }'
+    + '.pv-item { background: var(--surface); border: 1px solid var(--border-soft); border-radius: 12px; padding: 12px 14px; margin-bottom: 10px; }'
+    + '.pv-name { font-weight: 600; margin-bottom: 4px; }'
+    + '.pv-addr { color: var(--text-muted); font-size: 13px; }'
+    + '.pv-meta { color: var(--text-muted); font-size: 12.5px; margin-top: 4px; }'
+    + '.pv-notes { color: var(--text); font-size: 13px; margin-top: 6px; font-style: italic; }'
+    + '.pv-footer { text-align: center; color: var(--text-muted); font-size: 12px; margin-top: 30px; padding-top: 18px; border-top: 1px solid var(--border-soft); }'
+    + '.pv-footer a { color: var(--primary); }'
+    + 'body.is-public-view .tabs, body.is-public-view .sos-fab, body.is-public-view .fab, body.is-public-view #share-btn, body.is-public-view .icon-btn { display: none !important; }'
+    + 'body.is-public-view .view { display: none !important; }'
+    + '</style>'
+    + '<div class="public-view-wrap">'
+    +   '<div class="pv-banner">\ud83d\udcd6 Read-only Reise-Ansicht \u2014 geteilt von <strong>' + sharedByHtml + '</strong></div>'
+    +   '<div class="pv-header">'
+    +     '<h1>' + titleHtml + '</h1>'
+    +     '<div class="sub">' + (cityHtml ? cityHtml + ' \u00b7 ' : '') + (dateRange || '') + '</div>'
+    +   '</div>'
+    +   itemsHtml
+    +   hotelsHtml
+    +   eventsHtml
+    +   '<div class="pv-footer">Erstellt mit <a href="' + location.origin + location.pathname + '" target="_blank">TripMate</a> \u00b7 Du siehst hier eine schreibgeschützte Ansicht.</div>'
+    + '</div>';
+}
+
+function formatDateShort(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return iso;
+  const lang = (typeof getLang === 'function') ? getLang() : 'de';
+  const locale = lang === 'en' ? 'en-US' : lang === 'vi' ? 'vi-VN' : 'de-DE';
+  return d.toLocaleDateString(locale, { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+function buildPublicViewLink(tripId) {
+  const t = state.trips[tripId];
+  if (!t) return '';
+  const cleanTrip = JSON.parse(JSON.stringify(t));
+  delete cleanTrip.documents;
+  delete cleanTrip.sharedRoom;
+  delete cleanTrip.members;
+  delete cleanTrip.ownerEmail;
+  delete cleanTrip._tombs;
+  delete cleanTrip.publicView;
+  delete cleanTrip.expenses;
+  delete cleanTrip.packlist;
+  const payload = { trip: cleanTrip, sharedBy: (myName || 'jemand'), sharedAt: Date.now() };
+  const json = JSON.stringify(payload);
+  const compressed = LZString.compressToEncodedURIComponent(json);
+  return location.origin + location.pathname + '?view=' + compressed;
+}
+
 // ============ Welcome flow ============
 function showWelcomeIfNeeded() {
   if (!myName) {
@@ -9351,6 +9895,8 @@ bindAuthGate();
 try { if (typeof setLang === 'function') setLang(getLang()); } catch(_) {}
 
 (async function bootAuth() {
+  // v0.9.0: Public-View ?view=... — komplett-frühes Bail-Out vor Auth-Logik
+  if (checkPublicViewInURL()) { return; }
   // 1. Kommen wir gerade von einem Magic-Link zurück? (#access_token=... im URL-Hash)
   const cb = parseAuthHash();
   if (cb && cb.error) {
