@@ -2358,7 +2358,7 @@ create policy "u" on trips for update using (true);</pre>
 // ============ App-Version ============
 // Bei Schema-Änderungen SCHEMA_VERSION hochzählen + Migration ergänzen.
 // APP_VERSION ist die User-sichtbare Version.
-const APP_VERSION = '0.8.1';
+const APP_VERSION = '0.8.2';
 const SCHEMA_VERSION = 3;
 
 // ============ Constants & Demo Data ============
@@ -2902,6 +2902,8 @@ async function persistAuthSession(data) {
   if (Object.keys(state.trips || {}).length > 0) {
     await cloudPushImmediate();
   }
+  // v0.8.2: Shared-Rooms aus Server-Wahrheit wiederherstellen (löst iOS-PWA-Container-Bug).
+  await discoverSharedRoomsForCurrentUser();
   return acc;
 }
 
@@ -3902,6 +3904,79 @@ async function joinTripFromInvite(roomCode, fromEmail, tripName) {
     return false;
   }
 }
+
+// v0.8.2: Bei Login oder App-Boot ALLE Shared-Rooms finden in denen der User Member ist
+// und lokal verbinden. Löst den iOS-PWA-Bug: PWA-Container nutzt eigenes localStorage,
+// nach Anmeldung in der PWA waren Shared-Rooms verloren. Jetzt server-truth-driven.
+async function discoverSharedRoomsForCurrentUser() {
+  if (!cloudEnabled()) return 0;
+  const acc = getAccount();
+  if (!acc || !acc.email) return 0;
+  try {
+    // PostgREST jsonb-contains: state @> {"members": ["email"]}
+    const memberFilter = encodeURIComponent('{"members":["' + acc.email + '"]}');
+    const url = cloudFullUrl('/rest/v1/trips?room_code=like.sr-%25&state=cs.' + memberFilter + '&select=room_code,state,updated_at');
+    const r = await cloudFetch(url);
+    if (!r.ok) {
+      console.warn('discoverSharedRooms: HTTP ' + r.status);
+      return 0;
+    }
+    const rows = await r.json();
+    if (!Array.isArray(rows) || rows.length === 0) return 0;
+    let imported = 0, relinked = 0;
+    for (const row of rows) {
+      const roomCode = row.room_code;
+      const sharedState = row.state || {};
+      const remoteTrip = sharedState.trip;
+      if (!remoteTrip || !remoteTrip.id) continue;
+      let localTrip = state.trips[remoteTrip.id];
+      if (localTrip) {
+        // Schon verbunden? Nichts tun, Polling regelt den Rest.
+        if (localTrip.sharedRoom === roomCode) continue;
+        // Lokaler Trip mit gleicher ID existiert aber sharedRoom fehlt/falsch → verbinden + mergen
+        ensureTripDefaults(localTrip);
+        mergeOneTrip(localTrip, remoteTrip);
+        localTrip.sharedRoom = roomCode;
+        const remoteOwner = sharedState.ownerEmail || remoteTrip.ownerEmail || '';
+        if (remoteOwner) localTrip.ownerEmail = remoteOwner;
+        const remoteMembers = sharedState.members || remoteTrip.members || [];
+        remoteMembers.forEach(m => { if (m && !localTrip.members.includes(m)) localTrip.members.push(m); });
+        relinked++;
+      } else {
+        // Komplett frisch — Trip importieren
+        localTrip = structuredClone(remoteTrip);
+        ensureTripDefaults(localTrip);
+        localTrip.sharedRoom = roomCode;
+        if (!localTrip.ownerEmail) {
+          localTrip.ownerEmail = sharedState.ownerEmail || '';
+        }
+        const outerMembers = sharedState.members || [];
+        outerMembers.forEach(m => { if (m && !localTrip.members.includes(m)) localTrip.members.push(m); });
+        state.trips[localTrip.id] = localTrip;
+        imported++;
+      }
+    }
+    const total = imported + relinked;
+    if (total > 0) {
+      saveState();
+      try { refreshCurrentView(); } catch(_e) {}
+      try { renderHeader(); } catch(_e) {}
+      const lbl = total === 1 ? 'geteilte Reise' : 'geteilte Reisen';
+      if (imported > 0 && relinked > 0) {
+        toast('🤝 ' + imported + ' importiert, ' + relinked + ' wiederverbunden');
+      } else if (imported > 0) {
+        toast('🤝 ' + imported + ' ' + lbl + ' importiert');
+      } else {
+        toast('🔗 ' + relinked + ' ' + lbl + ' wieder verbunden');
+      }
+    }
+    return total;
+  } catch (e) {
+    console.error('discoverSharedRoomsForCurrentUser error', e);
+    return 0;
+  }
+}
+
 
 // URL-Parameter ?join=... beim App-Start prüfen (nach Login)
 function checkJoinInviteInURL() {
@@ -9534,6 +9609,11 @@ function proceedToApp() {
   startCloudPolling();
   refreshFabVisibility();
   refreshSosFab();
+  // v0.8.2: Auch bei restored-Session (App-Boot ohne explizites Login) prüfen
+  // ob neue Shared-Rooms hinzugekommen sind oder lokale Verbindung verlorenging.
+  if (isAuthenticated()) {
+    setTimeout(function(){ discoverSharedRoomsForCurrentUser(); }, 1500);
+  }
 }
 
 // SOS-FAB Click → Notruf-Sheet
