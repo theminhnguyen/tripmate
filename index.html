@@ -1635,7 +1635,7 @@
 <div id="app">
   <header>
     <div class="brand" aria-label="TripMate">
-      <span class="brand-mark">✦</span>
+      <span class="brand-mark">🐭</span>
       <span class="brand-name">TripMate</span>
     </div>
     <!-- versteckt aber für Code-Kompatibilität (saveState/openTripManager Click-Pfad) -->
@@ -1646,9 +1646,8 @@
       </span>
     </button>
     <div class="actions">
-      <button class="icon-btn" id="sync-status" title="Cloud-Sync" style="display:none;">☁️</button>
-      <button class="icon-btn" id="share-btn" title="Teilen">↗</button>
-      <button class="icon-btn" id="settings-btn" title="Einstellungen">⚙</button>
+      <button class="icon-btn" id="sync-status" data-i18n-title="header.sync.title" title="Cloud-Sync" style="display:none;">☁️</button>
+      <button class="icon-btn" id="settings-btn" data-i18n-title="header.settings.title" title="Einstellungen">⚙</button>
     </div>
   </header>
 
@@ -1702,7 +1701,7 @@
   </main>
 
   <button class="fab" id="fab" title="Hinzufügen">+</button>
-  <button class="sos-fab" id="sos-fab" title="Notruf-Optionen" aria-label="Notruf öffnen">
+  <button class="sos-fab" id="sos-fab" data-i18n-title="sos.btnTitle" title="Notruf-Optionen" aria-label="Notruf öffnen">
     <span class="sos-fab-label">SOS</span>
   </button>
 
@@ -1898,7 +1897,7 @@
   <div class="modal">
     <h3>🧳 Meine Reisen</h3>
     <p style="color:var(--text-muted); font-size:13px; margin:0 0 10px;">
-      Tippe auf eine Reise, um zu wechseln. Jede Reise hat eigene Einträge, Kalender und Packliste.
+      ${tr('tripList.hint')}
     </p>
     <div id="trip-list" class="trip-list"></div>
     <div class="modal-actions">
@@ -1911,20 +1910,20 @@
 <!-- Trip-Edit modal: Name / Stadt / Zeitraum einer Reise bearbeiten -->
 <div class="modal-backdrop" id="trip-edit-modal">
   <div class="modal">
-    <h3 id="trip-edit-title">Reise bearbeiten</h3>
+    <h3 id="trip-edit-title" data-i18n="te.title">Reise bearbeiten</h3>
 
     <label>Name der Reise</label>
     <input type="text" id="te-name" placeholder="z.B. London 2026" />
 
-    <label>Stadt / Reiseziel</label>
-    <input type="text" id="te-city" placeholder="z.B. London, UK" />
+    <label data-i18n="te.city">Stadt / Reiseziel</label>
+    <input type="text" id="te-city" placeholder="z.B. London, UK" data-i18n-ph="te.cityPh" />
 
-    <label>Land (für Reiseinfos: Steckdose, Verkehr, …)</label>
+    <label data-i18n="te.countryHint">Land (für Reiseinfos: Steckdose, Verkehr, …)</label>
     <select id="te-country">
-      <option value="">— Kein Land —</option>
+      <option value="" data-i18n="te.countryNone">— Kein Land —</option>
     </select>
 
-    <label>Reisezeitraum</label>
+    <label data-i18n="te.dates">Reisezeitraum</label>
     <div class="row">
       <input type="date" id="te-start" />
       <input type="date" id="te-end" />
@@ -1932,44 +1931,19 @@
 
     <div class="date-range-picker" id="te-date-picker"></div>
     <div style="font-size:11px; color:var(--text-muted); margin-top:4px;">
-      Tipp: Im Kalender unten zuerst Start-Tag, dann End-Tag antippen.
+      <span data-i18n="te.calHint">Tipp: Im Kalender unten zuerst Start-Tag, dann End-Tag antippen.</span>
     </div>
 
-    <!-- Mitglieder & Live-Sharing (v0.6.1) -->
-    <div class="te-share-section" id="te-share-section">
-      <div class="te-share-head">
-        <span class="te-share-ic">👥</span>
-        <div style="flex:1; min-width:0;">
-          <div class="te-share-title">Mitglieder & Live-Sync</div>
-          <div class="te-share-sub" id="te-share-sub">Lade Personen ein, die mit dir an dieser Reise planen sollen.</div>
-        </div>
-      </div>
-      <div id="te-members-list" class="te-members-list"></div>
-      <div id="te-share-link-wrap" style="display:none;">
-        <label style="margin-top:8px;">Einladungs-Link</label>
-        <div class="te-link-row">
-          <input type="text" id="te-share-link" readonly />
-          <button class="btn-tiny" id="te-copy-link" type="button">📋 Kopieren</button>
-        </div>
-        <div style="font-size:11.5px; color:var(--text-muted); margin-top:4px; line-height:1.4;">
-          Sende den Link an die Person, die mitplanen soll. Nach dem Klick + Anmelden sieht sie alle Änderungen live.
-        </div>
-      </div>
-      <div class="te-share-actions">
-        <button class="btn secondary" id="te-enable-share-btn" type="button" style="margin-top:10px;">🔗 Reise live teilen</button>
-        <button class="btn ghost" id="te-disable-share-btn" type="button" style="margin-top:6px; display:none; color:var(--danger);">Live-Sharing beenden</button>
-      </div>
-    </div>
 
     <div class="modal-actions">
       <button class="btn secondary" id="trip-edit-cancel" data-i18n="btn.cancel">Abbrechen</button>
       <button class="btn primary" id="trip-edit-save" data-i18n="btn.save">Speichern</button>
     </div>
     <div class="modal-actions" id="trip-edit-duplicate-wrap" style="display:none;">
-      <button class="btn ghost" id="trip-edit-duplicate" type="button" style="width:100%;">📋 Reise duplizieren (neuer Trip mit gleichem Plan)</button>
+      <button class="btn ghost" id="trip-edit-duplicate" type="button" style="width:100%;" data-i18n="te.duplicate">📋 Reise duplizieren (neuer Trip mit gleichem Plan)</button>
     </div>
     <div class="modal-actions" id="trip-edit-delete-wrap" style="display:none;">
-      <button class="btn danger" id="trip-edit-delete">Reise löschen</button>
+      <button class="btn danger" id="trip-edit-delete" data-i18n="te.delete">Reise löschen</button>
     </div>
   </div>
 </div>
@@ -1978,22 +1952,22 @@
 <div class="modal-backdrop" id="sync-modal">
   <div class="modal">
     <div class="auth-wrap" style="padding:12px 0 16px;">
-      <div class="brand">☁️</div>
-      <h2>Cloud-Sync</h2>
-      <p>Deine Trips synchronisieren automatisch zwischen all deinen Geräten.</p>
+      <div class="brand">🐭</div>
+      <h2 data-i18n="sync.title">Cloud-Sync</h2>
+      <p data-i18n="sync.subtitle">Deine Trips synchronisieren automatisch zwischen all deinen Geräten.</p>
     </div>
     <div id="sync-connected-panel" style="display:none;">
       <div class="login-status connected" style="margin-bottom:12px;">
         <span class="dot-sync"></span>
         <span>Verbunden mit Raum <strong id="sync-conn-room-label"></strong></span>
       </div>
-      <p class="sub" style="margin:8px 0 14px;">Reisen mit anderen teilen: öffne den Trip → „Trip teilen" → Link verschicken. Der Empfänger meldet sich einmal an, danach läuft Sync auf allen seinen Geräten von alleine.</p>
+      <p class="sub" style="margin:8px 0 14px;"><span data-i18n="sync.shareHint">Reisen mit anderen teilen: öffne Mehr → „Trip teilen" → Link verschicken. Der Empfänger meldet sich einmal an, danach läuft Sync auf allen seinen Geräten von alleine.</span></p>
     </div>
     <div class="modal-actions">
       <button class="btn secondary" id="sync-cancel" data-i18n="btn.close">Schließen</button>
     </div>
     <div class="modal-actions" id="sync-disable-wrap" style="display:none;">
-      <button class="btn danger" id="sync-disable">Sync deaktivieren</button>
+      <button class="btn danger" id="sync-disable" data-i18n="sync.disable">Sync deaktivieren</button>
     </div>
   </div>
 </div>
@@ -2001,6 +1975,67 @@
 
 
 <!-- Share modal -->
+<!-- v0.9.2: Zentrales Share-Modal — Live-Sync + Public-Read-only in einem -->
+<div class="modal-backdrop" id="share-trip-modal">
+  <div class="modal">
+    <div class="auth-wrap" style="padding:8px 0 14px;">
+      <div class="brand">🤝</div>
+      <h2 data-i18n="share.title">Reise teilen</h2>
+      <p data-i18n="share.subtitle">Zwei Wege: gemeinsam live planen, oder einen schreibgeschützten Blick freigeben.</p>
+    </div>
+
+    <div class="te-share-section" style="margin-top:0;">
+      <div class="te-share-head">
+        <span class="te-share-ic">👥</span>
+        <div style="flex:1; min-width:0;">
+          <div class="te-share-title" data-i18n="share.live.title">Gemeinsam live planen</div>
+          <div class="te-share-sub" data-i18n="share.live.sub">Lade jemanden ein — beide sehen Änderungen sofort. Kontakt-Person braucht TripMate-Account.</div>
+        </div>
+      </div>
+      <div id="stm-members-list" class="te-members-list"></div>
+      <div id="stm-share-link-wrap" style="display:none;">
+        <label style="margin-top:8px;" data-i18n="share.live.linkLbl">Einladungs-Link</label>
+        <div class="te-link-row">
+          <input type="text" id="stm-share-link" readonly />
+          <button class="btn-tiny" id="stm-copy-link" type="button" data-i18n="share.copy">📋 Kopieren</button>
+        </div>
+        <div style="font-size:11.5px; color:var(--text-muted); margin-top:4px; line-height:1.4;" data-i18n="share.live.linkHint">
+          Sende den Link an die Person, die mitplanen soll. Nach Klick + Anmelden sieht sie alle Änderungen live.
+        </div>
+      </div>
+      <div class="te-share-actions">
+        <button class="btn secondary" id="stm-enable-live-btn" type="button" style="margin-top:10px;" data-i18n="share.live.enable">🔗 Live-Sharing aktivieren</button>
+        <button class="btn ghost" id="stm-disable-live-btn" type="button" style="margin-top:6px; display:none; color:var(--danger);" data-i18n="share.live.disable">Live-Sharing beenden</button>
+      </div>
+    </div>
+
+    <div class="te-share-section" style="margin-top:14px;">
+      <div class="te-share-head">
+        <span class="te-share-ic">🌐</span>
+        <div style="flex:1; min-width:0;">
+          <div class="te-share-title" data-i18n="share.public.title">Schreibgeschützter Link</div>
+          <div class="te-share-sub" data-i18n="share.public.sub">Familie oder Freunde sehen den Plan, ohne Account. Keine Änderungen möglich, kein Live-Update.</div>
+        </div>
+      </div>
+      <div id="stm-public-link-wrap" style="display:none;">
+        <label style="margin-top:8px;" data-i18n="share.public.linkLbl">Read-only-Link</label>
+        <div class="te-link-row">
+          <input type="text" id="stm-public-link" readonly />
+          <button class="btn-tiny" id="stm-copy-public-link" type="button" data-i18n="share.copy">📋 Kopieren</button>
+        </div>
+        <div style="font-size:11.5px; color:var(--text-muted); margin-top:4px; line-height:1.4;" data-i18n="share.public.linkHint">
+          Der Link enthält den Plan ohne Doc-Safe, Ausgaben und Packliste. Wer den Link hat, sieht den aktuellen Stand.
+        </div>
+      </div>
+      <button class="btn secondary" id="stm-build-public-btn" type="button" style="margin-top:10px;" data-i18n="share.public.build">🌐 Read-only-Link erzeugen</button>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn secondary" id="stm-close" data-i18n="btn.close">Schließen</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-backdrop" id="share-modal">
   <div class="modal">
     <h3>Reise teilen</h3>
@@ -2294,9 +2329,9 @@
       <p>Plant euren Urlaub gemeinsam.</p>
     </div>
     <label>Wie heißt du?</label>
-    <input type="text" id="welcome-name" placeholder="Dein Name" />
+    <input type="text" id="welcome-name" placeholder="Dein Name" data-i18n-ph="welcome.placeholder" />
     <div class="modal-actions">
-      <button class="btn primary" id="welcome-ok">Los geht's</button>
+      <button class="btn primary" id="welcome-ok" data-i18n="welcome.ok">Los geht's</button>
     </div>
   </div>
 </div>
@@ -2310,7 +2345,7 @@
 // ============ App-Version ============
 // Bei Schema-Änderungen SCHEMA_VERSION hochzählen + Migration ergänzen.
 // APP_VERSION ist die User-sichtbare Version.
-const APP_VERSION = '0.9.1';
+const APP_VERSION = '0.9.2';
 const SCHEMA_VERSION = 3;
 
 // ============ Constants & Demo Data ============
@@ -4897,16 +4932,15 @@ function renderMehr() {
   }
   html += `<div class="more-section">
     <button class="more-row" data-mehr-row="trip-edit" type="button"><span class="mr-ic">⚙️</span><span class="mr-lbl">${tr('mehr.tripEdit')}</span><span class="mr-ch">›</span></button>
-    <button class="more-row" data-mehr-row="members" type="button">
-      <span class="mr-ic">${_isShared ? '👥' : '📤'}</span>
+    <button class="more-row" data-mehr-row="share" type="button">
+      <span class="mr-ic">${_isShared ? '👥' : '🤝'}</span>
       <span class="mr-lbl" style="display:flex; flex-direction:column; align-items:flex-start; gap:2px; line-height:1.2;">
-        <span>${_membersLabel}</span>
+        <span>${tr('mehr.share')}</span>
         ${_membersSub ? `<span style="font-size:12px; color:var(--text-muted); font-weight:400;">${escapeHtml(_membersSub)}</span>` : ''}
       </span>
-      ${_isShared ? '<span class="mr-badge success">Live</span>' : ''}
+      ${_isShared ? `<span class="mr-badge success">${tr('mehr.live')}</span>` : ''}
       <span class="mr-ch">›</span>
     </button>
-    <button class="more-row" data-mehr-row="trip-share-snapshot" type="button"><span class="mr-ic">🔗</span><span class="mr-lbl">${tr('mehr.tripShareSnap')}</span><span class="mr-ch">›</span></button>
     <button class="more-row" data-mehr-row="sync" type="button"><span class="mr-ic">🔄</span><span class="mr-lbl">${tr('mehr.sync')}</span><span class="mr-badge ${cloudEnabled() ? 'success' : 'muted'}">${cloudEnabled() ? tr('mehr.sync.active') : tr('mehr.sync.off')}</span><span class="mr-ch">›</span></button>
     <button class="more-row" data-mehr-row="trip-list" type="button"><span class="mr-ic">🧳</span><span class="mr-lbl">${tr('mehr.tripList')}</span><span class="mr-ch">›</span></button>
     <button class="more-row" data-mehr-row="export-pdf" type="button"><span class="mr-ic">📄</span><span class="mr-lbl">${tr('mehr.exportPdf')}</span><span class="mr-ch">›</span></button>
@@ -4946,6 +4980,8 @@ function renderMehr() {
     </div>
   </div>`;
 
+  // v0.9.2: Footer „vibe coded by Minh ❤️"
+  html += `<div style="text-align:center; padding:24px 16px 8px; color:var(--text-muted); font-size:12px; opacity:0.7;">${tr('mehr.footer')}</div>`;
   html += `<div style="height:48px;"></div>`;
   container.innerHTML = html;
   bindTripStrip(container);
@@ -4972,11 +5008,9 @@ function handleMehrRow(action) {
     case 'docs': scrollToPanel('docs-panel', 'plan'); break;
     case 'sos': scrollToPanel('sos-panel', 'plan'); break;
     case 'trip-edit': openTripEdit(state.currentTripId); break;
-    case 'trip-share': document.getElementById('share-btn')?.click(); break;
     case 'sync': document.getElementById('open-sync-setup')?.click(); break;
     case 'trip-list': openTripManager(); break;
-    case 'members': openTripEdit(state.currentTripId); setTimeout(() => { document.getElementById('te-share-section')?.scrollIntoView({behavior:'smooth', block:'start'}); }, 200); break;
-    case 'trip-share-snapshot': document.getElementById('share-btn')?.click(); break;
+    case 'share': openShareTripModal(state.currentTripId); break;
     case 'export-trips': exportAllTrips(); break;
     case 'export-pdf': exportTripPdf(); break;
     case 'lang': openLangPicker(); break;
@@ -5316,23 +5350,22 @@ async function exportTripPdf(tripId) {
     y += 3;
   }
 
-  // Notrufnummern
+  // Notrufnummern (v0.9.2-Fix: nur emergency, police/medical existieren nicht im Schema)
   if (trip.country) {
     const c = findCountry(trip.country);
     if (c && c.emergency) {
       sectionTitle('🚨 Notruf');
-      bulletLine('Allgemein: ' + c.emergency);
-      if (c.police) bulletLine('Polizei: ' + c.police);
-      if (c.medical) bulletLine('Notarzt: ' + c.medical);
+      bulletLine(c.emergency);
     }
   }
 
-  // Visa
+  // Visa (v0.9.2-Fix: findVisa statt nicht-existierendem findVisaInfo, note statt requirement)
   if (trip.country) {
-    const v = findVisaInfo && findVisaInfo(trip.country);
-    if (v && v.requirement) {
+    const v = findVisa(trip.country);
+    if (v) {
       sectionTitle('🛂 Visum');
-      bulletLine(v.requirement);
+      if (v.stay) bulletLine('Aufenthalt: ' + v.stay);
+      if (v.note) bulletLine(v.note);
     }
   }
 
@@ -7672,6 +7705,60 @@ const I18N = {
     'sos.findNearby': 'in der Nähe finden', 'sos.findInCity': 'in {city} finden',
     // Drive-Sides
     'drive.right': 'rechts', 'drive.left': 'LINKS (!)',
+    // v0.9.2 — Share-Modal + Footer + Misc
+    'mehr.share': 'Trip teilen',
+    'mehr.footer': 'vibe coded by Minh ❤️',
+    'share.title': 'Reise teilen',
+    'share.subtitle': 'Zwei Wege: gemeinsam live planen, oder einen schreibgeschützten Blick freigeben.',
+    'share.live.title': 'Gemeinsam live planen',
+    'share.live.sub': 'Lade jemanden ein — beide sehen Änderungen sofort. Kontakt-Person braucht TripMate-Account.',
+    'share.live.linkLbl': 'Einladungs-Link',
+    'share.live.linkHint': 'Sende den Link an die Person, die mitplanen soll. Nach Klick + Anmelden sieht sie alle Änderungen live.',
+    'share.live.enable': '🔗 Live-Sharing aktivieren',
+    'share.live.disable': 'Live-Sharing beenden',
+    'share.live.disabled': 'Live-Sharing beendet',
+    'share.live.copied': '🔗 Einladungs-Link kopiert',
+    'share.live.empty': 'Aktiviere Live-Sharing unten, um den Einladungs-Link zu erzeugen.',
+    'share.live.confirmDisable': 'Live-Sharing beenden? Andere Mitglieder sehen keine Updates mehr.',
+    'share.public.title': 'Schreibgeschützter Link',
+    'share.public.sub': 'Familie oder Freunde sehen den Plan, ohne Account. Keine Änderungen möglich, kein Live-Update.',
+    'share.public.linkLbl': 'Read-only-Link',
+    'share.public.linkHint': 'Der Link enthält den Plan ohne Doc-Safe, Ausgaben und Packliste. Wer den Link hat, sieht den aktuellen Stand.',
+    'share.public.build': '🌐 Read-only-Link erzeugen',
+    'share.public.rebuild': '🔄 Link neu erzeugen',
+    'share.public.copied': '🌐 Read-only-Link kopiert',
+    'share.copy': '📋 Kopieren',
+    'share.noTrip': 'Keine Reise ausgewählt',
+    'share.you': 'du',
+    'welcome.title': 'Willkommen bei TripMate',
+    'welcome.subtitle': 'Wie sollen wir dich nennen?',
+    'welcome.placeholder': 'Dein Name',
+    'welcome.ok': 'Los geht\'s',
+    // v0.9.2 — TripEdit + Sync + Misc-UI
+    'te.title': 'Reise bearbeiten', 'te.titleNew': 'Neue Reise',
+    'te.name': 'Reise-Name', 'te.namePh': 'z.B. Tokio 2026',
+    'te.city': 'Stadt / Reiseziel', 'te.cityPh': 'z.B. Tokio, Japan',
+    'te.country': 'Land', 'te.countryHint': 'Land (für Reiseinfos: Steckdose, Verkehr, …)',
+    'te.countryNone': '— Kein Land —',
+    'te.dates': 'Reisezeitraum',
+    'te.calHint': 'Tipp: Im Kalender unten zuerst Start-Tag, dann End-Tag antippen.',
+    'te.duplicate': '📋 Reise duplizieren (neuer Trip mit gleichem Plan)',
+    'te.delete': 'Reise löschen',
+    'te.confirmDelete': 'Reise „{name}" wirklich löschen? Alle Einträge + Packliste dieser Reise gehen verloren.',
+    'sync.title': 'Cloud-Sync',
+    'sync.subtitle': 'Deine Trips synchronisieren automatisch zwischen all deinen Geräten.',
+    'sync.connected': 'Verbunden als',
+    'sync.shareHint': 'Reisen mit anderen teilen: öffne Mehr → „Trip teilen" → Link verschicken. Der Empfänger meldet sich einmal an, danach läuft Sync auf allen seinen Geräten von alleine.',
+    'sync.disable': 'Sync deaktivieren',
+    'sync.confirmDisable': 'Cloud-Sync deaktivieren? Deine lokalen Daten bleiben erhalten.',
+    'tripList.title': 'Meine Reisen',
+    'tripList.add': '+ Neue Reise',
+    'tripList.hint': 'Tippe auf eine Reise, um zu wechseln. Jede Reise hat eigene Einträge, Kalender und Packliste.',
+    'qa.email.import': 'Email-Import',
+    'sos.btnTitle': 'Notruf öffnen',
+    'header.share.title': 'Teilen',
+    'header.settings.title': 'Einstellungen',
+    'header.sync.title': 'Cloud-Sync',
   },
   en: {
     'nav.heute': 'Today', 'nav.plan': 'Plan', 'nav.karte': 'Map', 'nav.geld': 'Money', 'nav.mehr': 'More',
@@ -7751,6 +7838,59 @@ const I18N = {
     'sos.hospital': 'Hospital', 'sos.pharmacy': 'Pharmacy', 'sos.embassy': 'Embassy',
     'sos.findNearby': 'find nearby', 'sos.findInCity': 'find in {city}',
     'drive.right': 'right', 'drive.left': 'LEFT (!)',
+    // v0.9.2
+    'mehr.share': 'Share trip',
+    'mehr.footer': 'vibe coded by Minh ❤️',
+    'share.title': 'Share trip',
+    'share.subtitle': 'Two ways: plan together live, or share a read-only view.',
+    'share.live.title': 'Plan together live',
+    'share.live.sub': 'Invite someone — both see changes instantly. They need a TripMate account.',
+    'share.live.linkLbl': 'Invite link',
+    'share.live.linkHint': 'Send the link to the person who should co-plan. After they click + sign in, all changes are live for both.',
+    'share.live.enable': '🔗 Enable live sharing',
+    'share.live.disable': 'Stop live sharing',
+    'share.live.disabled': 'Live sharing stopped',
+    'share.live.copied': '🔗 Invite link copied',
+    'share.live.empty': 'Enable live sharing below to generate the invite link.',
+    'share.live.confirmDisable': 'Stop live sharing? Other members will no longer see updates.',
+    'share.public.title': 'Read-only link',
+    'share.public.sub': 'Family or friends see the plan without an account. No edits, no live updates.',
+    'share.public.linkLbl': 'Read-only link',
+    'share.public.linkHint': 'The link contains the plan without doc-safe, expenses or packing list. Whoever has the link sees the current state.',
+    'share.public.build': '🌐 Generate read-only link',
+    'share.public.rebuild': '🔄 Rebuild link',
+    'share.public.copied': '🌐 Read-only link copied',
+    'share.copy': '📋 Copy',
+    'share.noTrip': 'No trip selected',
+    'share.you': 'you',
+    'welcome.title': 'Welcome to TripMate',
+    'welcome.subtitle': 'What should we call you?',
+    'welcome.placeholder': 'Your name',
+    'welcome.ok': 'Let\'s go',
+    'te.title': 'Edit trip', 'te.titleNew': 'New trip',
+    'te.name': 'Trip name', 'te.namePh': 'e.g. Tokyo 2026',
+    'te.city': 'City / Destination', 'te.cityPh': 'e.g. Tokyo, Japan',
+    'te.country': 'Country', 'te.countryHint': 'Country (for info: outlet, traffic, …)',
+    'te.countryNone': '— No country —',
+    'te.dates': 'Travel dates',
+    'te.calHint': 'Tip: tap start day first, then end day in the calendar below.',
+    'te.duplicate': '📋 Duplicate trip (new trip with same plan)',
+    'te.delete': 'Delete trip',
+    'te.confirmDelete': 'Really delete trip "{name}"? All entries + packing list for this trip will be lost.',
+    'sync.title': 'Cloud sync',
+    'sync.subtitle': 'Your trips sync automatically across all your devices.',
+    'sync.connected': 'Signed in as',
+    'sync.shareHint': 'To share with others: open More → "Share trip" → send link. The recipient signs in once, then sync runs automatically on all their devices.',
+    'sync.disable': 'Disable sync',
+    'sync.confirmDisable': 'Disable cloud sync? Your local data is preserved.',
+    'tripList.title': 'My trips',
+    'tripList.add': '+ New trip',
+    'tripList.hint': 'Tap a trip to switch. Each trip has its own entries, calendar and packing list.',
+    'qa.email.import': 'Email import',
+    'sos.btnTitle': 'Open emergency',
+    'header.share.title': 'Share',
+    'header.settings.title': 'Settings',
+    'header.sync.title': 'Cloud sync',
   },
   vi: {
     'nav.heute': 'Hôm nay', 'nav.plan': 'Lịch trình', 'nav.karte': 'Bản đồ', 'nav.geld': 'Tiền', 'nav.mehr': 'Thêm',
@@ -7830,6 +7970,59 @@ const I18N = {
     'sos.hospital': 'Bệnh viện', 'sos.pharmacy': 'Hiệu thuốc', 'sos.embassy': 'Đại sứ quán',
     'sos.findNearby': 'tìm gần đây', 'sos.findInCity': 'tìm tại {city}',
     'drive.right': 'phải', 'drive.left': 'TRÁI (!)',
+    // v0.9.2
+    'mehr.share': 'Chia sẻ chuyến đi',
+    'mehr.footer': 'vibe coded by Minh ❤️',
+    'share.title': 'Chia sẻ chuyến đi',
+    'share.subtitle': 'Hai cách: cùng lên kế hoạch trực tiếp, hoặc chia sẻ chế độ chỉ xem.',
+    'share.live.title': 'Cùng lên kế hoạch',
+    'share.live.sub': 'Mời ai đó — cả hai thấy thay đổi ngay. Người được mời cần tài khoản TripMate.',
+    'share.live.linkLbl': 'Liên kết mời',
+    'share.live.linkHint': 'Gửi liên kết cho người cùng lên kế hoạch. Sau khi họ nhấn + đăng nhập, thay đổi hiện trực tiếp.',
+    'share.live.enable': '🔗 Bật chia sẻ trực tiếp',
+    'share.live.disable': 'Ngừng chia sẻ trực tiếp',
+    'share.live.disabled': 'Đã ngừng chia sẻ trực tiếp',
+    'share.live.copied': '🔗 Đã sao chép liên kết mời',
+    'share.live.empty': 'Bật chia sẻ trực tiếp bên dưới để tạo liên kết mời.',
+    'share.live.confirmDisable': 'Ngừng chia sẻ trực tiếp? Thành viên khác sẽ không thấy cập nhật nữa.',
+    'share.public.title': 'Liên kết chỉ xem',
+    'share.public.sub': 'Gia đình hoặc bạn bè xem kế hoạch mà không cần tài khoản. Không sửa, không cập nhật trực tiếp.',
+    'share.public.linkLbl': 'Liên kết chỉ xem',
+    'share.public.linkHint': 'Liên kết chứa kế hoạch không có két tài liệu, chi tiêu hay danh sách hành lý.',
+    'share.public.build': '🌐 Tạo liên kết chỉ xem',
+    'share.public.rebuild': '🔄 Tạo lại liên kết',
+    'share.public.copied': '🌐 Đã sao chép liên kết chỉ xem',
+    'share.copy': '📋 Sao chép',
+    'share.noTrip': 'Chưa chọn chuyến đi',
+    'share.you': 'bạn',
+    'welcome.title': 'Chào mừng đến TripMate',
+    'welcome.subtitle': 'Bạn muốn được gọi là gì?',
+    'welcome.placeholder': 'Tên của bạn',
+    'welcome.ok': 'Bắt đầu',
+    'te.title': 'Sửa chuyến đi', 'te.titleNew': 'Chuyến đi mới',
+    'te.name': 'Tên chuyến đi', 'te.namePh': 'VD: Tokyo 2026',
+    'te.city': 'Thành phố / Điểm đến', 'te.cityPh': 'VD: Tokyo, Nhật Bản',
+    'te.country': 'Quốc gia', 'te.countryHint': 'Quốc gia (cho thông tin: ổ cắm, giao thông, …)',
+    'te.countryNone': '— Không chọn —',
+    'te.dates': 'Thời gian',
+    'te.calHint': 'Mẹo: chạm ngày bắt đầu trước, rồi ngày kết thúc trên lịch bên dưới.',
+    'te.duplicate': '📋 Nhân bản chuyến đi (chuyến mới cùng kế hoạch)',
+    'te.delete': 'Xóa chuyến đi',
+    'te.confirmDelete': 'Xóa chuyến đi „{name}"? Tất cả mục + danh sách hành lý sẽ mất.',
+    'sync.title': 'Đồng bộ đám mây',
+    'sync.subtitle': 'Chuyến đi tự động đồng bộ giữa các thiết bị.',
+    'sync.connected': 'Đăng nhập với',
+    'sync.shareHint': 'Để chia sẻ: mở Thêm → „Chia sẻ chuyến đi" → gửi liên kết. Người nhận đăng nhập một lần, sau đó tự động đồng bộ trên mọi thiết bị.',
+    'sync.disable': 'Tắt đồng bộ',
+    'sync.confirmDisable': 'Tắt đồng bộ đám mây? Dữ liệu cục bộ vẫn còn.',
+    'tripList.title': 'Chuyến đi của tôi',
+    'tripList.add': '+ Chuyến đi mới',
+    'tripList.hint': 'Chạm vào một chuyến đi để chuyển. Mỗi chuyến có mục, lịch và hành lý riêng.',
+    'qa.email.import': 'Nhập từ email',
+    'sos.btnTitle': 'Mở khẩn cấp',
+    'header.share.title': 'Chia sẻ',
+    'header.settings.title': 'Cài đặt',
+    'header.sync.title': 'Đồng bộ đám mây',
   }
 };
 
@@ -7853,6 +8046,11 @@ function setLang(lang) {
   document.querySelectorAll('[data-i18n-ph]').forEach(function(el){
     const key = el.getAttribute('data-i18n-ph');
     if (key) el.setAttribute('placeholder', t(key));
+  });
+  // v0.9.2: title-Attribut auch übersetzen
+  document.querySelectorAll('[data-i18n-title]').forEach(function(el){
+    const key = el.getAttribute('data-i18n-title');
+    if (key) el.setAttribute('title', t(key));
   });
   refreshCurrentView();
   if (typeof renderHeader === 'function') renderHeader();
@@ -8855,6 +9053,99 @@ document.getElementById('open-new-trip').addEventListener('click', () => {
 let editingTripId = null;
 let tePickerState = { start: '', end: '', anchor: null }; // anchor = erstmonats-iso
 
+// v0.9.2: Zentrales Share-Modal
+function openShareTripModal(tripId) {
+  if (!tripId) tripId = state.currentTripId;
+  const t = state.trips[tripId];
+  if (!t) { toast(tr('share.noTrip', 'Keine Reise ausgewählt')); return; }
+  refreshShareModalState(tripId);
+  // Reset Public-Link
+  const pub = document.getElementById('stm-public-link-wrap');
+  if (pub) pub.style.display = 'none';
+  const btn = document.getElementById('stm-build-public-btn');
+  if (btn) btn.textContent = tr('share.public.build', '🌐 Read-only-Link erzeugen');
+  document.getElementById('share-trip-modal').classList.add('open');
+}
+
+function refreshShareModalState(tripId) {
+  const t = state.trips[tripId];
+  if (!t) return;
+  const isShared = !!t.sharedRoom;
+  document.getElementById('stm-enable-live-btn').style.display = isShared ? 'none' : 'block';
+  document.getElementById('stm-disable-live-btn').style.display = isShared ? 'block' : 'none';
+  document.getElementById('stm-share-link-wrap').style.display = isShared ? 'block' : 'none';
+  if (isShared) {
+    const acc = getAccount();
+    const url = location.origin + location.pathname + '?join=' + encodeURIComponent(t.sharedRoom)
+      + '&from=' + encodeURIComponent((acc && acc.email) || '')
+      + '&name=' + encodeURIComponent(t.name || 'Reise');
+    document.getElementById('stm-share-link').value = url;
+  }
+  renderMembersList(tripId, document.getElementById('stm-members-list'));
+}
+
+function renderMembersList(tripId, container) {
+  const t = state.trips[tripId];
+  if (!t || !container) return;
+  container.innerHTML = '';
+  const members = t.members || [];
+  if (!t.sharedRoom || members.length === 0) {
+    container.innerHTML = '<div style="font-size:12.5px; color:var(--text-muted); padding:8px 0;">' + tr('share.live.empty', 'Aktiviere Live-Sharing unten, um den Einladungs-Link zu erzeugen.') + '</div>';
+    return;
+  }
+  const acc = getAccount();
+  members.forEach(function(email){
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex; align-items:center; gap:8px; padding:6px 0; font-size:13.5px;';
+    const isMe = acc && acc.email === email;
+    row.innerHTML = '<span>👤</span><span style="flex:1;">' + escapeHtml(email) + (isMe ? ' <em style="color:var(--text-muted);">(' + tr('share.you', 'du') + ')</em>' : '') + '</span>';
+    container.appendChild(row);
+  });
+}
+
+// Bindings für share-trip-modal
+document.getElementById('stm-close')?.addEventListener('click', () => closeModal('share-trip-modal'));
+document.getElementById('stm-enable-live-btn')?.addEventListener('click', async () => {
+  const tid = state.currentTripId;
+  try {
+    const url = await enableTripSharing(tid);
+    refreshShareModalState(tid);
+    refreshCurrentView();
+    if (navigator.share) {
+      try { await navigator.share({ title: 'TripMate-Einladung', text: (myName || 'Jemand') + ' möchte mit dir planen 🧳', url: url }); } catch(_) {}
+    } else {
+      await copyToClipboard(url);
+      toast(tr('share.live.copied', '🔗 Einladungs-Link kopiert'));
+    }
+  } catch (e) { toast(e.message || 'Fehler'); }
+});
+document.getElementById('stm-disable-live-btn')?.addEventListener('click', () => {
+  if (!confirm(tr('share.live.confirmDisable', 'Live-Sharing beenden? Andere Mitglieder sehen keine Updates mehr.'))) return;
+  disableTripSharing(state.currentTripId);
+  refreshShareModalState(state.currentTripId);
+  refreshCurrentView();
+  toast(tr('share.live.disabled', 'Live-Sharing beendet'));
+});
+document.getElementById('stm-copy-link')?.addEventListener('click', async () => {
+  const inp = document.getElementById('stm-share-link');
+  if (!inp || !inp.value) return;
+  await copyToClipboard(inp.value);
+  toast(tr('share.live.copied', '🔗 Einladungs-Link kopiert'));
+});
+document.getElementById('stm-build-public-btn')?.addEventListener('click', () => {
+  const url = buildPublicViewLink(state.currentTripId);
+  if (!url) { toast('Link konnte nicht erstellt werden'); return; }
+  document.getElementById('stm-public-link').value = url;
+  document.getElementById('stm-public-link-wrap').style.display = 'block';
+  document.getElementById('stm-build-public-btn').textContent = tr('share.public.rebuild', '🔄 Link neu erzeugen');
+});
+document.getElementById('stm-copy-public-link')?.addEventListener('click', async () => {
+  const inp = document.getElementById('stm-public-link');
+  if (!inp || !inp.value) return;
+  await copyToClipboard(inp.value);
+  toast(tr('share.public.copied', '🌐 Read-only-Link kopiert'));
+});
+
 function openTripEdit(tripId) {
   editingTripId = tripId;
   const t = tripId ? state.trips[tripId] : null;
@@ -8892,74 +9183,8 @@ function openTripEdit(tripId) {
 
 // Mitglieder & Live-Sync Sektion in Trip-Edit-Modal befüllen
 function renderTripEditShareSection(t) {
-  const sec = document.getElementById('te-share-section');
-  if (!sec) return;
-  // Nur bei existierenden Trips zeigen
-  if (!t) { sec.style.display = 'none'; return; }
-  sec.style.display = '';
-  const acc = getAccount();
-  const list = document.getElementById('te-members-list');
-  const linkWrap = document.getElementById('te-share-link-wrap');
-  const linkInput = document.getElementById('te-share-link');
-  const enableBtn = document.getElementById('te-enable-share-btn');
-  const disableBtn = document.getElementById('te-disable-share-btn');
-  const sub = document.getElementById('te-share-sub');
-
-  if (t.sharedRoom) {
-    // Live-Sharing aktiv → Mitglieder zeigen + Link bereitstellen
-    sub.textContent = 'Live-Sync aktiv. Alle Mitglieder sehen Änderungen sofort.';
-    list.innerHTML = '';
-    const isOwnerMe = acc && acc.email === t.ownerEmail;
-    (t.members || []).forEach(email => {
-      const isOwner = email === t.ownerEmail;
-      const isMe = acc && email === acc.email;
-      const row = document.createElement('div');
-      row.className = 'te-member-row';
-      // v0.7.2: Owner kann andere Members entfernen (sich selbst nicht — der nutzt "Live-Sharing beenden")
-      const canRemove = isOwnerMe && !isOwner;
-      row.innerHTML = `<span class="me-ic">${isOwner ? '👑' : '👤'}</span>
-        <span class="me-email">${escapeHtml(email)}${isMe ? ' (du)' : ''}</span>
-        ${isOwner ? '<span class="me-tag">Owner</span>' : ''}
-        ${canRemove ? `<button class="me-remove" data-remove-email="${escapeHtml(email)}" title="Mitglied entfernen" type="button">🗑</button>` : ''}`;
-      list.appendChild(row);
-    });
-    // Remove-Buttons verdrahten
-    list.querySelectorAll('[data-remove-email]').forEach(btn => {
-      btn.addEventListener('click', async (e) => {
-        e.preventDefault(); e.stopPropagation();
-        const email = btn.dataset.removeEmail;
-        if (!confirm(email + ' aus der geteilten Reise entfernen?\n\nDie Person verliert den Zugriff. Ihre lokale Kopie bleibt aber bei ihr — sie sieht nur keine neuen Updates mehr.')) return;
-        const trip = state.trips[editingTripId];
-        if (!trip) return;
-        trip.members = (trip.members || []).filter(m => m !== email);
-        trip._metaUpdatedAt = Date.now();
-        saveState();
-        try { await pushSharedTrip(editingTripId); } catch(_) {}
-        renderTripEditShareSection(trip);
-        toast('🚪 ' + (email.split('@')[0]) + ' entfernt');
-      });
-    });
-    // Link generieren (re-use existierender sharedRoom)
-    const url = location.origin + location.pathname + '?join=' + encodeURIComponent(t.sharedRoom)
-      + '&from=' + encodeURIComponent(t.ownerEmail || (acc && acc.email) || '')
-      + '&name=' + encodeURIComponent(t.name || 'Reise');
-    linkInput.value = url;
-    linkWrap.style.display = '';
-    enableBtn.style.display = 'none';
-    disableBtn.style.display = '';
-  } else {
-    sub.textContent = 'Lade Personen ein, die mit dir an dieser Reise planen sollen.';
-    list.innerHTML = '';
-    if (acc) {
-      const row = document.createElement('div');
-      row.className = 'te-member-row';
-      row.innerHTML = `<span class="me-ic">👤</span><span class="me-email">${escapeHtml(acc.email)} (du)</span>`;
-      list.appendChild(row);
-    }
-    linkWrap.style.display = 'none';
-    enableBtn.style.display = '';
-    disableBtn.style.display = 'none';
-  }
+  // v0.9.2: deprecated — Sharing-UI wurde ins eigenständige Share-Modal verlegt.
+  return;
 }
 
 // Visueller Zeitraum-Picker (2 Monate nebeneinander auf Desktop, 1 auf Mobile)
@@ -9058,42 +9283,6 @@ document.getElementById('trip-edit-cancel').addEventListener('click', () => {
 });
 
 // Live-Sharing Buttons im Trip-Edit Modal
-document.getElementById('te-enable-share-btn')?.addEventListener('click', async (e) => {
-  e.preventDefault();
-  if (!editingTripId) { toast('Speichere die Reise zuerst'); return; }
-  const btn = e.currentTarget;
-  btn.disabled = true; btn.textContent = '⏳ Erstelle Link…';
-  try {
-    const url = await enableTripSharing(editingTripId);
-    // UI re-rendern (zeigt jetzt den Link)
-    renderTripEditShareSection(state.trips[editingTripId]);
-    // Direkt versuchen zu kopieren
-    try { await navigator.clipboard.writeText(url); toast('🔗 Link kopiert — jetzt versenden!'); }
-    catch (e2) { toast('🔗 Link erstellt — kopiere ihn aus dem Feld'); }
-  } catch (err) {
-    toast(err.message || 'Live-Sharing konnte nicht aktiviert werden');
-  } finally {
-    btn.disabled = false; btn.textContent = '🔗 Reise live teilen';
-  }
-});
-document.getElementById('te-disable-share-btn')?.addEventListener('click', () => {
-  if (!editingTripId) return;
-  if (!confirm('Live-Sharing wirklich beenden? Andere Mitglieder verlieren den Zugriff (sie behalten ihre Kopie). Du kannst es jederzeit wieder aktivieren.')) return;
-  disableTripSharing(editingTripId);
-  renderTripEditShareSection(state.trips[editingTripId]);
-  toast('Live-Sharing beendet');
-});
-document.getElementById('te-copy-link')?.addEventListener('click', async () => {
-  const inp = document.getElementById('te-share-link');
-  if (!inp || !inp.value) return;
-  try {
-    await navigator.clipboard.writeText(inp.value);
-    toast('🔗 Link kopiert');
-  } catch (e) {
-    inp.select();
-    toast('Bitte manuell kopieren (Cmd/Strg+C)');
-  }
-});
 document.getElementById('trip-edit-save').addEventListener('click', async () => {
   const name = document.getElementById('te-name').value.trim() || 'Meine Reise';
   const city = document.getElementById('te-city').value.trim();
@@ -9166,7 +9355,7 @@ document.getElementById('trip-edit-delete').addEventListener('click', () => {
   if (!editingTripId) return;
   const t = state.trips[editingTripId];
   if (!t) return;
-  if (!confirm(`Reise "${t.name}" wirklich löschen? Alle Einträge + Packliste dieser Reise gehen verloren.`)) return;
+  if (!confirm(tr('te.confirmDelete').replace('{name}', t.name || 'Reise'))) return;
   deleteTrip(editingTripId);
   closeModal('trip-edit-modal');
   refreshCurrentView();
@@ -9184,6 +9373,9 @@ function renderSyncModalState() {
     const acc = getAccount();
     const label = (acc && acc.email) ? acc.email : 'privater Raum';
     document.getElementById('sync-conn-room-label').textContent = label;
+    // v0.9.2: Auch Prefix lokalisieren
+    const prefix = document.querySelector('#sync-connected-panel .login-status span:not(.dot-sync)');
+    if (prefix) prefix.innerHTML = tr('sync.connected') + ' <strong id="sync-conn-room-label">' + escapeHtml(label) + '</strong>';
   }
 }
 
@@ -9195,7 +9387,7 @@ document.getElementById('open-sync-setup').addEventListener('click', () => {
 
 document.getElementById('sync-cancel').addEventListener('click', () => closeModal('sync-modal'));
 document.getElementById('sync-disable').addEventListener('click', () => {
-  if (!confirm('Cloud-Sync deaktivieren? Deine lokalen Daten bleiben erhalten.')) return;
+  if (!confirm(tr('sync.confirmDisable'))) return;
   clearInterval(CLOUD.pollTimer);
   clearTimeout(CLOUD.pushDebounceTimer);
   CLOUD.url = ''; CLOUD.key = ''; CLOUD.room = ''; CLOUD.lastPulledAt = 0;
