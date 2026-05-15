@@ -2345,7 +2345,7 @@
 // ============ App-Version ============
 // Bei Schema-Änderungen SCHEMA_VERSION hochzählen + Migration ergänzen.
 // APP_VERSION ist die User-sichtbare Version.
-const APP_VERSION = '0.9.2';
+const APP_VERSION = '0.9.3';
 const SCHEMA_VERSION = 3;
 
 // ============ Constants & Demo Data ============
@@ -3469,9 +3469,38 @@ async function cloudFetch(url, options) {
   // 401 → Token-Refresh versuchen. refreshAccessToken updated localStorage,
   // sodass die nächste cloudHeaders-Call den frischen Token nutzt.
   const refreshed = await refreshAccessToken();
-  if (!refreshed) return r;
+  if (!refreshed) {
+    // v0.9.2-Fix: Refresh-Token tot. Lokale Session ist nicht mehr brauchbar —
+    // force-Logout damit der Auth-Gate erscheint und User sich neu anmelden kann.
+    handleExpiredSession();
+    return r;
+  }
   const retryHeaders = cloudHeaders(options.headers);
-  return await fetch(url, Object.assign({}, options, { headers: retryHeaders }));
+  const r2 = await fetch(url, Object.assign({}, options, { headers: retryHeaders }));
+  if (r2.status === 401) {
+    // Auch nach Refresh noch 401 → Session ist endgültig kaputt.
+    handleExpiredSession();
+  }
+  return r2;
+}
+
+// v0.9.2: Falls Access- + Refresh-Token beide tot sind, lokale Session bereinigen
+// und Auth-Gate zeigen. Wird nur einmal pro App-Lifetime ausgeführt
+// (sonst Loop bei mehreren parallelen Requests die alle 401 zurückgeben).
+let _sessionExpiredHandled = false;
+function handleExpiredSession() {
+  if (_sessionExpiredHandled) return;
+  _sessionExpiredHandled = true;
+  console.warn('Session expired — force logout');
+  // Polling stoppen damit keine weiteren 401s nachkommen
+  clearInterval(CLOUD.pollTimer); clearTimeout(CLOUD.pollTimer);
+  CLOUD.pollTimer = null;
+  // Account löschen — Trips bleiben lokal erhalten
+  clearAccount();
+  // Auth-Gate zeigen
+  if (typeof showAuthGate === 'function') showAuthGate();
+  document.body.classList.remove('is-authed');
+  if (typeof toast === 'function') toast('🔒 Sitzung abgelaufen — bitte erneut anmelden');
 }
 function updateSyncIndicator() {
   const btn = document.getElementById('sync-status');
