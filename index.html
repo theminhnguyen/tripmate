@@ -3304,8 +3304,23 @@ function bindAuthGate() {
     }
   };
 
+  // v0.9.3: Event-Delegation via document — überlebt auch DOM-Mutationen
+  // (renderHeader/refreshCurrentView nach setLang könnten Buttons austauschen).
+  // Den lokalen Click-Listener trotzdem behalten als Fallback.
   if (submitBtn) submitBtn.addEventListener('click', submit);
-  // Enter in Email/Passwort feuert Submit
+  if (!window._authSubmitDelegated) {
+    window._authSubmitDelegated = true;
+    document.addEventListener('click', function(e){
+      const target = e.target && e.target.closest && e.target.closest('#auth-submit-btn');
+      if (target) { e.preventDefault(); submit(); }
+    });
+    document.addEventListener('keydown', function(e){
+      if (e.key !== 'Enter') return;
+      const t = e.target;
+      if (t && (t.id === 'auth-email' || t.id === 'auth-password')) submit();
+    });
+  }
+  // Enter in Email/Passwort feuert Submit (Fallback wenn Delegation deaktiviert)
   [emailInput, pwdInput].forEach(inp => inp && inp.addEventListener('keydown', e => {
     if (e.key === 'Enter') submit();
   }));
@@ -10175,6 +10190,9 @@ bindAuthGate();
 // Boot-Auth: Magic-Link Callback ODER existierende Session ODER Login-Gate zeigen
 // v0.7.8: Sprache initial anwenden
 try { if (typeof setLang === 'function') setLang(getLang()); } catch(_) {}
+// v0.9.3: Defensiver Re-Bind nach setLang (falls renderHeader/refreshCurrentView
+// in setLang das auth-gate DOM mutiert hat).
+try { bindAuthGate(); } catch(_) {}
 
 (async function bootAuth() {
   // v0.9.0: Public-View ?view=... — komplett-frühes Bail-Out vor Auth-Logik
