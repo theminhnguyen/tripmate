@@ -2339,7 +2339,7 @@ header .icon-btn {
 // ============ App-Version ============
 // Bei Schema-Änderungen SCHEMA_VERSION hochzählen + Migration ergänzen.
 // APP_VERSION ist die User-sichtbare Version.
-const APP_VERSION = '0.9.4';
+const APP_VERSION = '0.9.5';
 const SCHEMA_VERSION = 3;
 
 // ============ Constants & Demo Data ============
@@ -3239,84 +3239,115 @@ function setAuthMode(mode) {
   showAuthError('');
 }
 
-function bindAuthGate() {
-  // Tabs verdrahten
-  document.querySelectorAll('.auth-tab').forEach(tab => {
-    tab.addEventListener('click', () => setAuthMode(tab.dataset.mode));
-  });
-  setAuthMode('signin');
-
-  const submitBtn = document.getElementById('auth-submit-btn');
+// v0.9.5: authSubmit als TOP-LEVEL Funktion (vorher in bindAuthGate-Closure).
+// Wenn bindAuthGate aus irgendeinem Grund nicht durchläuft (Boot-Order, Throw),
+// ist die Submit-Logik trotzdem erreichbar via document-Delegation.
+async function authSubmit() {
   const emailInput = document.getElementById('auth-email');
   const pwdInput = document.getElementById('auth-password');
-
-  const submit = async () => {
-    const email = (emailInput.value || '').trim().toLowerCase();
-    const password = pwdInput.value || '';
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      showAuthError('Bitte gültige Email-Adresse eingeben');
-      return;
-    }
-    if (!password || password.length < 6) {
-      showAuthError('Passwort muss mindestens 6 Zeichen haben');
-      return;
-    }
-    if (!CLOUD.url || !CLOUD.key) {
-      showAuthError('Cloud-Backend nicht eingerichtet. Klicke unten "Cloud-Backend einrichten".');
-      return;
-    }
-    submitBtn.disabled = true;
-    const oldText = submitBtn.textContent;
-    submitBtn.textContent = '⏳ ' + (authMode === 'signup' ? 'Erstelle…' : 'Logge ein…');
-    try {
-      const data = authMode === 'signup'
-        ? await signUpWithPassword(email, password)
-        : await signInWithPassword(email, password);
-      await persistAuthSession(data);
-      hideAuthGate();
-      proceedToApp();
-    } catch (e) {
-      // v0.6.15: Confirm-Required Special-Case → Confirm-Pending Step zeigen
-      if (e && e.confirmRequired) {
-        const emailEl = document.getElementById('auth-confirm-pending-email');
-        if (emailEl) emailEl.textContent = e.confirmEmail || email;
-        // Email für Resend zwischenspeichern
-        window._confirmPendingEmail = e.confirmEmail || email;
-        showAuthStep('confirm-pending');
-        return;
-      }
-      let msg = e.message || 'Fehler';
-      // Häufige Fehler hübsch übersetzen
-      if (/invalid login credentials/i.test(msg)) msg = 'Email oder Passwort falsch';
-      else if (/user already registered|already exists/i.test(msg)) msg = 'Ein Account mit dieser Email existiert schon — wechsle auf "Anmelden"';
-      else if (/password.*should be at least/i.test(msg)) msg = 'Passwort zu kurz (min. 6 Zeichen)';
-      else if (/email not confirmed|email.*not.*confirmed/i.test(msg)) msg = 'Email noch nicht bestätigt — schau in dein Postfach (auch Spam-Ordner)';
-      showAuthError(msg);
-    } finally {
-      submitBtn.disabled = false;
-      submitBtn.textContent = oldText;
-    }
-  };
-
-  // v0.9.3: Event-Delegation via document — überlebt auch DOM-Mutationen
-  // (renderHeader/refreshCurrentView nach setLang könnten Buttons austauschen).
-  // Den lokalen Click-Listener trotzdem behalten als Fallback.
-  if (submitBtn) submitBtn.addEventListener('click', submit);
-  if (!window._authSubmitDelegated) {
-    window._authSubmitDelegated = true;
-    document.addEventListener('click', function(e){
-      const target = e.target && e.target.closest && e.target.closest('#auth-submit-btn');
-      if (target) { e.preventDefault(); submit(); }
-    });
-    document.addEventListener('keydown', function(e){
-      if (e.key !== 'Enter') return;
-      const t = e.target;
-      if (t && (t.id === 'auth-email' || t.id === 'auth-password')) submit();
-    });
+  const submitBtn = document.getElementById('auth-submit-btn');
+  if (!emailInput || !pwdInput || !submitBtn) return;
+  const email = (emailInput.value || '').trim().toLowerCase();
+  const password = pwdInput.value || '';
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    showAuthError('Bitte gültige Email-Adresse eingeben');
+    return;
   }
-  // Enter in Email/Passwort feuert Submit (Fallback wenn Delegation deaktiviert)
-  [emailInput, pwdInput].forEach(inp => inp && inp.addEventListener('keydown', e => {
-    if (e.key === 'Enter') submit();
+  if (!password || password.length < 6) {
+    showAuthError('Passwort muss mindestens 6 Zeichen haben');
+    return;
+  }
+  if (!CLOUD.url || !CLOUD.key) {
+    showAuthError('Cloud-Backend nicht eingerichtet.');
+    return;
+  }
+  submitBtn.disabled = true;
+  const oldText = submitBtn.textContent;
+  submitBtn.textContent = '⏳ ' + (authMode === 'signup' ? 'Erstelle…' : 'Logge ein…');
+  try {
+    const data = authMode === 'signup'
+      ? await signUpWithPassword(email, password)
+      : await signInWithPassword(email, password);
+    await persistAuthSession(data);
+    hideAuthGate();
+    proceedToApp();
+  } catch (e) {
+    if (e && e.confirmRequired) {
+      const emailEl = document.getElementById('auth-confirm-pending-email');
+      if (emailEl) emailEl.textContent = e.confirmEmail || email;
+      window._confirmPendingEmail = e.confirmEmail || email;
+      showAuthStep('confirm-pending');
+      return;
+    }
+    let msg = e.message || 'Fehler';
+    if (/invalid login credentials/i.test(msg)) msg = 'Email oder Passwort falsch';
+    else if (/user already registered|already exists/i.test(msg)) msg = 'Ein Account mit dieser Email existiert schon — wechsle auf "Anmelden"';
+    else if (/password.*should be at least/i.test(msg)) msg = 'Passwort zu kurz (min. 6 Zeichen)';
+    else if (/email not confirmed|email.*not.*confirmed/i.test(msg)) msg = 'Email noch nicht bestätigt — schau in dein Postfach (auch Spam-Ordner)';
+    showAuthError(msg);
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.textContent = oldText;
+  }
+}
+
+// v0.9.5: GLOBAL Document-Delegation — wird IMMER beim Script-Parse installiert.
+// Egal ob bindAuthGate jemals läuft, click auf #auth-submit-btn / Enter in Email/Passwort
+// triggert authSubmit(). Auch Click auf 'auth-forgot-btn' und 'auth-tab' wird hier behandelt.
+document.addEventListener('click', function(e){
+  const target = e.target && e.target.closest;
+  if (!target) return;
+  if (e.target.closest('#auth-submit-btn')) {
+    e.preventDefault();
+    authSubmit();
+  } else if (e.target.closest('#auth-forgot-btn')) {
+    e.preventDefault();
+    if (typeof showAuthStep === 'function') {
+      const r = document.getElementById('auth-reset-email');
+      if (r) { const em = document.getElementById('auth-email'); r.value = em ? em.value.trim() : ''; }
+      showAuthStep('reset-request');
+    }
+  } else if (e.target.closest('.auth-tab')) {
+    const tab = e.target.closest('.auth-tab');
+    if (tab && tab.dataset.mode && typeof setAuthMode === 'function') setAuthMode(tab.dataset.mode);
+  } else if (e.target.closest('#auth-reset-back-btn')) {
+    if (typeof showAuthStep === 'function') showAuthStep('form');
+  } else if (e.target.closest('#auth-confirm-back-btn')) {
+    if (typeof showAuthStep === 'function') showAuthStep('form');
+  }
+}, false);
+document.addEventListener('keydown', function(e){
+  if (e.key !== 'Enter') return;
+  const t = e.target;
+  if (t && (t.id === 'auth-email' || t.id === 'auth-password' || t.id === 'auth-reset-email')) {
+    e.preventDefault();
+    if (t.id === 'auth-reset-email') {
+      const sendBtn = document.getElementById('auth-reset-send-btn');
+      if (sendBtn) sendBtn.click();
+    } else {
+      authSubmit();
+    }
+  }
+}, false);
+
+function bindAuthGate() {
+  // Tabs verdrahten (Fallback — Delegation oben fängt das auch)
+  try {
+    document.querySelectorAll('.auth-tab').forEach(tab => {
+      tab.addEventListener('click', () => setAuthMode(tab.dataset.mode));
+    });
+    setAuthMode('signin');
+  } catch(_) {}
+  // Direkt-Listener als zusätzlicher Fallback
+  const submitBtn = document.getElementById('auth-submit-btn');
+  if (submitBtn && !submitBtn._authBound) {
+    submitBtn._authBound = true;
+    submitBtn.addEventListener('click', function(e){ e.preventDefault(); authSubmit(); });
+  }
+  const emailInput = document.getElementById('auth-email');
+  const pwdInput = document.getElementById('auth-password');
+  [emailInput, pwdInput].forEach(inp => inp && !inp._authBound && (inp._authBound = true) && inp.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); authSubmit(); }
   }));
 
   const setupBtn = document.getElementById('auth-setup-backend-btn');
