@@ -2339,7 +2339,7 @@ header .icon-btn {
 // ============ App-Version ============
 // Bei Schema-Änderungen SCHEMA_VERSION hochzählen + Migration ergänzen.
 // APP_VERSION ist die User-sichtbare Version.
-const APP_VERSION = '0.9.7';
+const APP_VERSION = '0.9.8';
 const SCHEMA_VERSION = 3;
 
 // ============ Constants & Demo Data ============
@@ -10053,6 +10053,7 @@ function renderPublicView(payload) {
   const t = payload.trip || {};
   const by = payload.sharedBy || 'jemand';
   document.body.classList.add('is-public-view');
+  document.documentElement.classList.add('is-public-view-root');
   document.body.classList.add('is-authed');
   const gate = document.getElementById('auth-gate');
   if (gate) { gate.setAttribute('aria-hidden', 'true'); gate.style.display = 'none'; }
@@ -10130,6 +10131,8 @@ function renderPublicView(payload) {
     + 'body.is-public-view .view { display: none !important; }'
     + 'body.is-public-view .auth-gate, body.is-public-view #auth-gate { display: none !important; visibility: hidden !important; pointer-events: none !important; }'
     + 'body.is-public-view header { display: none !important; }'
+    + 'html.is-public-view-root, body.is-public-view { overflow: auto !important; height: auto !important; min-height: 100% !important; -webkit-overflow-scrolling: touch; }'
+    + 'body.is-public-view #app { overflow: visible !important; height: auto !important; }'
     + '</style>'
     + '<div class="public-view-wrap">'
     +   '<div class="pv-banner">\ud83d\udcd6 Read-only Reise-Ansicht \u2014 geteilt von <strong>' + sharedByHtml + '</strong></div>'
