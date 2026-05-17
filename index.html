@@ -2339,7 +2339,7 @@ header .icon-btn {
 // ============ App-Version ============
 // Bei Schema-Änderungen SCHEMA_VERSION hochzählen + Migration ergänzen.
 // APP_VERSION ist die User-sichtbare Version.
-const APP_VERSION = '0.9.6';
+const APP_VERSION = '0.9.7';
 const SCHEMA_VERSION = 3;
 
 // ============ Constants & Demo Data ============
@@ -9471,25 +9471,27 @@ document.getElementById('sync-status').addEventListener('click', async () => {
   await pullAllSharedTrips();
 });
 
-// ============ Share ============
-document.getElementById('share-btn').addEventListener('click', () => {
-  // Nur die aktuelle Reise teilen — nicht alle Reisen des Users.
-  // Der Empfänger bekommt sie als eigene Reise (oder mergt, falls gleiche id).
+// ============ Share (Legacy Hash-Share-Modal) ============
+// v0.9.7-Fix: share-btn wurde in v0.9.2 aus dem Header entfernt — Handler
+// referenzierten null und crashten den Boot. Jetzt alle defensiv mit ?. .
+document.getElementById('share-btn')?.addEventListener('click', () => {
   const payload = { state: T(), sharedBy: myName, sharedAt: Date.now() };
   const json = JSON.stringify(payload);
   const compressed = LZString.compressToEncodedURIComponent(json);
   const url = `${location.origin}${location.pathname}#data=${compressed}`;
-  document.getElementById('share-url').value = url;
-  document.getElementById('share-modal').classList.add('open');
+  const urlEl = document.getElementById('share-url');
+  if (urlEl) urlEl.value = url;
+  document.getElementById('share-modal')?.classList.add('open');
 });
-document.getElementById('close-share').addEventListener('click', () => closeModal('share-modal'));
-document.getElementById('copy-share').addEventListener('click', async () => {
-  const url = document.getElementById('share-url').value;
+document.getElementById('close-share')?.addEventListener('click', () => closeModal('share-modal'));
+document.getElementById('copy-share')?.addEventListener('click', async () => {
+  const urlEl = document.getElementById('share-url');
+  if (!urlEl) return;
   try {
-    await navigator.clipboard.writeText(url);
+    await navigator.clipboard.writeText(urlEl.value);
     toast('Link kopiert ✓');
   } catch(e) {
-    document.getElementById('share-url').select();
+    urlEl.select();
     document.execCommand('copy');
     toast('Link kopiert ✓');
   }
