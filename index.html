@@ -2339,7 +2339,7 @@ header .icon-btn {
 // ============ App-Version ============
 // Bei Schema-Änderungen SCHEMA_VERSION hochzählen + Migration ergänzen.
 // APP_VERSION ist die User-sichtbare Version.
-const APP_VERSION = '0.9.5';
+const APP_VERSION = '0.9.6';
 const SCHEMA_VERSION = 3;
 
 // ============ Constants & Demo Data ============
@@ -2997,6 +2997,8 @@ async function persistAuthSession(data) {
   }
   // v0.8.2: Shared-Rooms aus Server-Wahrheit wiederherstellen (löst iOS-PWA-Container-Bug).
   await discoverSharedRoomsForCurrentUser();
+  // v0.9.6: Proaktiver Token-Refresh starten
+  startProactiveRefresh();
   return acc;
 }
 
@@ -3028,9 +3030,13 @@ async function fetchUserFromToken(accessToken) {
   return await r.json();
 }
 
+// v0.9.6: refreshAccessToken gibt jetzt ein {ok, dead} Object zurück:
+// - ok: refresh erfolgreich, neue Tokens gespeichert
+// - dead: Refresh-Token ist EXPLIZIT tot (invalid_grant) — nur dann logout
+// - sonst: temporärer Fehler (Netzwerk, Server) — KEIN logout, einfach später retry
 async function refreshAccessToken() {
   const acc = getAccount();
-  if (!acc || !acc.refreshToken) return false;
+  if (!acc || !acc.refreshToken) return { ok: false, dead: true };
   const url = CLOUD.url.replace(/\/+$/, '') + '/auth/v1/token?grant_type=refresh_token';
   try {
     const r = await fetch(url, {
@@ -3038,17 +3044,52 @@ async function refreshAccessToken() {
       headers: { 'Content-Type': 'application/json', apikey: CLOUD.key },
       body: JSON.stringify({ refresh_token: acc.refreshToken })
     });
-    if (!r.ok) return false;
+    if (r.status === 400 || r.status === 401 || r.status === 403) {
+      // Token explizit als ungültig deklariert
+      let data = {};
+      try { data = await r.json(); } catch(_) {}
+      const errCode = data.error || data.error_description || '';
+      if (/invalid_grant|refresh_token.*not.*found|expired/i.test(errCode + ' ' + (data.message || ''))) {
+        return { ok: false, dead: true };
+      }
+      return { ok: false, dead: false };
+    }
+    if (!r.ok) return { ok: false, dead: false }; // 5xx → temporär
     const data = await r.json();
     if (data.access_token) {
       acc.accessToken = data.access_token;
       acc.refreshToken = data.refresh_token || acc.refreshToken;
       acc.expiresAt = Date.now() + (data.expires_in || 3600) * 1000;
       setAccount(acc);
-      return true;
+      return { ok: true, dead: false };
     }
-  } catch (e) { /* ignore */ }
-  return false;
+    return { ok: false, dead: false };
+  } catch (e) {
+    // Netzwerkfehler → temporär, NICHT ausloggen
+    return { ok: false, dead: false };
+  }
+}
+
+// v0.9.6: Proaktiver Refresh-Timer + visibility-Trigger.
+// Token läuft nach 1h ab. Wir refreshen alle 45 min proaktiv UND bei Tab-Fokus
+// wenn der Token weniger als 5 min Restzeit hat.
+let _refreshTimer = null;
+function startProactiveRefresh() {
+  clearInterval(_refreshTimer);
+  if (!getAccount()) return;
+  // Alle 45 min
+  _refreshTimer = setInterval(function(){
+    if (getAccount()) refreshAccessToken().catch(() => {});
+  }, 45 * 60 * 1000);
+}
+function maybeRefreshOnFocus() {
+  const acc = getAccount();
+  if (!acc || !acc.expiresAt) return;
+  const remaining = acc.expiresAt - Date.now();
+  // < 5 min Restzeit → preemptive refresh
+  if (remaining < 5 * 60 * 1000) {
+    refreshAccessToken().catch(() => {});
+  }
 }
 
 // === Password Reset (v0.6.8) ===
@@ -3508,17 +3549,19 @@ async function cloudFetch(url, options) {
   if (r.status !== 401) return r;
   // 401 → Token-Refresh versuchen. refreshAccessToken updated localStorage,
   // sodass die nächste cloudHeaders-Call den frischen Token nutzt.
-  const refreshed = await refreshAccessToken();
-  if (!refreshed) {
-    // v0.9.2-Fix: Refresh-Token tot. Lokale Session ist nicht mehr brauchbar —
-    // force-Logout damit der Auth-Gate erscheint und User sich neu anmelden kann.
-    handleExpiredSession();
+  const result = await refreshAccessToken();
+  if (!result.ok) {
+    // v0.9.6: Nur force-logout wenn der Refresh-Token EXPLIZIT tot ist (invalid_grant).
+    // Bei temporären Fehlern (Netzwerk, 5xx) NICHT ausloggen — User soll weiterarbeiten können.
+    if (result.dead) {
+      handleExpiredSession();
+    }
     return r;
   }
   const retryHeaders = cloudHeaders(options.headers);
   const r2 = await fetch(url, Object.assign({}, options, { headers: retryHeaders }));
   if (r2.status === 401) {
-    // Auch nach Refresh noch 401 → Session ist endgültig kaputt.
+    // Auch nach Refresh noch 401 — jetzt definitiv tot.
     handleExpiredSession();
   }
   return r2;
@@ -4400,6 +4443,9 @@ function broadcastLocal(type) {
   try { _tmBroadcast.postMessage({ type: type, ts: Date.now() }); } catch(_e) {}
 }
 document.addEventListener('visibilitychange', function(){
+  if (document.visibilityState === 'visible') {
+    if (typeof maybeRefreshOnFocus === 'function') maybeRefreshOnFocus();
+  }
   if (document.visibilityState === 'visible' && cloudEnabled()) {
     cloudPull(true);
     pullAllSharedTrips();
@@ -10080,6 +10126,8 @@ function renderPublicView(payload) {
     + '.pv-footer a { color: var(--primary); }'
     + 'body.is-public-view .tabs, body.is-public-view .sos-fab, body.is-public-view .fab, body.is-public-view #share-btn, body.is-public-view .icon-btn { display: none !important; }'
     + 'body.is-public-view .view { display: none !important; }'
+    + 'body.is-public-view .auth-gate, body.is-public-view #auth-gate { display: none !important; visibility: hidden !important; pointer-events: none !important; }'
+    + 'body.is-public-view header { display: none !important; }'
     + '</style>'
     + '<div class="public-view-wrap">'
     +   '<div class="pv-banner">\ud83d\udcd6 Read-only Reise-Ansicht \u2014 geteilt von <strong>' + sharedByHtml + '</strong></div>'
@@ -10153,19 +10201,30 @@ try {
 
 document.body.setAttribute('data-view', 'heute');
 
-// Auth-Gate verdrahten
-bindAuthGate();
+// v0.9.6: Public-View-Check ganz früh — vor bindAuthGate, vor showAuthGate.
+// Setzt window._publicViewActive Flag, nachfolgender Boot-Code prüft das und skipped.
+window._publicViewActive = false;
+try {
+  if (typeof checkPublicViewInURL === 'function' && checkPublicViewInURL()) {
+    window._publicViewActive = true;
+  }
+} catch(_) {}
+
+if (!window._publicViewActive) {
+  // Auth-Gate verdrahten
+  bindAuthGate();
+}
 
 // Boot-Auth: Magic-Link Callback ODER existierende Session ODER Login-Gate zeigen
 // v0.7.8: Sprache initial anwenden
-try { if (typeof setLang === 'function') setLang(getLang()); } catch(_) {}
-// v0.9.3: Defensiver Re-Bind nach setLang (falls renderHeader/refreshCurrentView
-// in setLang das auth-gate DOM mutiert hat).
-try { bindAuthGate(); } catch(_) {}
+if (!window._publicViewActive) {
+  try { if (typeof setLang === 'function') setLang(getLang()); } catch(_) {}
+  // v0.9.3: Defensiver Re-Bind nach setLang
+  try { bindAuthGate(); } catch(_) {}
+}
 
 (async function bootAuth() {
-  // v0.9.0: Public-View ?view=... — komplett-frühes Bail-Out vor Auth-Logik
-  if (checkPublicViewInURL()) { return; }
+  if (window._publicViewActive) return; // Public-View: kein Auth/Boot
   // 1. Kommen wir gerade von einem Magic-Link zurück? (#access_token=... im URL-Hash)
   const cb = parseAuthHash();
   if (cb && cb.error) {
@@ -10205,6 +10264,7 @@ try { bindAuthGate(); } catch(_) {}
     }
     hideAuthGate();
     proceedToApp();
+    if (typeof startProactiveRefresh === 'function') startProactiveRefresh();
     return;
   }
   // 3. Kein Account → Gate zeigen
